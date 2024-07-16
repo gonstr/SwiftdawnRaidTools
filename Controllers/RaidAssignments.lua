@@ -77,6 +77,8 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId)
     if activeEncounter then
         if self.DEBUG then self:Print("Encounter starting") end
 
+        self:RaidAssignmentsUpdateGroups()
+
         -- Populate caches
         for _, part in ipairs(activeEncounter) do
             if part.type == "RAID_ASSIGNMENTS" then
@@ -86,7 +88,9 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId)
                     trigger.triggered = false
                     trigger.uuid = part.uuid
 
-                    if trigger.type == "UNIT_HEALTH" then
+                    if trigger.type == "ENCOUNTER_START" then
+                        self:RaidAssignmentsTrigger(trigger)
+                    elseif trigger.type == "UNIT_HEALTH" then
                         if not unitHealthTriggersCache[trigger.unit] then
                             unitHealthTriggersCache[trigger.unit] = {}
                         end
@@ -155,8 +159,6 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId)
                 end
             end
         end
-
-        self:RaidAssignmentsUpdateGroups()
     end
 end
 

@@ -174,7 +174,7 @@ local function validateTriggers(import)
                 return false, "Import trigger is missing a type field."
             end
 
-            if not trigger.type == "UNIT_HEALTH" and not trigger.type == "SPELL_CAST" and not trigger.type == "RAID_BOSS_EMOTE" and not trigger.type == "FOJJI_NUMEN_TIMER" then
+            if not (trigger.type == "UNIT_HEALTH" or trigger.type == "SPELL_CAST" or trigger.type == "RAID_BOSS_EMOTE" or trigger.type == "ENCOUNTER_START" or trigger.type == "FOJJI_NUMEN_TIMER") then
                 return false, "Import has an invalid trigger type."
             end
 
@@ -248,7 +248,7 @@ local function validateUntriggers(import)
                 return false, "Import untrigger is missing a type field."
             end
 
-            if not untrigger.type == "UNIT_HEALTH" and not untrigger.type == "SPELL_CAST" and not untrigger.type == "RAID_BOSS_EMOTE" then
+            if not (untrigger.type == "UNIT_HEALTH" or untrigger.type == "SPELL_CAST" or untrigger.type == "RAID_BOSS_EMOTE") then
                 return false, "Import has an invalid untrigger type."
             end
 

@@ -19,9 +19,9 @@ function SwiftdawnRaidTools:InternalTestStart()
     --     SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Anticipâte", nil, nil, 31821)
     -- end)
 
-    C_Timer.After(3, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 93059)
-    end)
+    -- C_Timer.After(3, function()
+    --     SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 93059)
+    -- end)
 
     -- C_Timer.After(10, function()
     --     SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(nil, "test 123 432")

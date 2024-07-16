@@ -16,7 +16,7 @@ See https://wowpedia.fandom.com/wiki/DungeonEncounterID.
 
 ### Triggers
 
-Assignment triggers. Can be of types `UNIT_HEALTH`, `SPELL_CAST`, `SPELL_AURA`, `RAID_BOSS_EMOTE` or `FOJJI_NUMEN_TIMER`.
+Assignment triggers. Can be of types `UNIT_HEALTH`, `SPELL_CAST`, `SPELL_AURA`, `RAID_BOSS_EMOTE`, `ENCOUNTER_START` or `FOJJI_NUMEN_TIMER`.
 
 #### UNIT_HEALTH
 
@@ -49,6 +49,13 @@ triggers:
 triggers:
 - type: RAID_BOSS_EMOTE
   text: "The air crackles with energy!"
+```
+
+#### ENCOUNTER_START
+
+```yaml
+triggers:
+- type: ENCOUNTER_START
 ```
 
 #### FOJJI_NUMEN_TIMER
