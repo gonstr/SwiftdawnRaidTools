@@ -7,10 +7,10 @@ function SwiftdawnRaidTools:MinimapInit()
     local broker = LDB:NewDataObject("SwiftdawnRaidTools", {
         type = "data source",
         text = "SwiftdawnRaidTools",
-        icon = "Interface\\Icons\\Spell_Shadow_GatherShadows",
+        icon = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\swiftdawn.png",
         OnClick = function(self, button)
             if button == "LeftButton" then
-                InterfaceOptionsFrame_OpenToCategory("SRT")
+                InterfaceOptionsFrame_OpenToCategory("Swiftdawn Raid Tools")
             else
                 if IsShiftKeyDown() then
                     SwiftdawnRaidTools:NotificationsToggleFrameLock()
@@ -21,7 +21,7 @@ function SwiftdawnRaidTools:MinimapInit()
             end
         end,
         OnTooltipShow = function(tooltip)
-            tooltip:AddLine("SRT")
+            tooltip:AddLine("Swiftdawn Raid Tools")
             tooltip:AddLine("|cFFFFFFFFleft click|r to open configuration")
             tooltip:AddLine("|cFFFFFFFFright click|r to toggle overview visibility")
             tooltip:AddLine("|cFFFFFFFFshift + right click|r to show/hide anchors")

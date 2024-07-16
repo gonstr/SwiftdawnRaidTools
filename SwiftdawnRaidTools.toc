@@ -1,6 +1,6 @@
 ## Interface: 40400
-## Title: SRT
-## Notes: Swiftdawn Raid Tools
+## Title: Swiftdawn Raid Tools
+## Notes: Raid Coordination and Automation Tool
 ## Author: Anti
 ## Version: @project-version@
 ## X-Curse-Project-ID: 1064414

@@ -4,12 +4,12 @@ local reqVersionsTimer = nil
 
 function SwiftdawnRaidTools:ChatHandleCommand(input)
     if not input or input:trim() == "" then
-        self:Print("Usage: /art [config,show,hide,versions]")
+        self:Print("Usage: /srt [config,show,hide,versions]")
     else
         local trimmed = input:trim()
         
         if trimmed == "config" then
-            InterfaceOptionsFrame_OpenToCategory("SRT")
+            InterfaceOptionsFrame_OpenToCategory("Swiftdawn Raid Tools")
         elseif trimmed == "show" or trimmed == "hide" then
             self.db.profile.overview.show = trimmed == "show" and true or false
             self:OverviewUpdate()
@@ -32,7 +32,7 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
             end
         elseif trimmed == "debug" then
             self.DEBUG = not self.DEBUG
-            self:Print("debug =", self.DEBUG)
+            self:Print("debug", self.DEBUG)
         elseif trimmed == "teststart" then
             self:InternalTestStart()
         elseif trimmed == "testend" then

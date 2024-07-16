@@ -47,9 +47,20 @@ local function validateRequiredFields(import)
     return true
 end
 
-local function validateType(import)
+local function validateTypeAndVersion(import)
+    if not import.type then
+        return false, "Import is missing a type field."
+    end
+
     if import.type ~= "RAID_ASSIGNMENTS" then
-        return false, "Import has an unknown type: " .. stringSafe(import.type) .. ". Supported values are `RAID_ASSIGNMENTS`."
+        return false, "Import has an unknown type: " .. stringSafe(import.type) .. "."
+    end
+
+    if not import.version then
+        return false, "Import is missing a version field."
+    end
+    if import.version ~= 1 then
+        return false, "Import has an unknown version: " .. stringSafe(import.version) .. "."
     end
 
     return true
@@ -83,8 +94,16 @@ local function validateRaidAssignments(import, spells)
             end
         end
 
-        if not import.trigger then
-            return false, "Import with type RAID_ASSIGNMENTS is missing a trigger field."
+        if not import.triggers then
+            return false, "Import with type RAID_ASSIGNMENTS is missing a triggers field."
+        end
+
+        if type(import.triggers) ~= "table" or not SwiftdawnRaidTools:IsArray(import.triggers) then
+            return false, "Import has an invalid triggers value: " .. stringSafe(import.triggers) .. "."
+        end
+
+        if import.untriggers and (type(import.untriggers) ~= "table" or not SwiftdawnRaidTools:IsArray(import.untriggers)) then
+            return false, "Import has an invalid untriggers value: " .. stringSafe(import.untriggers) .. "."
         end
 
         if not import.metadata then
@@ -99,27 +118,11 @@ local function validateRaidAssignments(import, spells)
             return false, "Import has an invalid spell_id value: " .. stringSafe(import.spell_id) .. "."
         end
 
-        if not import.strategy then
-            return false, "Import with type RAID_ASSIGNMENTS is missing a strategy field."
-        end
-
-        if type(import.strategy) ~= "table" then
-            return false, "Import has an invalid strategy value: " .. stringSafe(import.strategy) .. "."
-        end
-
-        if not import.strategy.type then
-            return false, "Import has an invalid strategy field. Requires type."
-        end
-
-        if import.strategy.type ~= "BEST_MATCH" and import.strategy.type ~= "CHAIN" then
-            return false, "Import has an unknown strategy: " .. stringSafe(import.strategy.type) .. ". Supported values are `BEST_MATCH`, `CHAIN`."
-        end
-
         if not import.assignments then
             return false, "Import with type RAID_ASSIGNMENTS is missing an assignments field."
         end
 
-        if type(import.assignments) ~= "table" then
+        if type(import.assignments) ~= "table" or not SwiftdawnRaidTools:IsArray(import.assignments) then
             return false, "Import has an invalid assignments value: " .. stringSafe(import.assignments) .. "."
         end
 
@@ -128,7 +131,7 @@ local function validateRaidAssignments(import, spells)
         end
         
         for _, group in pairs(import.assignments) do
-            if type(group) ~= "table" then
+            if type(group) ~= "table" or not SwiftdawnRaidTools:IsArray(group) then
                 return false, "Import has an invalid assignments value: " .. stringSafe(group) .. "."
             end
 
@@ -155,7 +158,7 @@ local function validateRaidAssignments(import, spells)
                     return false, "Import has an unknown spell_id value: " .. stringSafe(assignment.spell_id) .. "."
                 end
                 if not spells[assignment.spell_id] then
-                    return false, "Import has a spell_id that's not supported (yet): " .. stringSafe(assignment.spell_id) .. "."
+                    return false, "Import has a spell_id that's not supported: " .. stringSafe(assignment.spell_id) .. "."
                 end
             end
         end
@@ -164,90 +167,153 @@ local function validateRaidAssignments(import, spells)
     return true
 end
 
-local function validateTrigger(import)
-    if import.trigger then
-        if not import.trigger.type then
-            return false, "Import trigger is missing a type field."
-        end
-
-        if not import.trigger.type == "UNIT_HEALTH" and not import.trigger.type == "SPELL_CAST" and not import.trigger.type == "RAID_BOSS_EMOTE" and not import.trigger.type == "FOJJI_NUMEN_TIMER" then
-            return false, "Import with type RAID_ASSIGNMENTS has an invalid trigger type."
-        end
-
-        if import.trigger.type == "UNIT_HEALTH" then
-            if not import.trigger.unit then
-                return false, "Import with trigger type UNIT_HEALTH is missing a unit field."
+local function validateTriggers(import)
+    if import.triggers then
+        for _, trigger in ipairs(import.triggers) do
+            if not trigger.type then
+                return false, "Import trigger is missing a type field."
             end
 
-            if not import.trigger.percentage then
-                return false, "Import with trigger type UNIT_HEALTH is missing a percentage field."
-            end
-        end
-
-        if import.trigger.type == "SPELL_CAST" then
-            if not import.trigger.spell_id then
-                return false, "Import with trigger type SPELL_CAST is missing a spell_id field."
+            if not trigger.type == "UNIT_HEALTH" and not trigger.type == "SPELL_CAST" and not trigger.type == "RAID_BOSS_EMOTE" and not trigger.type == "FOJJI_NUMEN_TIMER" then
+                return false, "Import has an invalid trigger type."
             end
 
-            if type(import.trigger.spell_id) ~= "number" or import.trigger.spell_id ~= math.floor(import.trigger.spell_id) then
-                return false, "Import has an invalid spell_id value: " .. stringSafe(import.trigger.spell_id) .. "."
-            end
-        end
+            if trigger.type == "UNIT_HEALTH" then
+                if not trigger.unit then
+                    return false, "Import with trigger type UNIT_HEALTH is missing a unit field."
+                end
 
-        if import.trigger.type == "SPELL_AURA" then
-            if not import.trigger.spell_id then
-                return false, "Import with trigger type SPELL_AURA is missing a spell_id field."
-            end
-
-            if type(import.trigger.spell_id) ~= "number" or import.trigger.spell_id ~= math.floor(import.trigger.spell_id) then
-                return false, "Import has an invalid spell_id value: " .. stringSafe(import.trigger.spell_id) .. "."
-            end
-        end
-
-        if import.trigger.type == "RAID_BOSS_EMOTE" then
-            if not import.trigger.text then
-                return false, "Import with trigger type UNIT_HEALTH is missing a text field."
-            end
-        end
-
-        if import.trigger.type == "FOJJI_NUMEN_TIMER" then
-            if not import.trigger.key then
-                return false, "Import with trigger type FOJJI_NUMEN_TIMER is missing a key field."
+                if not trigger.percentage then
+                    return false, "Import with trigger type UNIT_HEALTH is missing a percentage field."
+                end
             end
 
-            if import.trigger.countdown then
-                return false, "Import with trigger type FOJJI_NUMEN_TIMER has a countdown field."
-            end
-        end
+            if trigger.type == "SPELL_CAST" then
+                if not trigger.spell_id then
+                    return false, "Import with trigger type SPELL_CAST is missing a spell_id field."
+                end
 
-        if import.trigger.countdown and (type(import.trigger.countdown) ~= "number" or import.trigger.countdown ~= math.floor(import.trigger.countdown)) then
-            return false, "Import has an invalid countdown value: " .. stringSafe(import.trigger.countdown) .. "."
+                if type(trigger.spell_id) ~= "number" or trigger.spell_id ~= math.floor(trigger.spell_id) then
+                    return false, "Import has an invalid spell_id value: " .. stringSafe(trigger.spell_id) .. "."
+                end
+            end
+
+            if trigger.type == "SPELL_AURA" then
+                if not trigger.spell_id then
+                    return false, "Import with trigger type SPELL_AURA is missing a spell_id field."
+                end
+    
+                if type(trigger.spell_id) ~= "number" or trigger.spell_id ~= math.floor(trigger.spell_id) then
+                    return false, "Import has an invalid spell_id value: " .. stringSafe(trigger.spell_id) .. "."
+                end
+            end
+
+            if trigger.type == "RAID_BOSS_EMOTE" then
+                if not trigger.text then
+                    return false, "Import with trigger type RAID_BOSS_EMOTE is missing a text field."
+                end
+            end
+
+            if trigger.type == "FOJJI_NUMEN_TIMER" then
+                if not trigger.key then
+                    return false, "Import with trigger type FOJJI_NUMEN_TIMER is missing a key field."
+                end
+
+                if trigger.countdown then
+                    return false, "Import with trigger type FOJJI_NUMEN_TIMER has a countdown field."
+                end
+
+                if trigger.delay then
+                    return false, "Import with trigger type FOJJI_NUMEN_TIMER has a delay field."
+                end
+            end
+
+            if trigger.countdown and (type(trigger.countdown) ~= "number" or trigger.countdown ~= math.floor(trigger.countdown)) then
+                return false, "Import has an invalid countdown value: " .. stringSafe(trigger.countdown) .. "."
+            end
+
+            if trigger.delay and (type(trigger.delay) ~= "number" or trigger.delay ~= math.floor(trigger.delay)) then
+                return false, "Import has an invalid delay value: " .. stringSafe(trigger.delay) .. "."
+            end
         end
     end
 
     return true
 end
 
-function SwiftdawnRaidTools:ValidationValidateImports(imports)
+local function validateUntriggers(import)
+    if import.untriggers then
+        for _, untrigger in ipairs(import.untriggers) do
+            if not untrigger.type then
+                return false, "Import untrigger is missing a type field."
+            end
+
+            if not untrigger.type == "UNIT_HEALTH" and not untrigger.type == "SPELL_CAST" and not untrigger.type == "RAID_BOSS_EMOTE" then
+                return false, "Import has an invalid untrigger type."
+            end
+
+            if untrigger.type == "UNIT_HEALTH" then
+                if not untrigger.unit then
+                    return false, "Import with untrigger type UNIT_HEALTH is missing a unit field."
+                end
+
+                if not untrigger.percentage then
+                    return false, "Import with untrigger type UNIT_HEALTH is missing a percentage field."
+                end
+            end
+
+            if untrigger.type == "SPELL_CAST" then
+                if not untrigger.spell_id then
+                    return false, "Import with untrigger type SPELL_CAST is missing a spell_id field."
+                end
+    
+                if type(untrigger.spell_id) ~= "number" or untrigger.spell_id ~= math.floor(untrigger.spell_id) then
+                    return false, "Import has an invalid spell_id value: " .. stringSafe(untrigger.spell_id) .. "."
+                end
+            end
+
+            if untrigger.type == "SPELL_AURA" then
+                if not untrigger.spell_id then
+                    return false, "Import with trigger type SPELL_AURA is missing a spell_id field."
+                end
+
+                if type(untrigger.spell_id) ~= "number" or untrigger.spell_id ~= math.floor(untrigger.spell_id) then
+                    return false, "Import has an invalid spell_id value: " .. stringSafe(untrigger.spell_id) .. "."
+                end
+            end
+
+            if untrigger.type == "RAID_BOSS_EMOTE" then
+                if not untrigger.text then
+                    return false, "Import with trigger type RAID_BOSS_EMOTE is missing a text field."
+                end
+            end
+        end
+    end
+
+    return true
+end
+
+function SwiftdawnRaidTools:ValidationValidateImport(import)
     local spells = self:SpellsGetAll()
     local encounters = self:EncountersGetAll()
 
-    for _, import in pairs(imports) do
-        local ok, err = validateRequiredFields(import)
-        if not ok then return false, err end
-        
-        ok, err = validateType(import)
-        if not ok then return false, err end
-        
-        ok, err = validateEncounter(import, encounters)
-        if not ok then return false, err end
+    local ok, err = validateRequiredFields(import)
+    if not ok then return false, err end
 
-        ok, err = validateTrigger(import)
-        if not ok then return false, err end
+    ok, err = validateTypeAndVersion(import)
+    if not ok then return false, err end
 
-        ok, err = validateRaidAssignments(import, spells)
-        if not ok then return false, err end
-    end
+    ok, err = validateEncounter(import, encounters)
+    if not ok then return false, err end
+
+    ok, err = validateTriggers(import)
+    if not ok then return false, err end
+
+    ok, err = validateUntriggers(import)
+    if not ok then return false, err end
+
+    ok, err = validateRaidAssignments(import, spells)
+    if not ok then return false, err end
     
     return true
 end

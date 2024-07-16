@@ -202,7 +202,7 @@ function SwiftdawnRaidTools:OverviewUpdateHeaderText()
         if self.db.profile.data.encountersProgress then
             self.overviewHeaderText:SetText("Loading Assignments... |cFFFFFFFF" .. string.format("%.1f", self.db.profile.data.encountersProgress) .. "%|r")
         else
-            self.overviewHeaderText:SetText("ART |cFFFFFFFF" .. self.VERSION .. "|r")
+            self.overviewHeaderText:SetText("SRT |cFFFFFFFF" .. self.VERSION .. "|r")
             self.overviewHeaderText:SetAlpha(0.8)
         end
     end
@@ -329,7 +329,7 @@ function SwiftdawnRaidTools:OverviewUpdatePopup()
 
     index = index + 1
 
-    local configurationFunc = function() InterfaceOptionsFrame_OpenToCategory("SRT") end
+    local configurationFunc = function() InterfaceOptionsFrame_OpenToCategory("Swiftdawn Raid Tools") end
     self:OverviewShowPopupListItem(index, "Configuration", true, configurationFunc, encounterListItems and 10 or 0, false)
 
     index = index + 1
@@ -350,7 +350,7 @@ local function createOverviewMainHeader(mainFrame, prevFrame)
         tile = true,
         tileSize = 32
     })
-    frame:SetBackdropColor(0.12, 0.56, 1, 1)
+    frame:SetBackdropColor(1, 0.165, 0, 0.8)
 
     -- Anchor to main frame or previous row if it exists
     if prevFrame then

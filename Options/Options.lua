@@ -65,7 +65,7 @@ do
 end
 
 local mainOptions = {
-    name = "SRT " .. SwiftdawnRaidTools.VERSION,
+    name = "Swiftdawn Raid Tools " .. SwiftdawnRaidTools.VERSION,
     type = "group",
     args =  {
         buttonGroup = {
@@ -77,7 +77,7 @@ local mainOptions = {
                 button1 = {
                     type = "execute",
                     name = "Toggle Overview",
-                    desc = "Toggle the Overview visiblity.",
+                    desc = "Toggle Overview visiblity.",
                     func = function()
                         SwiftdawnRaidTools.db.profile.overview.show = not SwiftdawnRaidTools.db.profile.overview.show
                         SwiftdawnRaidTools:OverviewUpdate()
@@ -87,7 +87,7 @@ local mainOptions = {
                 button2 = {
                     type = "execute",
                     name = "Toggle Anchors",
-                    desc = "Toggle visibility of View Anchors.",
+                    desc = "Toggle Anchors Visibility.",
                     func = function()
                         SwiftdawnRaidTools:NotificationsToggleFrameLock()
                     end,
@@ -162,14 +162,14 @@ local fojjiIntegrationOptions = {
         helperWeakAuraInstalledMessage = {
             type = "description",
             fontSize = "medium",
-            name = "|cff00ff00SRT Helper WeakAura Installed.|r",
+            name = "|cff00ff00Swiftdawn Raid Tools Helper WeakAura Installed.|r",
             order = 4,
             hidden = function() return not SwiftdawnRaidTools:WeakaurasIsHelperInstalled() end
         },
         installWeakAuraButton = {
             type = "execute",
             name = "Install WeakAura",
-            desc = "Install the SRT Helper WeakAura.",
+            desc = "Install the Swiftdawn Raid Tools Helper WeakAura.",
             func = function() SwiftdawnRaidTools:WeakAurasInstallHelper(function()
                 LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Fojji Integration")
             end) end,
@@ -231,19 +231,19 @@ local importOptions = {
 
 function SwiftdawnRaidTools:OptionsInit()
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools", mainOptions)
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools", "SRT")
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools", "Swiftdawn Raid Tools")
 
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Notifications", notificationOptions)
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Notifications", "Notifications", "SRT")
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Notifications", "Notifications", "Swiftdawn Raid Tools")
 
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Fojji Integration", fojjiIntegrationOptions)
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Fojji Integration", "Fojji Integration", "SRT")
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Fojji Integration", "Fojji Integration", "Swiftdawn Raid Tools")
     
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Import", importOptions)
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Import", "Import", "SRT")
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Import", "Import", "Swiftdawn Raid Tools")
 
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Profiles", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Profiles", "Profiles", "SRT")
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Profiles", "Profiles", "Swiftdawn Raid Tools")
 end
 
 function SwiftdawnRaidTools:ToggleFrameLock(lock) end

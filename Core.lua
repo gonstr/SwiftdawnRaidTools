@@ -3,9 +3,9 @@ SwiftdawnRaidTools = LibStub("AceAddon-3.0"):NewAddon("SwiftdawnRaidTools", "Ace
 SwiftdawnRaidTools.DEBUG = false
 SwiftdawnRaidTools.TEST = false
 
-SwiftdawnRaidTools.PREFIX_SYNC = "ART-S"
-SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS = "ART-SP"
-SwiftdawnRaidTools.PREFIX_MAIN = "ART-M"
+SwiftdawnRaidTools.PREFIX_SYNC = "SRT-S"
+SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS = "SRT-SP"
+SwiftdawnRaidTools.PREFIX_MAIN = "SRT-M"
 
 SwiftdawnRaidTools.VERSION = GetAddOnMetadata("SwiftdawnRaidTools", "Version")
 SwiftdawnRaidTools.IS_DEV = SwiftdawnRaidTools.VERSION == '\@project-version\@'
@@ -57,9 +57,9 @@ function SwiftdawnRaidTools:OnEnable()
     self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 
-    self:RegisterMessage("ART_WA_EVENT")
+    self:RegisterMessage("SRT_WA_EVENT")
 
-    self:RegisterChatCommand("art", "ChatHandleCommand")
+    self:RegisterChatCommand("srt", "ChatHandleCommand")
 end
 
 function SwiftdawnRaidTools:OnDisable()
@@ -73,9 +73,9 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
 
-    self:UnregisterMessage("ART_WA_EVENT")
+    self:UnregisterMessage("SRT_WA_EVENT")
 
-    self:UnregisterChatCommand("art")
+    self:UnregisterChatCommand("srt")
 end
 
 function SwiftdawnRaidTools:DBInit()
@@ -148,14 +148,14 @@ function SwiftdawnRaidTools:OnCommReceived(prefix, message, _, sender)
                 self:OverviewUpdateActiveGroups()
             elseif payload.e == "TRIGGER" then
                 if self.DEBUG then self:Print("Received message TRIGGER") end
-                self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.countdown)
+                self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.delay, payload.d.countdown)
                 self:NotificationsUpdateSpells()
             end
         end
     end
 end
 
-function SwiftdawnRaidTools:ART_WA_EVENT(_, event, ...)
+function SwiftdawnRaidTools:SRT_WA_EVENT(_, event, ...)
     if event == "WA_NUMEN_TIMER" then
         self:RaidAssignmentsHandleFojjiNumenTimer(...)
     end

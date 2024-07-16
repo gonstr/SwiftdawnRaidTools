@@ -3,16 +3,23 @@ local SwiftdawnRaidTools = SwiftdawnRaidTools
 local random = math.random
 
 function SwiftdawnRaidTools:GenerateUUID()
-    local chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    local base = #chars
-    local id = ''
+    local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
 
-    for i = 1, 8 do
-        local rand = math.random(base)
-        id = id .. chars:sub(rand, rand)
+    return string.gsub(template, '[xy]', function (c)
+        local v = (c == 'x') and random(0, 15) or (random(8, 11))
+        return string.format('%x', v)
+    end)
+end
+
+function SwiftdawnRaidTools:IsArray(table)
+    local i = 0
+
+    for _ in pairs(table) do
+        i = i + 1
+        if table[i] == nil then return false end
     end
-        
-    return id
+
+    return true
 end
 
 local fallbackColor = { r = 0, g = 0, b = 0 }
@@ -70,7 +77,7 @@ function SwiftdawnRaidTools:CreateFadeOut(frame, onFinished)
     return fadeOutGroup
 end
 
-function SwiftdawnRaidTools:ShallowCopy(table)
+function SwiftdawnRaidTools:ShallowClone(table)
     if not table then return nil end
 
     local copy = {}
@@ -79,6 +86,23 @@ function SwiftdawnRaidTools:ShallowCopy(table)
         copy[k] = v
     end
     
+    return copy
+end
+
+function SwiftdawnRaidTools:DeepClone(orig)
+    local orig_type = type(orig)
+    local copy
+
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[self:DeepClone(orig_key)] = self:DeepClone(orig_value)
+        end
+        setmetatable(copy, self:DeepClone(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+
     return copy
 end
 

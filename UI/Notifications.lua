@@ -25,7 +25,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     container.frameLockText:SetFont("Fonts\\FRIZQT__.TTF", 14)
     container.frameLockText:SetTextColor(1, 1, 1, 0.4)
     container.frameLockText:SetPoint("CENTER", 0, 0)
-    container.frameLockText:SetText("ART Notifications Anchor")
+    container.frameLockText:SetText("SRT Notifications Anchor")
     container.frameLockText:Hide()
 
     local content = CreateFrame("Frame", nil, container)
@@ -38,7 +38,7 @@ function SwiftdawnRaidTools:NotificationsInit()
         tile = true,
         tileSize = 32
     })
-    content.header:SetBackdropColor(0.12, 0.56, 1, 1)
+    content.header:SetBackdropColor(1, 0.165, 0, 0.8)
     content.header:SetPoint("TOPLEFT", 0, 0)
     content.header:SetPoint("TOPRIGHT", 0, 0)
 
@@ -211,7 +211,7 @@ local function updateExtraInfo(frame, prevFrame, assignments, activeGroups)
     -- estimation we can do.
     local groups = {}
 
-    local assignmentsClone = SwiftdawnRaidTools:ShallowCopy(assignments)
+    local assignmentsClone = SwiftdawnRaidTools:ShallowClone(assignments)
 
     local bestMatchIndex = SwiftdawnRaidTools:RaidAssignmentsSelectBestMatchIndex(assignmentsClone)
     if bestMatchIndex then assignmentsClone[bestMatchIndex] = nil end
@@ -275,21 +275,15 @@ local function updateCountdown(_, elapsed)
     end
 end
 
-function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, countdown)
+function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, delay, countdown)
     local selectedEncounterId = self.db.profile.overview.selectedEncounterId
     local encounter = self.db.profile.data.encounters[selectedEncounterId]
 
     if self.db.profile.options.notifications.showOnlyOwnNotifications then
         local part = self:GetRaidAssignmentPart(uuid)
 
-        if part then
-            if part.strategy.type == "BEST_MATCH" and not self:IsPlayerInActiveGroup(part) then
-                return
-            end
-
-            if part.strategy.type == "CHAIN" and not self:IsPlayerInAssignments(part.assignments) then
-                return
-            end
+        if part and not not self:IsPlayerInActiveGroup(part) then
+            return
         end
     end
 
@@ -330,18 +324,6 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, countdown)
                 end
 
                 self:NotificationsUpdateHeader(headerText)
-                        
-                if part.trigger.spell_id then
-                    local _, _, _, castTime = GetSpellInfo(part.trigger.spell_id)
-            
-                    if castTime then
-                        countdown = castTime / 1000
-                    end
-                end
-
-                if part.trigger.countdown then
-                    countdown = part.trigger.countdown
-                end
 
                 if countdown > 0 then
                     self.notificationsCountdown = countdown
@@ -349,16 +331,10 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, countdown)
                     self.notificationContentFrame:SetScript("OnUpdate", updateCountdown)
                 end
 
-                local duration = 5
-
-                if part.trigger.duration then
-                    duration = part.trigger.duration
-                end
-
                 local showId = self:GenerateUUID()
                 self.notificationShowId = showId
 
-                C_Timer.After(duration + countdown, function()
+                C_Timer.After(8 + countdown, function()
                     if showId == self.notificationShowId then
                         SwiftdawnRaidTools.notificationFrameFadeOut:Play()
                     end
@@ -376,10 +352,6 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, countdown)
 
                     prevFrame = frame
                     groupIndex = groupIndex + 1
-                end
-
-                if part.strategy.type == "CHAIN" then
-                    updateExtraInfo(self.notificationExtraInfoFrame, prevFrame, part.assignments, activeGroups)
                 end
 
                 break
