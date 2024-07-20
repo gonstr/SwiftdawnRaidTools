@@ -118,7 +118,7 @@ function SwiftdawnRaidTools:OverviewInit()
 end
 
 function SwiftdawnRaidTools:OverviewResize()
-    local encounters = self.db.profile.data.encounters
+    local encounters = self:GetEncounters()
 
     local maxHeight = 0
 
@@ -146,7 +146,7 @@ function SwiftdawnRaidTools:OverviewResize()
 end
 
 function SwiftdawnRaidTools:OverviewUpdate()
-    local encounters = self.db.profile.data.encounters
+    local encounters = self:GetEncounters()
 
     local show = self.db.profile.overview.show
     
@@ -165,7 +165,7 @@ function SwiftdawnRaidTools:OverviewUpdate()
 
     if not selectedEncounterIdFound then
         local encounterIndexes = {}
-        for encounterId in pairs(self.db.profile.data.encounters) do
+        for encounterId in pairs(self:GetEncounters()) do
             table.insert(encounterIndexes, encounterId)
         end
         table.sort(encounterIndexes)
@@ -185,7 +185,7 @@ function SwiftdawnRaidTools:OverviewUpdateLocked()
 end
 
 function SwiftdawnRaidTools:OverviewUpdateHeaderText()
-    local encounters = self.db.profile.data.encounters
+    local encounters = self:GetEncounters()
 
     local encountersExists = false
 
@@ -197,7 +197,7 @@ function SwiftdawnRaidTools:OverviewUpdateHeaderText()
     self.overviewHeaderText:SetAlpha(1)
 
     if encountersExists then
-        self.overviewHeaderText:SetText(self:EncountersGetAll()[self.db.profile.overview.selectedEncounterId])
+        self.overviewHeaderText:SetText(self:BossEncountersGetAll()[self.db.profile.overview.selectedEncounterId])
     else
         if self.db.profile.data.encountersProgress then
             self.overviewHeaderText:SetText("Loading Assignments... |cFFFFFFFF" .. string.format("%.1f", self.db.profile.data.encountersProgress) .. "%|r")
@@ -298,7 +298,7 @@ function SwiftdawnRaidTools:OverviewUpdatePopup()
     end
 
     local encounterIndexes = {}
-    for encounterId in pairs(self.db.profile.data.encounters) do
+    for encounterId in pairs(self:GetEncounters()) do
         table.insert(encounterIndexes, encounterId)
     end
     table.sort(encounterIndexes)
@@ -306,7 +306,7 @@ function SwiftdawnRaidTools:OverviewUpdatePopup()
     local index = 1
     for _, encounterId in ipairs(encounterIndexes) do
         local selectFunc = function() self:OverviewSelectEncounter(encounterId) end
-        self:OverviewShowPopupListItem(index, self:EncountersGetAll()[encounterId], false, selectFunc)
+        self:OverviewShowPopupListItem(index, self:BossEncountersGetAll()[encounterId], false, selectFunc)
         index = index + 1
     end
 
@@ -404,7 +404,7 @@ local function createOverviewMainGroupAssignment(parentFrame)
 
     frame.iconFrame = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     frame.iconFrame:SetSize(14, 14)
-    frame.iconFrame:SetPoint("BOTTOMLEFT", 10, 3)
+    frame.iconFrame:SetPoint("BOTTOMLEFT", 10, 2.5)
 
     frame.cooldownFrame = CreateFrame("Cooldown", nil, frame.iconFrame, "CooldownFrameTemplate")
     frame.cooldownFrame:SetAllPoints()
@@ -418,7 +418,7 @@ local function createOverviewMainGroupAssignment(parentFrame)
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.text:SetFont("Fonts\\FRIZQT__.TTF", 10)
     frame.text:SetTextColor(1, 1, 1, 1)
-    frame.text:SetPoint("BOTTOMLEFT", 28, 5)
+    frame.text:SetPoint("BOTTOMLEFT", 28, 4.5)
 
     return frame
 end
@@ -497,7 +497,7 @@ function SwiftdawnRaidTools:OverviewUpdateMain()
     end
 
     local selectedEncounterId = self.db.profile.overview.selectedEncounterId
-    local encounter = self.db.profile.data.encounters[selectedEncounterId]
+    local encounter = self:GetEncounters()[selectedEncounterId]
 
     if encounter then
         local headerIndex = 1
@@ -549,7 +549,7 @@ end
 function SwiftdawnRaidTools:OverviewUpdateActiveGroups()
     for _, groupFrame in ipairs(self.overviewMainRaidAssignmentGroups) do
         local selectedEncounterId = self.db.profile.overview.selectedEncounterId
-        local encounter = self.db.profile.data.encounters[selectedEncounterId]
+        local encounter = self:GetEncounters()[selectedEncounterId]
 
 
         if encounter then

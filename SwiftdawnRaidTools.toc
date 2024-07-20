@@ -32,7 +32,7 @@ Import\YAML.lua
 Import\Import.lua
 Import\Validation.lua
 State\Spells.lua
-State\Encounters.lua
+State\BossEncounters.lua
 State\Groups.lua
 State\Units.lua
 Controllers\RaidAssignments.lua

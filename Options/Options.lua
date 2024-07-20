@@ -74,7 +74,7 @@ local mainOptions = {
             name = "",
             order = 1,
             args = {
-                button1 = {
+                toggleOverview = {
                     type = "execute",
                     name = "Toggle Overview",
                     desc = "Toggle Overview visiblity.",
@@ -84,7 +84,7 @@ local mainOptions = {
                     end,
                     order = 1,
                 },
-                button2 = {
+                toggleAnchors = {
                     type = "execute",
                     name = "Toggle Anchors",
                     desc = "Toggle Anchors Visibility.",
@@ -92,6 +92,17 @@ local mainOptions = {
                         SwiftdawnRaidTools:NotificationsToggleFrameLock()
                     end,
                     order = 2,
+                },
+                toggleTestMode = {
+                    type = "execute",
+                    name = "Toggle Test Mode",
+                    desc = "Toggle Test Mode on and off.",
+                    func = function()
+                        if not InCombatLockdown() then
+                            SwiftdawnRaidTools:TestModeToggle()
+                        end
+                    end,
+                    order = 3,
                 },
             },
         },
@@ -208,6 +219,8 @@ local importOptions = {
                 if val then
                     val = val:trim()
                 end
+
+                SwiftdawnRaidTools:TestModeSet(false)
 
                 SwiftdawnRaidTools.db.profile.options.import = val
 

@@ -135,7 +135,7 @@ function SwiftdawnRaidTools:IsPlayerRaidLeader()
 end
 
 function SwiftdawnRaidTools:GetRaidAssignmentPart(uuid)
-    local encounters = self.db.profile.data.encounters
+    local encounters = self:GetEncounters()
 
     if encounters then
         for _, encounter in pairs(encounters) do

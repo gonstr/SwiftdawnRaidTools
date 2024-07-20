@@ -68,11 +68,11 @@ end
 function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId)
     resetState()
 
-    if not self:IsPlayerRaidLeader() then
+    if not self.TEST and not self:IsPlayerRaidLeader() then
         return
     end
 
-    activeEncounter = self.db.profile.data.encounters[encounterId]
+    activeEncounter = self:GetEncounters()[encounterId]
 
     if activeEncounter then
         if self.DEBUG then self:Print("Encounter starting") end
@@ -403,7 +403,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId)
         -- We don't want to handle a spellcast twice so we only look for start events or success events for instant cast spells
         if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not castTime or castTime == 0)) then
             for _, trigger in ipairs(triggers) do
-                self:RaidAssignmentsTrigger(trigger, castTime)
+                self:RaidAssignmentsTrigger(trigger, castTime / 1000)
             end
         end
     end

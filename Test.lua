@@ -1,4 +1,15 @@
+local insert = table.insert
+
 local SwiftdawnRaidTools = SwiftdawnRaidTools
+
+local timers = {}
+
+local function cancelTimers()
+    for i, timer in ipairs(timers) do
+        timer:Cancel()
+        timers[i] = nil
+    end
+end
 
 function SwiftdawnRaidTools:InternalTestStart()
     self.TEST = true
@@ -44,14 +55,161 @@ function SwiftdawnRaidTools:InternalTestStart()
     -- C_Timer.After(40, function()
     --     SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 93059)
     -- end)
-
-    -- C_Timer.After(42, function()
-    --     SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Solfernus", nil, nil, 51052)
-    -- end)
 end
 
 function SwiftdawnRaidTools:InternalTestEnd()
     self.TEST = false
 
     self:ENCOUNTER_END(nil, 1035)
+end
+
+function SwiftdawnRaidTools:TestModeToggle()
+    local testMode = not self.TEST
+
+    self:TestModeSet(testMode)
+end
+
+function SwiftdawnRaidTools:TestModeSet(testMode)
+    self.TEST = testMode
+
+    cancelTimers()
+
+    self:GroupsReset()
+    self:SpellsResetCache()
+    self:UnitsResetDeadCache()
+    self:OverviewUpdate()
+
+    if self.TEST then
+        self:ENCOUNTER_START(nil, 1027)
+
+        insert(timers, C_Timer.NewTimer(2, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+        end))
+
+        insert(timers, C_Timer.NewTimer(4, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ant", nil, nil, 31821)
+        end))
+
+        insert(timers, C_Timer.NewTimer(5, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Aeo", nil, nil, 740)
+        end))
+
+        insert(timers, C_Timer.NewTimer(15, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+        end))
+
+        insert(timers, C_Timer.NewTimer(17, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ven", nil, nil, 98008)
+        end))
+
+        insert(timers, C_Timer.NewTimer(17, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Kon", nil, nil, 62618)
+        end))
+
+        insert(timers, C_Timer.NewTimer(25, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+        end))
+
+        insert(timers, C_Timer.NewTimer(29, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ven", nil, nil, 98008)
+        end))
+
+        insert(timers, C_Timer.NewTimer(36, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
+        end))
+
+        insert(timers, C_Timer.NewTimer(37, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Rip", nil, nil, 77764)
+        end))
+    end
+end
+
+function SwiftdawnRaidTools:GetEncounters()
+    if self.TEST then
+        return {
+            [1027] = {
+                {
+                    uuid = "1",
+                    type = "RAID_ASSIGNMENTS",
+                    version = 1,
+                    encounter = 1027,
+                    metadata = {
+                        name = "Incineration"
+                    },
+                    triggers = {
+                        {
+                            type = "SPELL_CAST",
+                            spell_id = 79023
+                        }
+                    },
+                    assignments = {
+                        {
+                            {
+                                type = "SPELL",
+                                player = "Ant",
+                                spell_id = 31821
+                            },
+                            {
+                                type = "SPELL",
+                                player = "Aeo",
+                                spell_id = 740
+                            }
+                        },
+                        {
+                            {
+                                type = "SPELL",
+                                player = "Ven",
+                                spell_id = 98008
+                            },
+                            {
+                                type = "SPELL",
+                                player = "Kon",
+                                spell_id = 62618
+                            }
+                        },
+                        {
+                            {
+                                type = "SPELL",
+                                player = "Eli",
+                                spell_id = 31821
+                            }
+                        }
+                    }
+                },
+                {
+                    uuid = "2",
+                    type = "RAID_ASSIGNMENTS",
+                    version = 1,
+                    encounter = 1027,
+                    metadata = {
+                        name = "Grip of Death"
+                    },
+                    triggers = {
+                        {
+                            type = "SPELL_CAST",
+                            spell_id = 91849
+                        }
+                    },
+                    assignments = {
+                        {
+                            {
+                                type = "SPELL",
+                                player = "Rip",
+                                spell_id = 77764
+                            }
+                        },
+                        {
+                            {
+                                type = "SPELL",
+                                player = "Jam",
+                                spell_id = 77764
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    else
+        return self.db.profile.data.encounters
+    end
 end

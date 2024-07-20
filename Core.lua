@@ -51,6 +51,7 @@ function SwiftdawnRaidTools:OnEnable()
     self:RegisterEvent("ENCOUNTER_START")
     self:RegisterEvent("ENCOUNTER_END")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:RegisterEvent("UNIT_HEALTH")
     self:RegisterEvent("GROUP_ROSTER_UPDATE")
@@ -67,6 +68,7 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterEvent("ENCOUNTER_START")
     self:UnregisterEvent("ENCOUNTER_END")
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    self:UnregisterEvent("PLAYER_REGEN_DISABLED")
     self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:UnregisterEvent("UNIT_HEALTH")
     self:UnregisterEvent("GROUP_ROSTER_UPDATE")
@@ -84,7 +86,7 @@ end
 
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
-        self:EncountersInit()
+        self:BossEncountersInit()
         self:SyncSendStatus()
         self:SyncSchedule()
     end
@@ -93,21 +95,23 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
-    if IsInRaid() then
-        local payload = {
-            v = self.VERSION,
-            e = event,
-            d = data,
-        }
+    local payload = {
+        v = self.VERSION,
+        e = event,
+        d = data,
+    }
 
-        if not prefix then
-            prefix = self.PREFIX_MAIN
-        end
+    if not prefix then
+        prefix = self.PREFIX_MAIN
+    end
 
-        if not prio then
-            prio = "NORMAL"
-        end
+    if not prio then
+        prio = "NORMAL"
+    end
 
+    if self.TEST then
+        self:OnCommReceived(prefix, self:Serialize(payload), "RAID", UnitName("player"))
+    elseif IsInRaid() then
         self:SendCommMessage(prefix, self:Serialize(payload), "RAID", nil, prio, callbackFn)
     end
 end
@@ -183,6 +187,10 @@ function SwiftdawnRaidTools:PLAYER_REGEN_ENABLED()
         self:OverviewUpdateSpells()
         self:NotificationsUpdateSpells()
     end
+end
+
+function SwiftdawnRaidTools:PLAYER_REGEN_DISABLED()
+    self:TestModeSet(false)
 end
 
 function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId)

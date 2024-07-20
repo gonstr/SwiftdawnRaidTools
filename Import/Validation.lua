@@ -66,12 +66,12 @@ local function validateTypeAndVersion(import)
     return true
 end
 
-local function validateEncounter(import, encounters)
+local function validateEncounter(import, bossEncounters)
     if type(import.encounter) ~= "number" or import.encounter ~= math.floor(import.encounter) then
         return false, "Import has an invalid encounter value: " .. stringSafe(import.encounter) .. ".."
     end
 
-    if not encounters[import.encounter] then
+    if not bossEncounters[import.encounter] then
         return false, "Import has an unknown encounter value: " .. stringSafe(import.encounter) .. "."
     end
 
@@ -295,7 +295,7 @@ end
 
 function SwiftdawnRaidTools:ValidationValidateImport(import)
     local spells = self:SpellsGetAll()
-    local encounters = self:EncountersGetAll()
+    local bossEncounters = self:BossEncountersGetAll()
 
     local ok, err = validateRequiredFields(import)
     if not ok then return false, err end
@@ -303,7 +303,7 @@ function SwiftdawnRaidTools:ValidationValidateImport(import)
     ok, err = validateTypeAndVersion(import)
     if not ok then return false, err end
 
-    ok, err = validateEncounter(import, encounters)
+    ok, err = validateEncounter(import, bossEncounters)
     if not ok then return false, err end
 
     ok, err = validateTriggers(import)
