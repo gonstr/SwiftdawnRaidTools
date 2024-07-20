@@ -19,12 +19,9 @@ SwiftdawnRaidTools.defaults = {
                 showOnlyOwnNotifications = false,
                 mute = false
             },
-            overview = {
-                scale = 1,
-            },
             appearance = {
                 overviewScale = 1,
-                overviewBackgroundOpacity = 1,
+                overviewBackgroundOpacity = 0.4,
                 font = "Fonts\\FRIZQT__.TTF"
             }
         },

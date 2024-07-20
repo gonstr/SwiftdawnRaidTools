@@ -11,8 +11,7 @@ function SwiftdawnRaidTools:OverviewInit()
         tile = true,
         tileSize = 32,
     })
-    container.alpha = 0.4
-    container:SetBackdropColor(0, 0, 0, container.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
+    container:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewBackgroundOpacity)
     container:SetMovable(true)
     container:EnableMouse(true)
     container:SetUserPlaced(true)
@@ -68,8 +67,7 @@ function SwiftdawnRaidTools:OverviewInit()
         tile = true,
         tileSize = 16,
     })
-    header.alpha = 0.8
-    header:SetBackdropColor(0, 0, 0, header.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
+    header:SetBackdropColor(0, 0, 0, 0.8)
     header:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" and container:IsMouseEnabled() then
             self:GetParent():StartMoving()
@@ -127,10 +125,7 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
     self.overviewHeaderText:SetFont(self:AppearanceGetFont(), 10)
 
     local r, g, b = self.overviewFrame:GetBackdropColor()
-    self.overviewFrame:SetBackdropColor(r, g, b, self.overviewFrame.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
-
-    r, g, b = self.overviewHeader:GetBackdropColor()
-    self.overviewHeader:SetBackdropColor(r, g, b, self.overviewHeader.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
+    self.overviewFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.overviewBackgroundOpacity)
 
     for _, frame in pairs(self.overviewPopupListItems) do
         frame.text:SetFont(self:AppearanceGetFont(), 10)
@@ -138,9 +133,6 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
 
     for _, frame in pairs(self.overviewMainHeaders) do
         frame.text:SetFont(self:AppearanceGetFont(), 10)
-
-        local r, g, b = frame:GetBackdropColor()
-        frame:SetBackdropColor(r, g, b, frame.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
     end
 
     for _, group in pairs(self.overviewMainRaidAssignmentGroups) do
@@ -378,13 +370,6 @@ end
 local function createOverviewMainHeader(mainFrame, prevFrame)
     local frame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
     frame:SetHeight(20)
-    frame:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 32
-    })
-    frame.alpha = 0.8
-    frame:SetBackdropColor(1, 0.165, 0, frame.alpha * SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity)
 
     -- Anchor to main frame or previous row if it exists
     if prevFrame then
