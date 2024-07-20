@@ -11,7 +11,8 @@ function SwiftdawnRaidTools:OverviewInit()
         tile = true,
         tileSize = 32,
     })
-    container:SetBackdropColor(0, 0, 0, 0.4)
+    container.alpha = 0.4
+    container:SetBackdropColor(0, 0, 0, container.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
     container:SetMovable(true)
     container:EnableMouse(true)
     container:SetUserPlaced(true)
@@ -67,7 +68,8 @@ function SwiftdawnRaidTools:OverviewInit()
         tile = true,
         tileSize = 16,
     })
-    header:SetBackdropColor(0, 0, 0, 0.8)
+    header.alpha = 0.8
+    header:SetBackdropColor(0, 0, 0, header.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
     header:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" and container:IsMouseEnabled() then
             self:GetParent():StartMoving()
@@ -83,7 +85,7 @@ function SwiftdawnRaidTools:OverviewInit()
     end)
 
     local headerText = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    headerText:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    headerText:SetFont(self:AppearanceGetFont(), 10)
     headerText:SetPoint("TOPLEFT", 10, -5)
     headerText:SetShadowOffset(1, -1)
     headerText:SetShadowColor(0, 0, 0, 1)
@@ -115,6 +117,37 @@ function SwiftdawnRaidTools:OverviewInit()
     self.overviewMain = main
     self.overviewMainHeaders = {}
     self.overviewMainRaidAssignmentGroups = {}
+
+    self:OverviewUpdateAppearance()
+end
+
+function SwiftdawnRaidTools:OverviewUpdateAppearance()
+    self.overviewFrame:SetScale(self.db.profile.options.appearance.overviewScale)
+
+    self.overviewHeaderText:SetFont(self:AppearanceGetFont(), 10)
+
+    local r, g, b = self.overviewFrame:GetBackdropColor()
+    self.overviewFrame:SetBackdropColor(r, g, b, self.overviewFrame.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
+
+    r, g, b = self.overviewHeader:GetBackdropColor()
+    self.overviewHeader:SetBackdropColor(r, g, b, self.overviewHeader.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
+
+    for _, frame in pairs(self.overviewPopupListItems) do
+        frame.text:SetFont(self:AppearanceGetFont(), 10)
+    end
+
+    for _, frame in pairs(self.overviewMainHeaders) do
+        frame.text:SetFont(self:AppearanceGetFont(), 10)
+
+        local r, g, b = frame:GetBackdropColor()
+        frame:SetBackdropColor(r, g, b, frame.alpha * self.db.profile.options.appearance.overviewBackgroundOpacity)
+    end
+
+    for _, group in pairs(self.overviewMainRaidAssignmentGroups) do
+        for _, frame in pairs(group.assignments) do
+            frame.text:SetFont(self:AppearanceGetFont(), 10)
+        end
+    end
 end
 
 function SwiftdawnRaidTools:OverviewResize()
@@ -233,7 +266,7 @@ local function createPopupListItem(popupFrame, text, onClick)
     highlight:Hide()
 
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    item.text:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    item.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 10)
     item.text:SetTextColor(1, 1, 1)
     item.text:SetPoint("BOTTOMLEFT", 15, 5)
     item.text:SetText(text)
@@ -350,7 +383,8 @@ local function createOverviewMainHeader(mainFrame, prevFrame)
         tile = true,
         tileSize = 32
     })
-    frame:SetBackdropColor(1, 0.165, 0, 0.8)
+    frame.alpha = 0.8
+    frame:SetBackdropColor(1, 0.165, 0, frame.alpha * SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity)
 
     -- Anchor to main frame or previous row if it exists
     if prevFrame then
@@ -362,7 +396,7 @@ local function createOverviewMainHeader(mainFrame, prevFrame)
     end
 
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.text:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 10)
     frame.text:SetTextColor(1, 1, 1, 1)
     frame.text:SetPoint("BOTTOMLEFT", 10, 5)
 
@@ -416,7 +450,7 @@ local function createOverviewMainGroupAssignment(parentFrame)
     frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.text:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 10)
     frame.text:SetTextColor(1, 1, 1, 1)
     frame.text:SetPoint("BOTTOMLEFT", 28, 4.5)
 
@@ -560,7 +594,7 @@ function SwiftdawnRaidTools:OverviewUpdateActiveGroups()
                     if activeGroups then
                         for _, index in ipairs(activeGroups) do
                             if index == groupFrame.index then
-                                groupFrame:SetBackdropColor(1, 1, 1, 0.4)
+                                groupFrame:SetBackdropColor(1, 1, 1, 0.6)
                             else
                                 groupFrame:SetBackdropColor(0, 0, 0, 0)
                             end

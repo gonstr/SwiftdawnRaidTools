@@ -18,6 +18,14 @@ SwiftdawnRaidTools.defaults = {
             notifications = {
                 showOnlyOwnNotifications = false,
                 mute = false
+            },
+            overview = {
+                scale = 1,
+            },
+            appearance = {
+                overviewScale = 1,
+                overviewBackgroundOpacity = 1,
+                font = "Fonts\\FRIZQT__.TTF"
             }
         },
         data = {
@@ -109,53 +117,59 @@ function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackF
         prio = "NORMAL"
     end
 
-    if self.TEST then
-        self:OnCommReceived(prefix, self:Serialize(payload), "RAID", UnitName("player"))
-    elseif IsInRaid() then
+    -- "Send" message directly to self
+    self:HandleMessagePayload(payload)
+
+    -- Send to raid
+    if IsInRaid() then
         self:SendCommMessage(prefix, self:Serialize(payload), "RAID", nil, prio, callbackFn)
     end
 end
 
 function SwiftdawnRaidTools:OnCommReceived(prefix, message, _, sender)
+    if sender == UnitName("player") then
+        return
+    end
+
     if prefix == self.PREFIX_MAIN or prefix == self.PREFIX_SYNC or prefix == self.PREFIX_SYNC_PROGRESS then
         local ok, payload = self:Deserialize(message)
+
         if ok then
             self:SyncSetClientVersion(sender, payload.v)
-
-            if payload.e == "SYNC_REQ_VERSIONS" then
-                if self.DEBUG then self:Print("Received message SYNC_REQ_VERSIONS:", sender) end
-                self:SyncSendVersion()
-            elseif payload.e == "SYNC_STATUS" then
-                if sender ~= UnitName("player") then
-                    if self.DEBUG then self:Print("Received message SYNC_STATUS:", sender) end
-                    self:SyncHandleStatus(payload.d)
-                end
-            elseif payload.e == "SYNC_PROG" then
-                if sender ~= UnitName("player") and payload.d.encountersId ~= self.db.profile.data.encountersId then
-                    if self.DEBUG then self:Print("Received message SYNC_PROG:", sender, payload.d.progress) end
-                    self.db.profile.data.encountersProgress = payload.d.progress
-                    self.db.profile.data.encountersId = nil
-                    self.db.profile.data.encounters = {}
-                    self:OverviewUpdate()
-                end
-            elseif payload.e == "SYNC" then
-                if sender ~= UnitName("player") then
-                    if self.DEBUG then self:Print("Received message SYNC") end
-                    self.db.profile.data.encountersProgress = nil
-                    self.db.profile.data.encountersId = payload.d.encountersId
-                    self.db.profile.data.encounters = payload.d.encounters
-                    self:OverviewUpdate()
-                end
-            elseif payload.e == "ACT_GRPS" then
-                if self.DEBUG then self:Print("Received message ACT_GRPS") end
-                self:GroupsSetAllActive(payload.d)
-                self:OverviewUpdateActiveGroups()
-            elseif payload.e == "TRIGGER" then
-                if self.DEBUG then self:Print("Received message TRIGGER") end
-                self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.delay, payload.d.countdown)
-                self:NotificationsUpdateSpells()
-            end
+            self:HandleMessagePayload(prefix, payload)
         end
+    end
+end
+
+function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
+    if payload.e == "SYNC_REQ_VERSIONS" then
+        if self.DEBUG then self:Print("Received message SYNC_REQ_VERSIONS:", sender) end
+        self:SyncSendVersion()
+    elseif payload.e == "SYNC_STATUS" then
+        if self.DEBUG then self:Print("Received message SYNC_STATUS:", sender) end
+        self:SyncHandleStatus(payload.d)
+    elseif payload.e == "SYNC_PROG" then
+        if payload.d.encountersId ~= self.db.profile.data.encountersId then
+            if self.DEBUG then self:Print("Received message SYNC_PROG:", sender, payload.d.progress) end
+            self.db.profile.data.encountersProgress = payload.d.progress
+            self.db.profile.data.encountersId = nil
+            self.db.profile.data.encounters = {}
+            self:OverviewUpdate()
+        end
+    elseif payload.e == "SYNC" then
+        if self.DEBUG then self:Print("Received message SYNC") end
+        self.db.profile.data.encountersProgress = nil
+        self.db.profile.data.encountersId = payload.d.encountersId
+        self.db.profile.data.encounters = payload.d.encounters
+        self:OverviewUpdate()
+    elseif payload.e == "ACT_GRPS" then
+        if self.DEBUG then self:Print("Received message ACT_GRPS") end
+        self:GroupsSetAllActive(payload.d)
+        self:OverviewUpdateActiveGroups()
+    elseif payload.e == "TRIGGER" then
+        if self.DEBUG then self:Print("Received message TRIGGER") end
+        self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.delay, payload.d.countdown)
+        self:NotificationsUpdateSpells()
     end
 end
 
@@ -166,6 +180,7 @@ function SwiftdawnRaidTools:SRT_WA_EVENT(_, event, ...)
 end
 
 function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterId)
+    self:TestModeSet(false)
     self:OverviewSelectEncounter(encounterId)
     self:RaidAssignmentsStartEncounter(encounterId)
 end

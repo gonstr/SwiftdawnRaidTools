@@ -1,6 +1,7 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 local insert = table.insert
 
+local SharedMedia = LibStub("LibSharedMedia-3.0")
 local AceGUI = LibStub("AceGUI-3.0")
 
 do
@@ -127,7 +128,7 @@ local notificationOptions = {
             name = "Only show Raid Notifications that apply to you.",
             order = 2,
         },
-        separator = {
+        separator1 = {
             type = "description",
             name = " ",
             order = 3,
@@ -140,6 +141,115 @@ local notificationOptions = {
             order = 4,
             get = function() return SwiftdawnRaidTools.db.profile.options.notifications.mute end,
             set = function(_, value) SwiftdawnRaidTools.db.profile.options.notifications.mute = value end,
+        },
+        muteDescription = {
+            type = "description",
+            name = "Mute all Raid Notification Sounds.",
+            order = 5,
+        },
+    },
+}
+
+local appearanceOptions = {
+    name = "Appearance",
+    type = "group",
+    args =  {
+        font = {
+            type = "select",
+            name = "Font",
+            desc = "Set the Font used in UI views.",
+            values = SharedMedia:HashTable("font"),
+            dialogControl = "LSM30_Font",
+            order = 1,
+            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.font end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.font = value
+
+                SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:NotificationsUpdateAppearance()
+            end,
+        },
+        separator1 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 2,
+        },
+        overviewScale = {
+            type = "range",
+            min = 0.6,
+            max = 1.2,
+            step = 0.01,
+            isPercent = true,
+            name = "Overview Scale",
+            desc = "Set the Overview Scale.",
+            width = "double",
+            order = 3,
+            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewScale end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewScale = value
+
+                SwiftdawnRaidTools:OverviewUpdateAppearance()
+            end,
+        },
+        separator2 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 4,
+        },
+        overviewBackgroundOpacity = {
+            type = "range",
+            min = 0,
+            max = 1,
+            step = 0.01,
+            isPercent = true,
+            name = "Overview Background Opacity",
+            desc = "Set the Overview Background Opacity.",
+            width = "double",
+            order = 5,
+            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity = value
+
+                SwiftdawnRaidTools:OverviewUpdateAppearance()
+            end,
+        },
+
+    },
+}
+
+local notificationOptions = {
+    name = "Notifications",
+    type = "group",
+    args =  {
+        showOnlyOwnNotificationsCheckbox = {
+            type = "toggle",
+            name = "Limit Notifications",
+            desc = "Only show Raid Notifications that apply to You.",
+            width = "full",
+            order = 1,
+            get = function() return SwiftdawnRaidTools.db.profile.options.notifications.showOnlyOwnNotifications end,
+            set = function(_, value) SwiftdawnRaidTools.db.profile.options.notifications.showOnlyOwnNotifications = value end,
+        },
+        showOnlyOwnNotificationsDescription = {
+            type = "description",
+            name = "Only show Raid Notifications that apply to you.",
+            order = 2,
+        },
+        separator = {
+            type = "description",
+            name = " ",
+            order = 3,
+        },
+        muteCheckbox = {
+            type = "toggle",
+            name = "Mute Sounds",
+            desc = "Mute all Raid Notification Sounds.",
+            width = "full",
+            order = 4,
+            get = function() return SwiftdawnRaidTools.db.profile.options.notifications.mute end,
+            set = function(_, value)SwiftdawnRaidTools.db.profile.options.notifications.mute = value end,
         },
         muteDescription = {
             type = "description",
@@ -245,6 +355,10 @@ local importOptions = {
 function SwiftdawnRaidTools:OptionsInit()
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools", mainOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools", "Swiftdawn Raid Tools")
+
+
+    LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Appearance", appearanceOptions)
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Appearance", "Appearance", "Swiftdawn Raid Tools")
 
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Notifications", notificationOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Notifications", "Notifications", "Swiftdawn Raid Tools")

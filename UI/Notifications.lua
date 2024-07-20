@@ -22,7 +22,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 
     container.frameLockText = container:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    container.frameLockText:SetFont("Fonts\\FRIZQT__.TTF", 14)
+    container.frameLockText:SetFont(self:AppearanceGetFont(), 14)
     container.frameLockText:SetTextColor(1, 1, 1, 0.4)
     container.frameLockText:SetPoint("CENTER", 0, 0)
     container.frameLockText:SetText("SRT Notifications Anchor")
@@ -43,12 +43,12 @@ function SwiftdawnRaidTools:NotificationsInit()
     content.header:SetPoint("TOPRIGHT", 0, 0)
 
     content.header.text = content.header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    content.header.text:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    content.header.text:SetFont(self:AppearanceGetFont(), 10)
     content.header.text:SetTextColor(1, 1, 1, 1)
     content.header.text:SetPoint("BOTTOMLEFT", 10, 5)
 
     content.header.countdown = content.header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    content.header.countdown:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    content.header.countdown:SetFont(self:AppearanceGetFont(), 10)
     content.header.countdown:SetTextColor(1, 1, 1, 1)
     content.header.countdown:SetPoint("BOTTOMRIGHT", -10, 5)
     content.header.countdown:Hide()
@@ -86,6 +86,18 @@ function SwiftdawnRaidTools:NotificationsInit()
     self.notificationFrame = container
     self.notificationContentFrame = content
     self.notificationExtraInfoFrame = extraInfo
+end
+
+function SwiftdawnRaidTools:NotificationsUpdateAppearance()
+    self.notificationFrame.frameLockText:SetFont(self:AppearanceGetFont(), 14)
+    self.notificationContentFrame.header.text:SetFont(self:AppearanceGetFont(), 10)
+    self.notificationContentFrame.header.countdown:SetFont(self:AppearanceGetFont(), 10)
+
+    for _, group in pairs(self.notificationRaidAssignmentGroups) do
+        for _, frame in pairs(group.assignments) do
+            frame.text:SetFont(self:AppearanceGetFont(), 10)
+        end
+    end
 end
 
 function SwiftdawnRaidTools:NotificationsToggleFrameLock(lock)
@@ -141,7 +153,7 @@ local function createNotificationGroupAssignment(parentFrame)
     frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.text:SetFont("Fonts\\FRIZQT__.TTF", 12)
+    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 12)
     frame.text:SetTextColor(1, 1, 1, 1)
     frame.text:SetPoint("BOTTOMLEFT", 32, 8)
 

@@ -2,6 +2,8 @@ local SwiftdawnRaidTools = SwiftdawnRaidTools
 
 local random = math.random
 
+local SharedMedia = LibStub("LibSharedMedia-3.0")
+
 function SwiftdawnRaidTools:GenerateUUID()
     local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
 
@@ -177,4 +179,8 @@ function SwiftdawnRaidTools:IsPlayerInActiveGroup(part)
     end
 
     return false
+end
+
+function SwiftdawnRaidTools:AppearanceGetFont()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.font)
 end

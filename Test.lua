@@ -80,7 +80,8 @@ function SwiftdawnRaidTools:TestModeSet(testMode)
     self:OverviewUpdate()
 
     if self.TEST then
-        self:ENCOUNTER_START(nil, 1027)
+        self:OverviewSelectEncounter(1027)
+        self:RaidAssignmentsStartEncounter(1027)
 
         insert(timers, C_Timer.NewTimer(2, function()
             SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
@@ -90,37 +91,43 @@ function SwiftdawnRaidTools:TestModeSet(testMode)
             SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ant", nil, nil, 31821)
         end))
 
-        insert(timers, C_Timer.NewTimer(5, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Aeo", nil, nil, 740)
-        end))
-
         insert(timers, C_Timer.NewTimer(15, function()
             SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
         end))
 
         insert(timers, C_Timer.NewTimer(17, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ven", nil, nil, 98008)
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Kendoc", nil, nil, 62618)
         end))
 
         insert(timers, C_Timer.NewTimer(17, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Kon", nil, nil, 62618)
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Mirven", nil, nil, 98008)
         end))
 
         insert(timers, C_Timer.NewTimer(25, function()
             SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
         end))
 
-        insert(timers, C_Timer.NewTimer(29, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ven", nil, nil, 98008)
+        insert(timers, C_Timer.NewTimer(28, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ile", nil, nil, 31821)
         end))
 
-        insert(timers, C_Timer.NewTimer(36, function()
+        insert(timers, C_Timer.NewTimer(33, function()
             SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
         end))
 
-        insert(timers, C_Timer.NewTimer(37, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Rip", nil, nil, 77764)
+        insert(timers, C_Timer.NewTimer(35, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Claytox", nil, nil, 77764)
         end))
+
+        insert(timers, C_Timer.NewTimer(46, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
+        end))
+
+        insert(timers, C_Timer.NewTimer(47, function()
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Yesmon", nil, nil, 77764)
+        end))
+    else
+        self:ENCOUNTER_END(nil, 1027)
     end
 end
 
@@ -151,26 +158,26 @@ function SwiftdawnRaidTools:GetEncounters()
                             },
                             {
                                 type = "SPELL",
-                                player = "Aeo",
+                                player = "Eoline",
                                 spell_id = 740
                             }
                         },
                         {
                             {
                                 type = "SPELL",
-                                player = "Ven",
+                                player = "Mirven",
                                 spell_id = 98008
                             },
                             {
                                 type = "SPELL",
-                                player = "Kon",
+                                player = "Kendoc",
                                 spell_id = 62618
                             }
                         },
                         {
                             {
                                 type = "SPELL",
-                                player = "Eli",
+                                player = "Ile",
                                 spell_id = 31821
                             }
                         }
@@ -194,14 +201,14 @@ function SwiftdawnRaidTools:GetEncounters()
                         {
                             {
                                 type = "SPELL",
-                                player = "Rip",
+                                player = "Claytox",
                                 spell_id = 77764
                             }
                         },
                         {
                             {
                                 type = "SPELL",
-                                player = "Jam",
+                                player = "Yesmon",
                                 spell_id = 77764
                             }
                         }
