@@ -96,7 +96,7 @@ function SwiftdawnRaidTools:TestModeSet(testMode)
         end))
 
         insert(timers, C_Timer.NewTimer(17, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Kendoc", nil, nil, 62618)
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Condoc", nil, nil, 62618)
         end))
 
         insert(timers, C_Timer.NewTimer(17, function()
@@ -108,7 +108,7 @@ function SwiftdawnRaidTools:TestModeSet(testMode)
         end))
 
         insert(timers, C_Timer.NewTimer(28, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ile", nil, nil, 31821)
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Elli", nil, nil, 31821)
         end))
 
         insert(timers, C_Timer.NewTimer(33, function()
@@ -116,7 +116,7 @@ function SwiftdawnRaidTools:TestModeSet(testMode)
         end))
 
         insert(timers, C_Timer.NewTimer(35, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Claytox", nil, nil, 77764)
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Clayton", nil, nil, 77764)
         end))
 
         insert(timers, C_Timer.NewTimer(46, function()
@@ -124,7 +124,7 @@ function SwiftdawnRaidTools:TestModeSet(testMode)
         end))
 
         insert(timers, C_Timer.NewTimer(47, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Yesmon", nil, nil, 77764)
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Treebush", nil, nil, 77764)
         end))
     else
         self:ENCOUNTER_END(nil, 1027)
@@ -158,7 +158,7 @@ function SwiftdawnRaidTools:GetEncounters()
                             },
                             {
                                 type = "SPELL",
-                                player = "Eoline",
+                                player = "Eline",
                                 spell_id = 740
                             }
                         },
@@ -170,14 +170,14 @@ function SwiftdawnRaidTools:GetEncounters()
                             },
                             {
                                 type = "SPELL",
-                                player = "Kendoc",
+                                player = "Condoc",
                                 spell_id = 62618
                             }
                         },
                         {
                             {
                                 type = "SPELL",
-                                player = "Ile",
+                                player = "Elli",
                                 spell_id = 31821
                             }
                         }
@@ -201,14 +201,14 @@ function SwiftdawnRaidTools:GetEncounters()
                         {
                             {
                                 type = "SPELL",
-                                player = "Claytox",
+                                player = "Clayton",
                                 spell_id = 77764
                             }
                         },
                         {
                             {
                                 type = "SPELL",
-                                player = "Yesmon",
+                                player = "Treebush",
                                 spell_id = 77764
                             }
                         }

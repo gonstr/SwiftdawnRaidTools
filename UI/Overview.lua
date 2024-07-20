@@ -382,7 +382,7 @@ local function createOverviewMainHeader(mainFrame, prevFrame)
 
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 10)
-    frame.text:SetTextColor(1, 1, 1, 1)
+    frame.text:SetTextColor(0.8, 0.8, 0.8, 1)
     frame.text:SetPoint("BOTTOMLEFT", 10, 5)
 
     return frame
