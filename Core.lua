@@ -22,7 +22,7 @@ SwiftdawnRaidTools.defaults = {
             appearance = {
                 overviewScale = 1,
                 overviewBackgroundOpacity = 0.4,
-                font = "Fonts\\FRIZQT__.TTF"
+                font = "Friz Quadrata TT"
             }
         },
         data = {
