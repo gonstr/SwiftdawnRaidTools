@@ -291,11 +291,13 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, delay, countdo
     local selectedEncounterId = self.db.profile.overview.selectedEncounterId
     local encounter = self:GetEncounters()[selectedEncounterId]
 
-    if not self.TEST and self.db.profile.options.notifications.showOnlyOwnNotifications then
-        local part = self:GetRaidAssignmentPart(uuid)
+    if not self.TEST then
+        if self.db.profile.options.notifications.showOnlyOwnNotifications then
+            local part = self:GetRaidAssignmentPart(uuid)
 
-        if part and not not self:IsPlayerInActiveGroup(part) then
-            return
+            if part and not self:IsPlayerInActiveGroup(part) then
+                return
+            end
         end
     end
 

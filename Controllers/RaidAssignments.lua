@@ -306,8 +306,53 @@ function SwiftdawnRaidTools:RaidAssignmentsSelectGroup(assignments)
     return groups
 end
 
+local function triggerConditionsTrue(conditions)
+    if conditions then
+        for _, condition in ipairs(conditions) do
+            if condition.type == "UNIT_HEALTH" then
+                local health = UnitHealth(condition.unit)
+
+                if condition.lt and health >= condition.lt then
+                    return false
+                end
+
+                if condition.gt and health <= condition.gt then
+                    return false
+                end
+
+                if condition.pct_lt then
+                    local maxHealth = UnitHealthMax(condition.unit)
+
+                    local pct = health / maxHealth * 100
+
+                    if pct >= condition.pct_lt then
+                        return false
+                    end
+                end
+
+                if condition.pct_gt then
+                    local maxHealth = UnitHealthMax(condition.unit)
+
+                    local pct = health / maxHealth * 100
+
+                    if pct <= condition.pct_gt then
+                        return false
+                    end
+                end
+            end
+        end
+    end
+
+    return true
+end
+
 function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, countdown)
     if self.DEBUG then self:Print("Sending TRIGGER start") end
+
+    if not triggerConditionsTrue(trigger.conditions) then
+        if self.DEBUG then self:Print("TRIGGER conditions did not passs") end
+        return
+    end
 
     local activeGroups = self:GroupsGetActive(trigger.uuid)
 
@@ -359,10 +404,38 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
         for _, trigger in ipairs(triggers) do
             if not trigger.triggered then
                 local health = UnitHealth(unit)
-                local maxHealth = UnitHealthMax(unit)
-                local percentage = health / maxHealth * 100
 
-                if percentage < trigger.percentage then
+                local shouldTrigger = false
+
+                if trigger.lt and health < trigger.lt then
+                    shouldTrigger = true
+                end
+
+                if trigger.gt and health > trigger.gt then
+                    shouldTrigger = true
+                end
+
+                if trigger.pct_lt then
+                    local maxHealth = UnitHealthMax(unit)
+
+                    local pct = health / maxHealth * 100
+
+                    if pct < trigger.pct_lt then
+                        shouldTrigger = true
+                    end
+                end
+
+                if trigger.pct_gt then
+                    local maxHealth = UnitHealthMax(unit)
+
+                    local pct = health / maxHealth * 100
+
+                    if pct > trigger.pct_gt then
+                        shouldTrigger = true
+                    end
+                end
+
+                if shouldTrigger then
                     trigger.triggered = true
 
                     self:RaidAssignmentsTrigger(trigger)
@@ -377,10 +450,24 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
         for _, untrigger in ipairs(untriggers) do
             if not untrigger.triggered then
                 local health = UnitHealth(unit)
-                local maxHealth = UnitHealthMax(unit)
-                local percentage = health / maxHealth * 100
 
-                if percentage < untrigger.percentage then
+                local shouldTrigger = false
+
+                if untrigger.lt and health < untrigger.lt then
+                    shouldTrigger = true
+                end
+
+                if untrigger.pct_lt then
+                    local maxHealth = UnitHealthMax(unit)
+
+                    local pct = health / maxHealth * 100
+
+                    if pct < untrigger.pct_lt then
+                        shouldTrigger = true
+                    end
+                end
+
+                if shouldTrigger then
                     untrigger.triggered = true
 
                     cancelDelayTimers(untrigger.uuid)

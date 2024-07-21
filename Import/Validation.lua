@@ -174,7 +174,7 @@ local function validateTriggers(import)
                 return false, "Import trigger is missing a type field."
             end
 
-            if not (trigger.type == "UNIT_HEALTH" or trigger.type == "SPELL_CAST" or trigger.type == "RAID_BOSS_EMOTE" or trigger.type == "ENCOUNTER_START" or trigger.type == "FOJJI_NUMEN_TIMER") then
+            if not (trigger.type == "UNIT_HEALTH" or trigger.type == "SPELL_CAST" or trigger.type == "SPELL_AURA" or trigger.type == "RAID_BOSS_EMOTE" or trigger.type == "ENCOUNTER_START" or trigger.type == "FOJJI_NUMEN_TIMER") then
                 return false, "Import has an invalid trigger type."
             end
 
@@ -183,8 +183,18 @@ local function validateTriggers(import)
                     return false, "Import with trigger type UNIT_HEALTH is missing a unit field."
                 end
 
-                if not trigger.percentage then
-                    return false, "Import with trigger type UNIT_HEALTH is missing a percentage field."
+                local conditions = 0
+
+                if trigger.lt then
+                    conditions = conditions + 1
+                end
+
+                if trigger.pct_lt then
+                    conditions = conditions + 1
+                end
+
+                if conditions ~= 1 then
+                    return false, "Import with trigger type UNIT_HEALTH requries exactly one of lt or pct_lt fields."
                 end
             end
 
@@ -234,6 +244,50 @@ local function validateTriggers(import)
 
             if trigger.delay and (type(trigger.delay) ~= "number" or trigger.delay ~= math.floor(trigger.delay)) then
                 return false, "Import has an invalid delay value: " .. stringSafe(trigger.delay) .. "."
+            end
+
+            if trigger.conditions and type(trigger.conditions) ~= "table"  then
+                return false, "Import has an invalid conditions value: " .. stringSafe(trigger.conditions) .. "."
+            end
+
+            if trigger.conditions then
+                for _, condition in ipairs(trigger.conditions) do
+                    if not condition.type then
+                        return false, "Import condition is missing a type field."
+                    end
+
+                    if not (condition.type == "UNIT_HEALTH") then
+                        return false, "Import has an invalid condition type."
+                    end
+
+                    if condition.type == "UNIT_HEALTH" then
+                        if not condition.unit then
+                            return false, "Import condition of type UNIT_HEALTH is missing a unit field."
+                        end
+
+                        local conditions = 0
+
+                        if condition.lt then
+                            conditions = conditions + 1
+                        end
+
+                        if condition.gt then
+                            conditions = conditions + 1
+                        end
+
+                        if condition.pct_lt then
+                            conditions = conditions + 1
+                        end
+
+                        if condition.pct_gt then
+                            conditions = conditions + 1
+                        end
+
+                        if conditions ~= 1 then
+                            return false, "Import condition of type UNIT_HEALTH requires exactly one of lt, gt, pct_gt or pct_lt fields."
+                        end
+                    end
+                end
             end
         end
     end
