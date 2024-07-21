@@ -133,6 +133,9 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
 
     for _, frame in pairs(self.overviewMainHeaders) do
         frame.text:SetFont(self:AppearanceGetFont(), 10)
+
+        local r, g, b = frame:GetBackdropColor()
+        frame:SetBackdropColor(r, g, b, 0.8 * self.db.profile.options.appearance.overviewBackgroundOpacity)
     end
 
     for _, group in pairs(self.overviewMainRaidAssignmentGroups) do
@@ -369,6 +372,12 @@ end
 
 local function createOverviewMainHeader(mainFrame, prevFrame)
     local frame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
+    frame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 32,
+    })
+    frame:SetBackdropColor(0, 0, 0, 0.8 * SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity)
     frame:SetHeight(20)
 
     -- Anchor to main frame or previous row if it exists
