@@ -302,7 +302,7 @@ local function validateUntriggers(import)
                 return false, "Import untrigger is missing a type field."
             end
 
-            if not (untrigger.type == "UNIT_HEALTH" or untrigger.type == "SPELL_CAST" or untrigger.type == "RAID_BOSS_EMOTE") then
+            if not (untrigger.type == "UNIT_HEALTH" or untrigger.type == "SPELL_CAST" or untrigger.type == "SPELL_AURA" or untrigger.type == "RAID_BOSS_EMOTE") then
                 return false, "Import has an invalid untrigger type."
             end
 
