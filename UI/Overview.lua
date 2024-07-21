@@ -67,7 +67,7 @@ function SwiftdawnRaidTools:OverviewInit()
         tile = true,
         tileSize = 16,
     })
-    header:SetBackdropColor(0, 0, 0, 0.8)
+    header:SetBackdropColor(0, 0, 0, 1)
     header:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" and container:IsMouseEnabled() then
             self:GetParent():StartMoving()
@@ -135,7 +135,7 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
         frame.text:SetFont(self:AppearanceGetFont(), 10)
 
         local r, g, b = frame:GetBackdropColor()
-        frame:SetBackdropColor(r, g, b, 0.8 * self.db.profile.options.appearance.overviewBackgroundOpacity)
+        frame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.overviewBackgroundOpacity)
     end
 
     for _, group in pairs(self.overviewMainRaidAssignmentGroups) do
@@ -377,7 +377,7 @@ local function createOverviewMainHeader(mainFrame, prevFrame)
         tile = true,
         tileSize = 32,
     })
-    frame:SetBackdropColor(0, 0, 0, 0.8 * SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity)
+    frame:SetBackdropColor(0, 0, 0, SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity)
     frame:SetHeight(20)
 
     -- Anchor to main frame or previous row if it exists
