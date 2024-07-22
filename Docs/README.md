@@ -20,14 +20,18 @@ Assignment triggers. Can be of types `UNIT_HEALTH`, `SPELL_CAST`, `SPELL_AURA`, 
 
 #### UNIT_HEALTH
 
+Required values: `unit` and one of `lt`, `gt`, `pct_lt` or `pct_gt`.
+
 ```yaml
 triggers:
 - type: UNIT_HEALTH
   unit: boss1
-  percentage: 20
+  pct_lt: 20
 ```
 
 #### SPELL_AURA
+
+Required values: `spell_id`.
 
 ```yaml
 triggers:
@@ -37,6 +41,8 @@ triggers:
 
 #### SPELL_CAST
 
+Required values: `spell_id`.
+
 ```yaml
 triggers:
 - type: SPELL_CAST
@@ -44,6 +50,8 @@ triggers:
 ```
 
 #### RAID_BOSS_EMOTE
+
+Required values: `text`.
 
 ```yaml
 triggers:
@@ -60,6 +68,10 @@ triggers:
 
 #### FOJJI_NUMEN_TIMER
 
+Triggers when a fojji numen timer reaches 5 seconds left. This trigger requires the raid leader to have the Helper Weakaura installed. This Weakaura can be installed from within the Addon settings.
+
+Required values: `key`.
+
 ```yaml
 triggers:
 - type: FOJJI_NUMEN_TIMER
@@ -72,9 +84,34 @@ Same as triggers. This field is optional and really only useful if you created t
 
 ### Countdown and Delay
 
-For most triggers, `countdown` and `delay` fields can also be set. The `countdown` value controls the countdown timer in the raid assignments popup. `delay` controls how long a raid notifications will be delayed for after triggering.
+Most triggers support `countdown` and `delay`. The `countdown` value controls the countdown timer in the raid assignments popup. `delay` controls how long a raid notifications will be delayed for after triggering.
 
-Both countdown and delay sort of serve a similar purpose and it's mostly a matter of if you want to show the window with a countdown timer or just delay it. Countdown makes sense for small values while delay makes sense for longer timer periods.
+Both countdown and delay serve a similar purpose and it's mostly a matter of if you want to show the window with a countdown timer or just delay it. Countdown makes sense for small values while delay makes sense for longer timer periods. They can also be combined.
+
+```yaml
+triggers:
+- type: SPELL_CAST
+  spell_id: 12345
+  delay: 3
+  countdown: 2
+```
+
+### Conditions
+
+All triggers support `conditions`. Conditions is a list of things that need to be true for the trigger to go off.
+
+#### UNIT_HEALTH
+
+Only trigger if the health of the boss is below 20%.
+
+Required values: `unit` and one of `lt`, `gt`, `pct_lt` or `pct_gt`.
+
+```yaml
+triggers:
+- type: SPELL_CAST
+  spell_id: 12345
+  conditions: [{ type: UNIT_HEALTH, unit: boss1, pct_lt: 20 }]
+```
 
 ### Assignments
 
@@ -86,41 +123,47 @@ Assignments is priority list and not a sequence. This means that the addon will 
 
 ```yaml
 type: RAID_ASSIGNMENTS
-encounter: 1024
-trigger: { type: UNIT_HEALTH, unit: boss1, percentage: 35 }
-metadata: { name: "Boss 25%" }
-strategy: { type: CHAIN }
+version: 1
+encounter: 1029
+triggers: 
+- { type: UNIT_HEALTH, unit: boss1, pct_lt: 20 }
+- { type: UNIT_HEALTH, unit: boss1, pct_lt: 20, delay: 10 }
+metadata: { name: 'Phase 2' }
 assignments:
-- [{ type: SPELL, player: Anticipâte, spell_id: 31821 }]
-- [{ type: SPELL, player: Kondec, spell_id: 62618 }]
-- [{ type: SPELL, player: Venmir, spell_id: 98008 }]
+- [{ type: SPELL, player: Aeolyne, spell_id: 740 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
+- [{ type: SPELL, player: Elí, spell_id: 31821 }, { type: SPELL, player: Kondec, spell_id: 62618 }]
 ---
 type: RAID_ASSIGNMENTS
-encounter: 1027
-trigger: { type: SPELL_CAST, spell_id: 91849 }
-metadata: { name: "Grip of Death" }
-strategy: { type: BEST_MATCH }
+version: 1
+encounter: 1025
+triggers:
+- { type: RAID_BOSS_EMOTE, text: "red|r vial into the cauldron!", delay: 19, countdown: 3 }
+- { type: SPELL_CAST, spell_id: 77679, delay: 7, countdown: 3 }
+untriggers:
+- { type: SPELL_CAST, spell_id: 77991 }
+- { type: RAID_BOSS_EMOTE, text: "blue|r vial into the cauldron!" }
+- { type: RAID_BOSS_EMOTE, text: "green|r vial into the cauldron!" }
+- { type: RAID_BOSS_EMOTE, text: "dark|r vial into the cauldron!" }
+metadata: { name: 'Scorching Blast' }
 assignments:
-- [{ type: SPELL, player: Riphyrra, spell_id: 77764 }]
-- [{ type: SPELL, player: Jamón, spell_id: 77764 }]
-- [{ type: SPELL, player: Clutex, spell_id: 77764 }]
-- [{ type: SPELL, player: Crawlern, spell_id: 77764 }]
+- [{ type: SPELL, player: Aeolyne, spell_id: 740 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
+- [{ type: SPELL, player: Crawlern, spell_id: 740 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
 ---
 type: RAID_ASSIGNMENTS
-encounter: 1022
-trigger: { type: FOJJI_NUMEN_TIMER, key: ATRAMEDES_SEARING_FLAME, duration: 7 }
-metadata: { name: Flames }
-strategy: { type: BEST_MATCH }
-assignments: 
-- [{ type: SPELL, player: Sîf, spell_id: 97462 }, { type: SPELL, player: Anticipâte, spell_id: 31821 }]
-- [{ type: SPELL, player: Solfernus, spell_id: 51052 }, { type: SPELL, player: Kondec, spell_id: 62618 }]
+version: 1
+encounter: 1023
+triggers: [{ type: SPELL_CAST, spell_id: 82848, conditions: [{ type: UNIT_HEALTH, unit: boss1, pct_lt: 25 }]}]
+metadata: { name: 'Heal to full for P2!' }
+assignments:
+- [{ type: SPELL, player: Sîf, spell_id: 97462 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
+- [{ type: SPELL, player: Aeolyne, spell_id: 740 }, { type: SPELL, player: Solfernus, spell_id: 51052 }]
 ---
 type: RAID_ASSIGNMENTS
+version: 1
 encounter: 1026
-trigger: { type: RAID_BOSS_EMOTE, text: "The air crackles with electricity!", countdown: 5, duration: 10 }
-metadata: { name: "Crackle" }
-strategy: { type: BEST_MATCH }
+triggers: [{ type: RAID_BOSS_EMOTE, text: 'The air crackles with electricity!', countdown: 5 }]
+metadata: { name: 'Electrocute/Crackle' }
 assignments:
-- [{ type: SPELL, player: Anticipâte, spell_id: 31821 }, { type: SPELL, player: Kondec, spell_id: 62618 }]
-- [{ type: SPELL, player: Managobrr, spell_id: 64843 }, { type: SPELL, player: Venmir, spell_id: 98008 }]
+- [{ type: SPELL, player: Sîf, spell_id: 97462 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
+- [{ type: SPELL, player: Aeolyne, spell_id: 740 }, { type: SPELL, player: Solfernus, spell_id: 51052 }]
 ```
