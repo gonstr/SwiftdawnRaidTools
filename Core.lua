@@ -22,6 +22,8 @@ SwiftdawnRaidTools.defaults = {
             appearance = {
                 overviewScale = 1,
                 overviewBackgroundOpacity = 0.4,
+                notificationsScale = 1,
+                notificationsBackgroundOpacity = 0.6,
                 font = "Friz Quadrata TT"
             }
         },
@@ -53,9 +55,9 @@ end
 
 function SwiftdawnRaidTools:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:RegisterEvent("ZONE_CHANGED")
     self:RegisterEvent("ENCOUNTER_START")
     self:RegisterEvent("ENCOUNTER_END")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:RegisterEvent("UNIT_HEALTH")
@@ -70,9 +72,9 @@ end
 
 function SwiftdawnRaidTools:OnDisable()
     self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+    self:UnregisterEvent("ZONE_CHANGED")
     self:UnregisterEvent("ENCOUNTER_START")
     self:UnregisterEvent("ENCOUNTER_END")
-    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
     self:UnregisterEvent("PLAYER_REGEN_DISABLED")
     self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:UnregisterEvent("UNIT_HEALTH")
@@ -190,15 +192,10 @@ function SwiftdawnRaidTools:ENCOUNTER_END()
     self:NotificationsUpdateSpells()
 end
 
-function SwiftdawnRaidTools:PLAYER_REGEN_ENABLED()
-    -- This is just another way of registering an encounter ending
-    if not UnitIsDeadOrGhost("player") then
-        self:RaidAssignmentsEndEncounter()
-        self:SpellsResetCache()
-        self:UnitsResetDeadCache()
-        self:OverviewUpdateSpells()
-        self:NotificationsUpdateSpells()
-    end
+function SwiftdawnRaidTools:ZONE_CHANGED()
+    self:RaidAssignmentsEndEncounter()
+    self:OverviewUpdateSpells()
+    self:NotificationsUpdateSpells()
 end
 
 function SwiftdawnRaidTools:PLAYER_REGEN_DISABLED()

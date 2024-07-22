@@ -116,7 +116,7 @@ function SwiftdawnRaidTools:TestModeSet(testMode)
         end))
 
         insert(timers, C_Timer.NewTimer(35, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Clayton", nil, nil, 77764)
+            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Claytox", nil, nil, 77764)
         end))
 
         insert(timers, C_Timer.NewTimer(46, function()
@@ -201,7 +201,7 @@ function SwiftdawnRaidTools:GetEncounters()
                         {
                             {
                                 type = "SPELL",
-                                player = "Clayton",
+                                player = "Claytox",
                                 spell_id = 77764
                             }
                         },

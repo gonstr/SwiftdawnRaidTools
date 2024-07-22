@@ -20,6 +20,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     container:RegisterForDrag("LeftButton")
     container:SetScript("OnDragStart", function(self) self:StartMoving() end)
     container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+    container:SetScale(self.db.profile.options.appearance.notificationsScale)
 
     container.frameLockText = container:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     container.frameLockText:SetFont(self:AppearanceGetFont(), 14)
@@ -28,19 +29,18 @@ function SwiftdawnRaidTools:NotificationsInit()
     container.frameLockText:SetText("SRT Notifications Anchor")
     container.frameLockText:Hide()
 
-    local content = CreateFrame("Frame", nil, container)
+    local content = CreateFrame("Frame", nil, container, "BackdropTemplate")
+    content:SetBackdrop({
+        bgFile = "Interface\\Cooldown\\LoC-ShadowBG"
+    })
+    content:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewBackgroundOpacity)
     content:SetAllPoints()
 
-    content.header = CreateFrame("Frame", nil, content, "BackdropTemplate")
+    content.header = CreateFrame("Frame", nil, content)
     content.header:SetHeight(20)
-    content.header:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 32
-    })
-    content.header:SetBackdropColor(1, 0.165, 0, 0.8)
-    content.header:SetPoint("TOPLEFT", 0, 0)
-    content.header:SetPoint("TOPRIGHT", 0, 0)
+
+    content.header:SetPoint("TOPLEFT", 20, 0)
+    content.header:SetPoint("TOPRIGHT", -20, 0)
 
     content.header.text = content.header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     content.header.text:SetFont(self:AppearanceGetFont(), 10)
@@ -89,6 +89,11 @@ function SwiftdawnRaidTools:NotificationsInit()
 end
 
 function SwiftdawnRaidTools:NotificationsUpdateAppearance()
+    self.notificationFrame:SetScale(self.db.profile.options.appearance.notificationsScale)
+
+    local r, g, b = self.notificationContentFrame:GetBackdropColor()
+    self.notificationContentFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.notificationsBackgroundOpacity)
+
     self.notificationFrame.frameLockText:SetFont(self:AppearanceGetFont(), 14)
     self.notificationContentFrame.header.text:SetFont(self:AppearanceGetFont(), 10)
     self.notificationContentFrame.header.countdown:SetFont(self:AppearanceGetFont(), 10)
@@ -124,12 +129,6 @@ end
 local function createNotificationGroup(mainFrame, prevFrame)
     local frame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
     frame:SetHeight(30)
-    frame:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 32,
-    })
-    frame:SetBackdropColor(0, 0, 0, 0.6)
 
     frame.assignments = {}
 

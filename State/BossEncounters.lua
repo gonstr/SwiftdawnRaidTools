@@ -41,7 +41,7 @@ function SwiftdawnRaidTools:BossEncountersInit()
 
     EJ_SelectTier(currTier)
 
-    -- Add bosses not in the encounter journal
+    -- Add bosses not in the encounter journal until discovered
     bossEncounters[1082] = "Sinestra"
     bossEncounters[1083] = "Sinestra"
 end

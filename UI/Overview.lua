@@ -19,6 +19,7 @@ function SwiftdawnRaidTools:OverviewInit()
     container:RegisterForDrag("LeftButton")
     container:SetScript("OnDragStart", function(self) self:StartMoving() end)
     container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+    container:SetScale(self.db.profile.options.appearance.overviewScale)
 
     local popup = CreateFrame("Frame", "SwiftdawnRaidToolsOverviewPopup", UIParent, "BackdropTemplate")
     popup:SetClampedToScreen(true)
@@ -579,7 +580,6 @@ function SwiftdawnRaidTools:OverviewUpdateActiveGroups()
         local selectedEncounterId = self.db.profile.overview.selectedEncounterId
         local encounter = self:GetEncounters()[selectedEncounterId]
 
-
         if encounter then
             for _, part in ipairs(encounter) do
                 if part.uuid == groupFrame.uuid then
@@ -596,6 +596,7 @@ function SwiftdawnRaidTools:OverviewUpdateActiveGroups()
                     else
                         groupFrame:SetBackdropColor(0, 0, 0, 0)
                     end
+
                     break
                 end
             end

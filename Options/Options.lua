@@ -154,13 +154,30 @@ local appearanceOptions = {
     name = "Appearance",
     type = "group",
     args =  {
+        toggleTestMode = {
+            type = "execute",
+            name = "Toggle Test Mode",
+            desc = "Toggle Test Mode on and off.",
+            func = function()
+                if not InCombatLockdown() then
+                    SwiftdawnRaidTools:TestModeToggle()
+                end
+            end,
+            order = 1,
+        },
+        separator1 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 2,
+        },
         font = {
             type = "select",
             name = "Font",
             desc = "Set the Font used in UI views.",
             values = SharedMedia:HashTable("font"),
             dialogControl = "LSM30_Font",
-            order = 1,
+            order = 3,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.font end,
             set = function(_, value)
                 SwiftdawnRaidTools.db.profile.options.appearance.font = value
@@ -169,21 +186,21 @@ local appearanceOptions = {
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
-        separator1 = {
+        separator2 = {
             type = "description",
             name = " ",
             width = "full",
-            order = 2,
+            order = 4,
         },
         overviewScale = {
             type = "range",
             min = 0.6,
-            max = 1.2,
+            max = 1.4,
             isPercent = true,
             name = "Overview Scale",
-            desc = "Set the Overview Scale.",
+            desc = "Set the Overview UI Scale.",
             width = "double",
-            order = 3,
+            order = 5,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewScale end,
             set = function(_, value)
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewScale = value
@@ -191,11 +208,11 @@ local appearanceOptions = {
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
             end,
         },
-        separator2 = {
+        separator3 = {
             type = "description",
             name = " ",
             width = "full",
-            order = 4,
+            order = 6,
         },
         overviewBackgroundOpacity = {
             type = "range",
@@ -205,7 +222,7 @@ local appearanceOptions = {
             name = "Overview Background Opacity",
             desc = "Set the Overview Background Opacity.",
             width = "double",
-            order = 5,
+            order = 7,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity end,
             set = function(_, value)
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity = value
@@ -213,7 +230,50 @@ local appearanceOptions = {
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
             end,
         },
+        separator4 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 8,
+        },
+        notificationsScale = {
+            type = "range",
+            min = 0.6,
+            max = 1.4,
+            isPercent = true,
+            name = "Notifications Scale",
+            desc = "Set the Notifications UI Scale.",
+            width = "double",
+            order = 9,
+            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale = value
 
+                SwiftdawnRaidTools:NotificationsUpdateAppearance()
+            end,
+        },
+        separator5 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 10,
+        },
+        noticationsBackgroundOpacity = {
+            type = "range",
+            min = 0,
+            max = 1,
+            isPercent = true,
+            name = "Notifications Background Opacity",
+            desc = "Set the Notifications Background Opacity.",
+            width = "double",
+            order = 11,
+            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsBackgroundOpacity end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsBackgroundOpacity = value
+
+                SwiftdawnRaidTools:NotificationsUpdateAppearance()
+            end,
+        },
     },
 }
 
