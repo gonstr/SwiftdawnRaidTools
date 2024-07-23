@@ -139,7 +139,7 @@ function SwiftdawnRaidTools:TestModeEnd()
 
         cancelTimers()
 
-        self:GroupsReset()
+        self:RaidAssignmentsEndEncounter()
         self:SpellsResetCache()
         self:UnitsResetDeadCache()
         self:OverviewUpdate()

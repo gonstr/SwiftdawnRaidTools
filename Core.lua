@@ -22,7 +22,7 @@ SwiftdawnRaidTools.defaults = {
             appearance = {
                 overviewScale = 1,
                 overviewBackgroundOpacity = 0.4,
-                notificationsScale = 1,
+                notificationsScale = 1.2,
                 notificationsBackgroundOpacity = 0.6,
                 font = "Friz Quadrata TT"
             }
@@ -179,14 +179,12 @@ function SwiftdawnRaidTools:SRT_WA_EVENT(_, event, ...)
 end
 
 function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterId)
-    if self.DEBUG then self:Print("ENCOUNTER_START event triggered") end
     self:TestModeEnd()
     self:OverviewSelectEncounter(encounterId)
     self:RaidAssignmentsStartEncounter(encounterId)
 end
 
 function SwiftdawnRaidTools:ENCOUNTER_END()
-    if self.DEBUG then self:Print("ENCOUNTER_END event triggered") end
     self:RaidAssignmentsEndEncounter()
     self:SpellsResetCache()
     self:UnitsResetDeadCache()
@@ -195,7 +193,7 @@ function SwiftdawnRaidTools:ENCOUNTER_END()
 end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
-    if self.DEBUG then self:Print("ZONE_CHANGED event triggered") end
+    self:TestModeEnd()
     self:RaidAssignmentsEndEncounter()
     self:OverviewUpdateSpells()
     self:NotificationsUpdateSpells()

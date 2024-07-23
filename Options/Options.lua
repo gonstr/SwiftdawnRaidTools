@@ -157,7 +157,7 @@ local appearanceOptions = {
         toggleTestMode = {
             type = "execute",
             name = "Toggle Test Mode",
-            desc = "Toggle Test Mode on and off.",
+            desc = "Toggle Test Mode to see example Raid Assignments and Notifications.",
             func = function()
                 if not InCombatLockdown() then
                     SwiftdawnRaidTools:TestModeToggle()
