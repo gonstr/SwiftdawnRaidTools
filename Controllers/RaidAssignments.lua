@@ -350,7 +350,7 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, countdown)
     if self.DEBUG then self:Print("Sending TRIGGER start") end
 
     if not triggerConditionsTrue(trigger.conditions) then
-        if self.DEBUG then self:Print("TRIGGER conditions did not passs") end
+        if self.DEBUG then self:Print("TRIGGER conditions did not pass") end
         return
     end
 
@@ -367,7 +367,7 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, countdown)
             delay = delay
         }
 
-        if self.DEBUG then self:Print("Sending TRIGGER done") end
+            if self.DEBUG then self:Print("Sending TRIGGER done") end
 
         if trigger.delay then
             if not delayTimers[trigger.uuid] then
@@ -375,7 +375,7 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, countdown)
             end
 
             insert(delayTimers[trigger.uuid], C_Timer.NewTimer(trigger.delay, function()
-                self:SendRaidMessage("TRIGGER", data)
+                SwiftdawnRaidTools:SendRaidMessage("TRIGGER", data)
             end))
         else
             self:SendRaidMessage("TRIGGER", data)
@@ -384,6 +384,8 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, countdown)
 end
 
 local function cancelDelayTimers(uuid)
+    if SwiftdawnRaidTools.DEBUG then SwiftdawnRaidTools:Print("Cancelling timers for", uuid) end
+
     if delayTimers[uuid] then
         for _, timer in ipairs(delayTimers[uuid]) do
             timer:Cancel()
@@ -508,7 +510,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(event, spellId)
+function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId)
     if not activeEncounter then
         return
     end

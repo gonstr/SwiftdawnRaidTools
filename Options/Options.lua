@@ -388,7 +388,7 @@ local importOptions = {
                     val = val:trim()
                 end
 
-                SwiftdawnRaidTools:TestModeSet(false)
+                SwiftdawnRaidTools:TestModeEnd()
 
                 SwiftdawnRaidTools.db.profile.options.import = val
 

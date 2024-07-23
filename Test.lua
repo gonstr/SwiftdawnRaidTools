@@ -63,14 +63,20 @@ function SwiftdawnRaidTools:InternalTestEnd()
     self:ENCOUNTER_END(nil, 1035)
 end
 
-function SwiftdawnRaidTools:TestModeToggle()
-    local testMode = not self.TEST
-
-    self:TestModeSet(testMode)
+function SwiftdawnRaidTools:TestModeEnabled()
+    return self.TEST and true or false
 end
 
-function SwiftdawnRaidTools:TestModeSet(testMode)
-    self.TEST = testMode
+function SwiftdawnRaidTools:TestModeToggle()
+    if self.TEST then
+        self:TestModeEnd()
+    else
+        self:TestModeStart()
+    end
+end
+
+function SwiftdawnRaidTools:TestModeStart()
+    self.TEST = true
 
     cancelTimers()
 
@@ -79,55 +85,64 @@ function SwiftdawnRaidTools:TestModeSet(testMode)
     self:UnitsResetDeadCache()
     self:OverviewUpdate()
 
+    self:OverviewSelectEncounter(1027)
+    self:RaidAssignmentsStartEncounter(1027)
+
+    insert(timers, C_Timer.NewTimer(2, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+    end))
+
+    insert(timers, C_Timer.NewTimer(4, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ant", nil, nil, 31821)
+    end))
+
+    insert(timers, C_Timer.NewTimer(15, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+    end))
+
+    insert(timers, C_Timer.NewTimer(17, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Condoc", nil, nil, 62618)
+    end))
+
+    insert(timers, C_Timer.NewTimer(17, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Mirven", nil, nil, 98008)
+    end))
+
+    insert(timers, C_Timer.NewTimer(25, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+    end))
+
+    insert(timers, C_Timer.NewTimer(28, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Elli", nil, nil, 31821)
+    end))
+
+    insert(timers, C_Timer.NewTimer(33, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
+    end))
+
+    insert(timers, C_Timer.NewTimer(35, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Claytox", nil, nil, 77764)
+    end))
+
+    insert(timers, C_Timer.NewTimer(46, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
+    end))
+
+    insert(timers, C_Timer.NewTimer(47, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Treebush", nil, nil, 77764)
+    end))
+end
+
+function SwiftdawnRaidTools:TestModeEnd()
     if self.TEST then
-        self:OverviewSelectEncounter(1027)
-        self:RaidAssignmentsStartEncounter(1027)
+        self.TEST = false
 
-        insert(timers, C_Timer.NewTimer(2, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
-        end))
+        cancelTimers()
 
-        insert(timers, C_Timer.NewTimer(4, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ant", nil, nil, 31821)
-        end))
-
-        insert(timers, C_Timer.NewTimer(15, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
-        end))
-
-        insert(timers, C_Timer.NewTimer(17, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Condoc", nil, nil, 62618)
-        end))
-
-        insert(timers, C_Timer.NewTimer(17, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Mirven", nil, nil, 98008)
-        end))
-
-        insert(timers, C_Timer.NewTimer(25, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
-        end))
-
-        insert(timers, C_Timer.NewTimer(28, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Elli", nil, nil, 31821)
-        end))
-
-        insert(timers, C_Timer.NewTimer(33, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
-        end))
-
-        insert(timers, C_Timer.NewTimer(35, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Claytox", nil, nil, 77764)
-        end))
-
-        insert(timers, C_Timer.NewTimer(46, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
-        end))
-
-        insert(timers, C_Timer.NewTimer(47, function()
-            SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Treebush", nil, nil, 77764)
-        end))
-    else
-        self:ENCOUNTER_END(nil, 1027)
+        self:GroupsReset()
+        self:SpellsResetCache()
+        self:UnitsResetDeadCache()
+        self:OverviewUpdate()
     end
 end
 

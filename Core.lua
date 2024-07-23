@@ -58,7 +58,6 @@ function SwiftdawnRaidTools:OnEnable()
     self:RegisterEvent("ZONE_CHANGED")
     self:RegisterEvent("ENCOUNTER_START")
     self:RegisterEvent("ENCOUNTER_END")
-    self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:RegisterEvent("UNIT_HEALTH")
     self:RegisterEvent("GROUP_ROSTER_UPDATE")
@@ -75,7 +74,6 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterEvent("ZONE_CHANGED")
     self:UnregisterEvent("ENCOUNTER_START")
     self:UnregisterEvent("ENCOUNTER_END")
-    self:UnregisterEvent("PLAYER_REGEN_DISABLED")
     self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:UnregisterEvent("UNIT_HEALTH")
     self:UnregisterEvent("GROUP_ROSTER_UPDATE")
@@ -102,6 +100,8 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
+    if self.DEBUG then self:Print("Sending RAID message") end
+
     local payload = {
         v = self.VERSION,
         e = event,
@@ -135,7 +135,7 @@ function SwiftdawnRaidTools:OnCommReceived(prefix, message, _, sender)
 
         if ok then
             self:SyncSetClientVersion(sender, payload.v)
-            self:HandleMessagePayload(prefix, payload)
+            self:HandleMessagePayload(payload, sender)
         end
     end
 end
@@ -179,12 +179,14 @@ function SwiftdawnRaidTools:SRT_WA_EVENT(_, event, ...)
 end
 
 function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterId)
-    self:TestModeSet(false)
+    if self.DEBUG then self:Print("ENCOUNTER_START event triggered") end
+    self:TestModeEnd()
     self:OverviewSelectEncounter(encounterId)
     self:RaidAssignmentsStartEncounter(encounterId)
 end
 
 function SwiftdawnRaidTools:ENCOUNTER_END()
+    if self.DEBUG then self:Print("ENCOUNTER_END event triggered") end
     self:RaidAssignmentsEndEncounter()
     self:SpellsResetCache()
     self:UnitsResetDeadCache()
@@ -193,13 +195,10 @@ function SwiftdawnRaidTools:ENCOUNTER_END()
 end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
+    if self.DEBUG then self:Print("ZONE_CHANGED event triggered") end
     self:RaidAssignmentsEndEncounter()
     self:OverviewUpdateSpells()
     self:NotificationsUpdateSpells()
-end
-
-function SwiftdawnRaidTools:PLAYER_REGEN_DISABLED()
-    self:TestModeSet(false)
 end
 
 function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId)
