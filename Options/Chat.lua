@@ -37,6 +37,8 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
             self:InternalTestStart()
         elseif trimmed == "testend" then
             self:InternalTestEnd()
+        elseif trimmed == "inter" then
+            self:Print(self:StringInterpolate("%(key) is %(val).1f%", { key = "concentration", val = 56.2795 }))
         end
     end
 end

@@ -132,6 +132,11 @@ function SwiftdawnRaidTools:StringJoin(strings, delimiter)
     return result
 end
 
+-- StringInterpolate("%(key)s is %(val).2f%" , { key = "concentration", val = 56.2795 }) -> "Concentration is 56.27%"
+function SwiftdawnRaidTools:StringInterpolate(str, tab)
+    return (str:gsub('%%%((%a%w*)%)([-0-9%.]*[cdeEfgGiouxXsq])', function(k, fmt) return tab[k] and ("%"..fmt):format(tab[k]) or '%('..k..')'..fmt end))
+end
+
 function SwiftdawnRaidTools:IsPlayerRaidLeader()
     return IsInRaid() and UnitIsGroupLeader("player")
 end

@@ -346,7 +346,7 @@ local function triggerConditionsTrue(conditions)
     return true
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, countdown)
+function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
     if self.DEBUG then self:Print("Sending TRIGGER start") end
 
     if not triggerConditionsTrue(trigger.conditions) then
@@ -492,7 +492,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId)
         -- We don't want to handle a spellcast twice so we only look for start events or success events for instant cast spells
         if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not castTime or castTime == 0)) then
             for _, trigger in ipairs(triggers) do
-                self:RaidAssignmentsTrigger(trigger, castTime / 1000)
+                self:RaidAssignmentsTrigger(trigger, nil, castTime / 1000)
             end
         end
     end
@@ -510,7 +510,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId)
+function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceName, destName)
     if not activeEncounter then
         return
     end
@@ -519,7 +519,8 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId)
 
     if triggers then
         for _, trigger in ipairs(triggers) do
-            self:RaidAssignmentsTrigger(trigger)
+            `spell_name`, `source_name` and `dest_name`
+            self:RaidAssignmentsTrigger(trigger, { })
         end
     end
 
@@ -573,12 +574,12 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleFojjiNumenTimer(key, countdown)
     if triggers then
         for _, trigger in ipairs(triggers) do
             if countdown <= 5 then
-                self:RaidAssignmentsTrigger(trigger, countdown)
+                self:RaidAssignmentsTrigger(trigger, nil, countdown)
             else
                 cancelFojjiNumenTimer(key)
 
                 fojjiNumenTimers[key] = C_Timer.NewTimer(countdown - 5, function()
-                    self:RaidAssignmentsTrigger(trigger, 5)
+                    self:RaidAssignmentsTrigger(trigger, nil, 5)
                 end)
             end
         end
