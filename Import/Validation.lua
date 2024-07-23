@@ -110,8 +110,8 @@ local function validateRaidAssignments(import, spells)
             return false, "Import with type RAID_ASSIGNMENTS is missing a metadata field."
         end
 
-        if not import.metadata.spell_id and not import.metadata.name then
-            return false, "Import has an invalid metadata field. Requires spell_id or name."
+        if not import.metadata.name then
+            return false, "Import metadata requires a name field."
         end
 
         if import.metadata.spell_id and (type(import.metadata.spell_id) ~= "number" or import.metadata.spell_id ~= math.floor(import.metadata.spell_id)) then

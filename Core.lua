@@ -167,7 +167,7 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self:OverviewUpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         if self.DEBUG then self:Print("Received message TRIGGER") end
-        self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.delay, payload.d.countdown)
+        self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
         self:NotificationsUpdateSpells()
     end
 end
@@ -226,8 +226,8 @@ function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
 end
 
 function SwiftdawnRaidTools:COMBAT_LOG_EVENT_UNFILTERED()
-    local _, subEvent, _,_, sourceName, _, _, destGUID, destName, _, _,spellId = CombatLogGetCurrentEventInfo()
-    self:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
+    local _, subEvent, _, _, sourceName, _, _, _, destName, _, _, spellId = CombatLogGetCurrentEventInfo()
+    self:HandleCombatLog(subEvent, sourceName, destName, spellId)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text)
@@ -238,15 +238,15 @@ function SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(_, text)
     self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
-function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
+function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destName, spellId)
     if subEvent == "SPELL_CAST_START" then
-        self:RaidAssignmentsHandleSpellCast(subEvent, spellId)
+        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
         self:SpellsCacheCast(sourceName, spellId, function()
             self:OverviewUpdateSpells()
             self:NotificationsUpdateSpells()
         end)
-        self:RaidAssignmentsHandleSpellCast(subEvent, spellId)
+        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
         self:RaidAssignmentsUpdateGroups()
 
         local spell = self:SpellsGetSpell(spellId)
@@ -255,7 +255,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
             C_Timer.NewTimer(spell.duration, function() SwiftdawnRaidTools:RaidAssignmentsUpdateGroups() end)
         end
     elseif subEvent == "SPELL_AURA_APPLIED" then
-        self:RaidAssignmentsHandleSpellAura(subEvent, spellId)
+        self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
         if self:IsFriendlyRaidMemberOrPlayer(destGUID) then
             self:UnitsSetDead(destGUID)

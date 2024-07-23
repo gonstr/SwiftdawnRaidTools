@@ -286,7 +286,7 @@ local function updateCountdown(_, elapsed)
     end
 end
 
-function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, delay, countdown)
+function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay, countdown)
     local selectedEncounterId = self.db.profile.overview.selectedEncounterId
     local encounter = self:GetEncounters()[selectedEncounterId]
 
@@ -327,13 +327,13 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, delay, countdo
                 end
 
                 -- Update header
-                local headerText
+                local headerText = part.metadata.name
 
-                if part.metadata.spell_id then
-                    local name = GetSpellInfo(part.metadata.spell_id)
-                    headerText = name
-                else
-                    headerText = part.metadata.name
+                if part.metadata.notification then
+                    local ok, result = self:StringInterpolate(part.metadata.notification, context)
+                    if ok then
+                        headerText = result
+                    end
                 end
 
                 self:NotificationsUpdateHeader(headerText)

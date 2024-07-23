@@ -358,16 +358,19 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
 
     countdown = countdown or trigger.countdown or 0
 
+    context = context or {}
+
     local delay = trigger.delay or 0
 
     if activeGroups and #activeGroups > 0 then
         local data = {
             uuid = trigger.uuid,
             countdown = countdown,
-            delay = delay
+            delay = delay,
+            context = context
         }
 
-            if self.DEBUG then self:Print("Sending TRIGGER done") end
+        if self.DEBUG then self:Print("Sending TRIGGER done") end
 
         if trigger.delay then
             if not delayTimers[trigger.uuid] then
@@ -406,6 +409,8 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
         for _, trigger in ipairs(triggers) do
             if not trigger.triggered then
                 local health = UnitHealth(unit)
+                local maxHealth = UnitHealthMax(unit)
+                local pct = health / maxHealth * 100
 
                 local shouldTrigger = false
 
@@ -417,30 +422,22 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
                     shouldTrigger = true
                 end
 
-                if trigger.pct_lt then
-                    local maxHealth = UnitHealthMax(unit)
-
-                    local pct = health / maxHealth * 100
-
-                    if pct < trigger.pct_lt then
-                        shouldTrigger = true
-                    end
+                if trigger.pct_lt and pct < trigger.pct_lt then
+                    shouldTrigger = true
                 end
 
-                if trigger.pct_gt then
-                    local maxHealth = UnitHealthMax(unit)
-
-                    local pct = health / maxHealth * 100
-
-                    if pct > trigger.pct_gt then
-                        shouldTrigger = true
-                    end
+                if trigger.pct_gt and pct > trigger.pct_gt then
+                    shouldTrigger = true
                 end
 
                 if shouldTrigger then
                     trigger.triggered = true
 
-                    self:RaidAssignmentsTrigger(trigger)
+                    self:RaidAssignmentsTrigger(trigger, {
+                        unit_name = UnitName(unit),
+                        health = health,
+                        health_pct = pct
+                    })
                 end
             end
         end
@@ -479,7 +476,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId)
+function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourceName, destName)
     if not activeEncounter then
         return
     end
@@ -487,12 +484,18 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId)
     local triggers = spellCastTriggersCache[spellId]
 
     if triggers then
-        local _, _, _, castTime = GetSpellInfo(spellId)
+        local spellName, _, _, castTime = GetSpellInfo(spellId)
+
+        local ctx = {
+            spell_name = spellName,
+            source_name = sourceName,
+            dest_name = destName
+        }
 
         -- We don't want to handle a spellcast twice so we only look for start events or success events for instant cast spells
         if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not castTime or castTime == 0)) then
             for _, trigger in ipairs(triggers) do
-                self:RaidAssignmentsTrigger(trigger, nil, castTime / 1000)
+                self:RaidAssignmentsTrigger(trigger, ctx, castTime / 1000)
             end
         end
     end
@@ -517,10 +520,17 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceNam
 
     local triggers = spellAuraTriggersCache[spellId]
 
+    local spellName = GetSpellInfo(spellId)
+
+    local ctx = {
+        spell_name = spellName,
+        source_name = sourceName,
+        dest_name = destName
+    }
+
     if triggers then
         for _, trigger in ipairs(triggers) do
-            `spell_name`, `source_name` and `dest_name`
-            self:RaidAssignmentsTrigger(trigger, { })
+            self:RaidAssignmentsTrigger(trigger, ctx)
         end
     end
 

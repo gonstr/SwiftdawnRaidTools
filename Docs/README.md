@@ -22,7 +22,7 @@ Assignment triggers. Can be of types `UNIT_HEALTH`, `SPELL_CAST`, `SPELL_AURA`, 
 
 Required values: `unit` and one of `lt`, `gt`, `pct_lt` or `pct_gt`.
 
-Context variables: `unit`, `unit_name`, `health` and `pct_health`.
+Context variables: `unit_name`, `health` and `health_pct`.
 
 ```yaml
 triggers:
@@ -130,7 +130,7 @@ See specific triggers for into on context variables that are available. The form
 triggers:
 - type: SPELL_CAST
   spell_id: 12345
-  metatada: { title: 'Finger of Doom', notification: 'Finger of Doom on %(dest_name)s!' }
+  metatada: { name: 'Finger of Doom', notification: 'Finger of Doom on %(dest_name)s!' }
 ```
 
 ### Assignments
@@ -148,7 +148,7 @@ encounter: 1029
 triggers: 
 - { type: UNIT_HEALTH, unit: boss1, pct_lt: 20 }
 - { type: UNIT_HEALTH, unit: boss1, pct_lt: 20, delay: 10 }
-metadata: { title: 'Phase 2' }
+metadata: { name: 'Phase 2' }
 assignments:
 - [{ type: SPELL, player: Aeolyne, spell_id: 740 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
 - [{ type: SPELL, player: Elí, spell_id: 31821 }, { type: SPELL, player: Kondec, spell_id: 62618 }]
@@ -164,7 +164,7 @@ untriggers:
 - { type: RAID_BOSS_EMOTE, text: "blue|r vial into the cauldron!" }
 - { type: RAID_BOSS_EMOTE, text: "green|r vial into the cauldron!" }
 - { type: RAID_BOSS_EMOTE, text: "dark|r vial into the cauldron!" }
-metadata: { title: 'Scorching Blast' }
+metadata: { name: 'Scorching Blast' }
 assignments:
 - [{ type: SPELL, player: Aeolyne, spell_id: 740 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
 - [{ type: SPELL, player: Crawlern, spell_id: 740 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
@@ -173,7 +173,7 @@ type: RAID_ASSIGNMENTS
 version: 1
 encounter: 1023
 triggers: [{ type: SPELL_CAST, spell_id: 82848, conditions: [{ type: UNIT_HEALTH, unit: boss1, pct_lt: 25 }]}]
-metadata: { title: 'Heal to full for P2!' }
+metadata: { name: 'Heal to full for P2!' }
 assignments:
 - [{ type: SPELL, player: Sîf, spell_id: 97462 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
 - [{ type: SPELL, player: Aeolyne, spell_id: 740 }, { type: SPELL, player: Solfernus, spell_id: 51052 }]
@@ -182,7 +182,7 @@ type: RAID_ASSIGNMENTS
 version: 1
 encounter: 1026
 triggers: [{ type: RAID_BOSS_EMOTE, text: 'The air crackles with electricity!', countdown: 5 }]
-metadata: { title: 'Electrocute/Crackle' }
+metadata: { name: 'Electrocute/Crackle' }
 assignments:
 - [{ type: SPELL, player: Sîf, spell_id: 97462 }, { type: SPELL, player: Dableach, spell_id: 51052 }]
 - [{ type: SPELL, player: Aeolyne, spell_id: 740 }, { type: SPELL, player: Solfernus, spell_id: 51052 }]

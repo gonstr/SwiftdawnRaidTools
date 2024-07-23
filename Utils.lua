@@ -132,9 +132,21 @@ function SwiftdawnRaidTools:StringJoin(strings, delimiter)
     return result
 end
 
+-- Returns a boolean indicating if the string was fully intepolated and the interpolated string
+-- Example use:
 -- StringInterpolate("%(key)s is %(val).2f%" , { key = "concentration", val = 56.2795 }) -> "Concentration is 56.27%"
-function SwiftdawnRaidTools:StringInterpolate(str, tab)
-    return (str:gsub('%%%((%a%w*)%)([-0-9%.]*[cdeEfgGiouxXsq])', function(k, fmt) return tab[k] and ("%"..fmt):format(tab[k]) or '%('..k..')'..fmt end))
+function SwiftdawnRaidTools:StringInterpolate(str, ctx)
+    local stringFullyInterpolated = true
+
+    local result = str:gsub('%%%(([%a%w_]*)%)([-0-9%.]*[cdeEfgGiouxXsq])', function(k, fmt)
+        if not ctx[k] then
+            stringFullyInterpolated = false
+        end
+
+        return ctx[k] and ("%" .. fmt):format(ctx[k]) or '%(' .. k .. ')' .. fmt
+    end)
+
+    return stringFullyInterpolated, result
 end
 
 function SwiftdawnRaidTools:IsPlayerRaidLeader()
