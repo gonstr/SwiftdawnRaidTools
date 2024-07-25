@@ -34,6 +34,12 @@ local spells = {
         cooldown = 60 * 2,
         duration = 12
     },
+    -- Divine Guardian
+    [70940] = {
+        class = "PALADIN",
+        cooldown = 60 * 3,
+        duration = 6
+    },
     -- Tranquility
     [740] = {
         class = "DRUID",
@@ -98,7 +104,7 @@ function SwiftdawnRaidTools:SpellsIsSpellReady(unit, spellId, timestamp)
     return true
 end
 
-function SwiftdawnRaidTools:SpellsIsSpellActive(unit, spellId)
+function SwiftdawnRaidTools:SpellsIsSpellActive(unit, spellId, timestamp)
     if not self.TEST then
         if UnitIsDeadOrGhost(unit) then
             return false
@@ -109,7 +115,7 @@ function SwiftdawnRaidTools:SpellsIsSpellActive(unit, spellId)
         end
     end
 
-    local timestamp = GetTime()
+    local timestamp = timestamp or GetTime()
 
     local key = unit .. ":" .. spellId
 

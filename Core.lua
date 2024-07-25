@@ -23,7 +23,7 @@ SwiftdawnRaidTools.defaults = {
                 overviewScale = 1,
                 overviewBackgroundOpacity = 0.4,
                 notificationsScale = 1.2,
-                notificationsBackgroundOpacity = 0.6,
+                notificationsBackgroundOpacity = 1,
                 font = "Friz Quadrata TT"
             }
         },
@@ -61,6 +61,7 @@ function SwiftdawnRaidTools:OnEnable()
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:RegisterEvent("UNIT_HEALTH")
     self:RegisterEvent("GROUP_ROSTER_UPDATE")
+    self:RegisterEvent("RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 
@@ -77,6 +78,7 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:UnregisterEvent("UNIT_HEALTH")
     self:UnregisterEvent("GROUP_ROSTER_UPDATE")
+    self:UnregisterEvent("RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
 
@@ -226,8 +228,12 @@ function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
 end
 
 function SwiftdawnRaidTools:COMBAT_LOG_EVENT_UNFILTERED()
-    local _, subEvent, _, _, sourceName, _, _, _, destName, _, _, spellId = CombatLogGetCurrentEventInfo()
-    self:HandleCombatLog(subEvent, sourceName, destName, spellId)
+    local _, subEvent, _, _, sourceName, _, _, destGUID, destName, _, _, spellId = CombatLogGetCurrentEventInfo()
+    self:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
+end
+
+function SwiftdawnRaidTools:RAID_BOSS_EMOTE(_, text)
+    self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text)
@@ -238,7 +244,7 @@ function SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(_, text)
     self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
-function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destName, spellId)
+function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
     if subEvent == "SPELL_CAST_START" then
         self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
@@ -252,7 +258,10 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destName, spel
         local spell = self:SpellsGetSpell(spellId)
         if spell then
             local SwiftdawnRaidTools = self
-            C_Timer.NewTimer(spell.duration, function() SwiftdawnRaidTools:RaidAssignmentsUpdateGroups() end)
+
+            if spell.duration - 5 > 0 then
+                C_Timer.NewTimer(spell.duration - 5, function() SwiftdawnRaidTools:RaidAssignmentsUpdateGroups() end)
+            end
         end
     elseif subEvent == "SPELL_AURA_APPLIED" then
         self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)

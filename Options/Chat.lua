@@ -37,8 +37,8 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
             self:InternalTestStart()
         elseif trimmed == "testend" then
             self:InternalTestEnd()
-        elseif trimmed == "inter" then
-            self:Print(self:StringInterpolate("%(key_)s is %(val).1f%", { key_ = "concentration", val = 56.2795 }))
+        elseif trimmed == "stringfind" then
+            self:Print(string.find("Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!", "Enough! Drawing upon this source will set us back months."))
         end
     end
 end

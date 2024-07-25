@@ -264,7 +264,7 @@ function SwiftdawnRaidTools:RaidAssignmentsSelectBestMatchIndex(assignments)
     for i, group in ipairs(assignments) do
         local ready = true
         for _, assignment in ipairs(group) do
-            if not self:SpellsIsSpellActive(assignment.player, assignment.spell_id) and not self:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+            if not self:SpellsIsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) and not self:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
                 ready = false
                 break
             end
@@ -280,7 +280,7 @@ function SwiftdawnRaidTools:RaidAssignmentsSelectBestMatchIndex(assignments)
         local readySpells = 0
         
         for _, assignment in ipairs(group) do
-            if self:SpellsIsSpellActive(assignment.player, assignment.spell_id) or self:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+            if self:SpellsIsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) or self:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
                 readySpells = readySpells + 1
             end
         end
