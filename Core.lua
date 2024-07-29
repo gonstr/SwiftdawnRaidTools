@@ -64,6 +64,7 @@ function SwiftdawnRaidTools:OnEnable()
     self:RegisterEvent("RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
+    self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE")
 
     self:RegisterMessage("SRT_WA_EVENT")
 
@@ -81,6 +82,7 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterEvent("RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
+    self:UnregisterEvent("CHAT_MSG_MONSTER_EMOTE")
 
     self:UnregisterMessage("SRT_WA_EVENT")
 
@@ -237,6 +239,10 @@ function SwiftdawnRaidTools:RAID_BOSS_EMOTE(_, text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text)
+    self:RaidAssignmentsHandleRaidBossEmote(text)
+end
+
+function SwiftdawnRaidTools:CHAT_MSG_MONSTER_EMOTE(_, text)
     self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 

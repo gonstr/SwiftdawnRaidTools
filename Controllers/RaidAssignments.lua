@@ -370,9 +370,9 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
             context = context
         }
 
-        if self.DEBUG then self:Print("Sending TRIGGER done") end
+        if self.DEBUG then self:Print("Sending TRIGGER found groups") end
 
-        if trigger.delay then
+        if trigger.delay and trigger.delay > 0 then
             if not delayTimers[trigger.uuid] then
                 delayTimers[trigger.uuid] = {}
             end
@@ -548,9 +548,12 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
         return
     end
 
+    if self.DEBUG then self:Print("Handling raid boss emote", text) end
+
     for _, triggers in pairs(raidBossEmoteTriggersCache) do
         for _, trigger in ipairs(triggers) do
             if stringFind(text, trigger.text) ~= nil then
+                if self.DEBUG then self:Print("Found raid boss emote TRIGGER match") end
                 self:RaidAssignmentsTrigger(trigger)
             end
         end
@@ -559,6 +562,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
     for _, untriggers in pairs(raidBossEmoteUntriggersCache) do
         for _, untrigger in ipairs(untriggers) do
             if stringFind(text, untrigger.text) ~= nil then
+                if self.DEBUG then self:Print("Found raid boss emote UNTRIGGER match") end
                 cancelDelayTimers(untrigger.uuid)
             end
         end
