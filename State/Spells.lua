@@ -161,6 +161,11 @@ function SwiftdawnRaidTools:SpellsCacheCast(unit, spellId, updateFunc)
         spellCastCache[key] = GetTime()
 
         updateFunc()
+
+        if spell.duration > 5 then
+            C_Timer.After(spell.duration - 5, updateFunc)
+        end
+
         C_Timer.After(spell.duration, updateFunc)
         C_Timer.After(spell.cooldown, updateFunc)
     end

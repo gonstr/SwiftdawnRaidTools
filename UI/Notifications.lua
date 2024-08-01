@@ -313,7 +313,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
             if part.type == "RAID_ASSIGNMENTS" and part.uuid == uuid then
                 local activeGroups = self:GroupsGetActive(uuid)
 
-                if not activeGroups then
+                if not activeGroups or #activeGroups == 0 then
                     return
                 end
                 

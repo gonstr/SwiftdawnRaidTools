@@ -88,9 +88,9 @@ triggers:
 
 Same as triggers. This field is optional and really only useful if you created triggers with a delay, and you want to cancel those triggers.
 
-### Countdown and Delay
+### Countdown, Delay and Throttle
 
-Most triggers support `countdown` and `delay`. The `countdown` value controls the countdown timer in the raid assignments popup. `delay` controls how long a raid notifications will be delayed for after triggering.
+Most triggers support `countdown`, `delay` and `throttle`. The `countdown` value controls the countdown timer in the raid assignments popup. `delay` controls how long a raid notifications will be delayed for after triggering. `throttle` controls how many times a trigger can trigger within a set timespan.
 
 Both countdown and delay serve a similar purpose and it's mostly a matter of if you want to show the window with a countdown timer or just delay it. Countdown makes sense for small values while delay makes sense for longer timer periods. They can also be combined.
 
@@ -100,6 +100,7 @@ triggers:
   spell_id: 12345
   delay: 3
   countdown: 2
+  throttle: 5
 ```
 
 ### Conditions

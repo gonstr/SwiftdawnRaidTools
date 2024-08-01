@@ -255,20 +255,11 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
         self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
         self:SpellsCacheCast(sourceName, spellId, function()
+            self:RaidAssignmentsUpdateGroups()
             self:OverviewUpdateSpells()
             self:NotificationsUpdateSpells()
         end)
         self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
-        self:RaidAssignmentsUpdateGroups()
-
-        local spell = self:SpellsGetSpell(spellId)
-        if spell then
-            local SwiftdawnRaidTools = self
-
-            if spell.duration - 5 > 0 then
-                C_Timer.NewTimer(spell.duration - 5, function() SwiftdawnRaidTools:RaidAssignmentsUpdateGroups() end)
-            end
-        end
     elseif subEvent == "SPELL_AURA_APPLIED" then
         self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then

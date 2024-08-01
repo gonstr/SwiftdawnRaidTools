@@ -246,6 +246,10 @@ local function validateTriggers(import)
                 return false, "Import has an invalid delay value: " .. stringSafe(trigger.delay) .. "."
             end
 
+            if trigger.throttle and (type(trigger.throttle) ~= "number" or trigger.throttle ~= math.floor(trigger.throttle)) then
+                return false, "Import has an invalid throttle value: " .. stringSafe(trigger.delay) .. "."
+            end
+
             if trigger.conditions and type(trigger.conditions) ~= "table"  then
                 return false, "Import has an invalid conditions value: " .. stringSafe(trigger.conditions) .. "."
             end

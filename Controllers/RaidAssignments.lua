@@ -217,12 +217,12 @@ function SwiftdawnRaidTools:RaidAssignmentsUpdateGroups()
 
     for _, part in ipairs(activeEncounter) do
         if part.type == "RAID_ASSIGNMENTS" then
-            -- Prevent active group from being updated if any spells in the current active group is still ready
+            -- Prevent active group from being updated if all spells in the current active group is still ready
             local allActiveGroupsReady = true
 
             local activeGroups = self:GroupsGetActive(part.uuid)
 
-            if not activeGroups then
+            if not activeGroups or #activeGroups == 0 then
                 allActiveGroupsReady = false
             else
                 for _, groupIndex in ipairs(activeGroups) do
@@ -240,7 +240,7 @@ function SwiftdawnRaidTools:RaidAssignmentsUpdateGroups()
                 local selectedGroups = self:RaidAssignmentsSelectGroup(part.assignments)
 
                 if not self:RaidAssignmentsIsGroupsEqual(activeGroups, selectedGroups) then
-                    if self.DEBUG then self:Print("Updated groups for", part.uuid) end
+                    if self.DEBUG then self:Print("Updated groups for", part.uuid, self:StringJoin(selectedGroups)) end
 
                     groupsUpdated = true
                     self:GroupsSetActive(part.uuid, selectedGroups)
@@ -349,6 +349,13 @@ end
 function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
     if self.DEBUG then self:Print("Sending TRIGGER start") end
 
+    if trigger.throttle then
+        if trigger.lastTriggerTime and GetTime() < trigger.lastTriggerTime + trigger.throttle then
+            if self.DEBUG then self:Print("TRIGGER throttled") end
+            return
+        end
+    end
+
     if not triggerConditionsTrue(trigger.conditions) then
         if self.DEBUG then self:Print("TRIGGER conditions did not pass") end
         return
@@ -378,9 +385,11 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
             end
 
             insert(delayTimers[trigger.uuid], C_Timer.NewTimer(trigger.delay, function()
+                trigger.lastTriggerTime = GetTime()
                 SwiftdawnRaidTools:SendRaidMessage("TRIGGER", data)
             end))
         else
+            trigger.lastTriggerTime = GetTime()
             self:SendRaidMessage("TRIGGER", data)
         end
     end

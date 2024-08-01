@@ -576,7 +576,7 @@ function SwiftdawnRaidTools:OverviewUpdateActiveGroups()
                 if part.uuid == groupFrame.uuid then
                     local activeGroups = self:GroupsGetActive(groupFrame.uuid)
 
-                    if activeGroups then
+                    if activeGroups and #activeGroups > 0 then
                         for _, index in ipairs(activeGroups) do
                             if index == groupFrame.index then
                                 groupFrame:SetBackdropColor(1, 1, 1, 0.6)
