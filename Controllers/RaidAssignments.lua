@@ -1,5 +1,4 @@
 local insert = table.insert
-local stringFind = string.find
 local tableSort = table.sort
 
 local SwiftdawnRaidTools = SwiftdawnRaidTools
@@ -561,7 +560,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
 
     for _, triggers in pairs(raidBossEmoteTriggersCache) do
         for _, trigger in ipairs(triggers) do
-            if stringFind(text, trigger.text) ~= nil then
+            if text:find(trigger.text) then
                 if self.DEBUG then self:Print("Found raid boss emote TRIGGER match") end
                 self:RaidAssignmentsTrigger(trigger)
             end
@@ -570,7 +569,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
 
     for _, untriggers in pairs(raidBossEmoteUntriggersCache) do
         for _, untrigger in ipairs(untriggers) do
-            if stringFind(text, untrigger.text) ~= nil then
+            if text:find(untrigger.text) then
                 if self.DEBUG then self:Print("Found raid boss emote UNTRIGGER match") end
                 cancelDelayTimers(untrigger.uuid)
             end

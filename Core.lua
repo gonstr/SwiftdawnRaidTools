@@ -23,7 +23,7 @@ SwiftdawnRaidTools.defaults = {
                 overviewScale = 1,
                 overviewBackgroundOpacity = 0.4,
                 notificationsScale = 1.2,
-                notificationsBackgroundOpacity = 1,
+                notificationsBackgroundOpacity = 0.9,
                 font = "Friz Quadrata TT"
             }
         },

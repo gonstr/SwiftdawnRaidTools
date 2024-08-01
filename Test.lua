@@ -16,37 +16,17 @@ function SwiftdawnRaidTools:InternalTestStart()
 
     self:OverviewUpdateSpells()
 
-    self:ENCOUNTER_START(nil, 1035)
+    self:ENCOUNTER_START(nil, 1082)
 
-    C_Timer.After(3, function()
-        SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(nil, "test 123 432")
-    end)
-
-    C_Timer.After(5, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Anticipâte", nil, nil, 31821)
-    end)
-
-    C_Timer.After(10, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 93059)
-    end)
-
-    C_Timer.After(12, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Antîtest", nil, nil, 740)
-    end)
-
-    C_Timer.After(18, function()
-        SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(nil, "test 123 432")
-    end)
-
-    C_Timer.After(130, function()
-        SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(nil, "test 123 432")
+    C_Timer.After(2, function()
+        SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(nil, "Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!")
     end)
 end
 
 function SwiftdawnRaidTools:InternalTestEnd()
     self.TEST = false
 
-    self:ENCOUNTER_END(nil, 1035)
+    self:ENCOUNTER_END(nil, 1082)
 end
 
 function SwiftdawnRaidTools:TestModeEnabled()
