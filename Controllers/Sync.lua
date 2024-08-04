@@ -15,37 +15,36 @@ function SwiftdawnRaidTools:SyncSchedule()
         return
     end
 
-    if not syncTimer then
-        local timeSinceLastSync = GetTime() - lastSyncTime
-        local waitTime = math.max(0, SYNC_WAIT_TIME - timeSinceLastSync)
+    if syncTimer then
+        syncTimer:Cancel()
+        syncTimer = nil
+    end
 
-        if self.DEBUG then self:Print("Scheduling raid sync in", waitTime, "seconds") end
+    local timeSinceLastSync = GetTime() - lastSyncTime
+    local waitTime = math.max(0, SYNC_WAIT_TIME - timeSinceLastSync)
 
-        syncTimer = C_Timer.NewTimer(waitTime, function()
-            lastSyncTime = GetTime()
+    if self.DEBUG then self:Print("Scheduling raid sync in", waitTime, "seconds") end
 
-            local data = {
+    syncTimer = C_Timer.NewTimer(waitTime, function()
+        lastSyncTime = GetTime()
 
-                encountersId = self.db.profile.data.encountersId,
-                encounters = self.db.profile.data.encounters
+        local data = {
+
+            encountersId = self.db.profile.data.encountersId,
+            encounters = self.db.profile.data.encounters
+        }
+
+        if self.DEBUG then self:Print("Sending raid sync") end
+
+        SwiftdawnRaidTools:SendRaidMessage("SYNC", data, self.PREFIX_SYNC, "BULK", function(_, sent, total)
+            local progressData = {
+                encountersId = data.encountersId,
+                progress = sent / total * 100,
             }
 
-            if self.DEBUG then self:Print("Sending raid sync") end
-
-            SwiftdawnRaidTools:SendRaidMessage("SYNC", data, self.PREFIX_SYNC, "BULK", function(_, sent, total)
-                if sent == total then
-                    syncTimer = nil
-                end
-
-                local progressData = {
-                    encountersId = data.encountersId,
-                    progress = sent / total * 100,
-                }
-
-                SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, self.PREFIX_SYNC_PROGRESS)
-            end)
+            SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, self.PREFIX_SYNC_PROGRESS)
         end)
-    end
+    end)
 end
 
 function SwiftdawnRaidTools:SyncReqVersions()
