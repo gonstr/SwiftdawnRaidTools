@@ -19,7 +19,11 @@ function SwiftdawnRaidTools:InternalTestStart()
     self:ENCOUNTER_START(nil, 1082)
 
     C_Timer.After(2, function()
-        SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(nil, "Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!")
+        SwiftdawnRaidTools:RAID_BOSS_EMOTE(nil, "throws a |cff6699FFred|r vial into the cauldron!")
+    end)
+
+    C_Timer.After(4, function()
+        SwiftdawnRaidTools:RAID_BOSS_EMOTE(nil, "throws a |cff5599FFdark|r magic into the cauldron!")
     end)
 end
 

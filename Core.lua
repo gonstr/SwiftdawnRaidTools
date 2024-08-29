@@ -171,6 +171,7 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self:OverviewUpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         if self.DEBUG then self:Print("Received message TRIGGER") end
+        self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
         self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
         self:NotificationsUpdateSpells()
     end

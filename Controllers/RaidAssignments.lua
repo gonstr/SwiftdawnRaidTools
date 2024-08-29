@@ -371,6 +371,7 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
     if activeGroups and #activeGroups > 0 then
         local data = {
             uuid = trigger.uuid,
+            activeGroups = activeGroups,
             countdown = countdown,
             delay = delay,
             context = context
@@ -560,7 +561,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
 
     for _, triggers in pairs(raidBossEmoteTriggersCache) do
         for _, trigger in ipairs(triggers) do
-            if text:find(trigger.text) then
+            if text:match(trigger.text) ~= nil then
                 if self.DEBUG then self:Print("Found raid boss emote TRIGGER match") end
                 self:RaidAssignmentsTrigger(trigger)
             end
@@ -569,7 +570,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
 
     for _, untriggers in pairs(raidBossEmoteUntriggersCache) do
         for _, untrigger in ipairs(untriggers) do
-            if text:find(untrigger.text) then
+            if text:match(untrigger.text) ~= nil then
                 if self.DEBUG then self:Print("Found raid boss emote UNTRIGGER match") end
                 cancelDelayTimers(untrigger.uuid)
             end

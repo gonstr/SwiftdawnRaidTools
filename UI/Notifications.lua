@@ -33,7 +33,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     content:SetBackdrop({
         bgFile = "Interface\\Cooldown\\LoC-ShadowBG"
     })
-    content:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewBackgroundOpacity)
+    content:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.notificationsBackgroundOpacity)
     content:SetAllPoints()
 
     content.header = CreateFrame("Frame", nil, content)

@@ -38,7 +38,9 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
         elseif trimmed == "testend" then
             self:InternalTestEnd()
         elseif trimmed == "stringfind" then
-            self:Print(string.find("Enough! Drawing upon this source will set us back months. You should feel honored to be worthy of its expenditure. Now... die!", "Enough! Drawing upon this source will set us back months."))
+            local str = "throws a |cff6699FFred|r vial into the cauldron!"
+            local match = "red|r vial into the cauldron!"
+            self:Print(str:find(match))
         end
     end
 end
