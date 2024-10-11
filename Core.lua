@@ -20,11 +20,22 @@ SwiftdawnRaidTools.defaults = {
                 mute = false
             },
             appearance = {
-                overviewScale = 1,
+                overviewScale = 1.0,
+                overviewTitleFontType = "Friz Quadrata TT",
+                overviewTitleFontSize = 12,
+                overviewHeaderFontType = "Friz Quadrata TT",
+                overviewHeaderFontSize = 10,
+                overviewPlayerFontType = "Friz Quadrata TT",
+                overviewPlayerFontSize = 10,
                 overviewBackgroundOpacity = 0.4,
+                overviewIconSize = 14,
+                notificationsHeaderFontType = "Friz Quadrata TT",
+                notificationsHeaderFontSize = 14,
+                notificationsPlayerFontType = "Friz Quadrata TT",
+                notificationsPlayerFontSize = 14,
                 notificationsScale = 1.2,
                 notificationsBackgroundOpacity = 0.9,
-                font = "Friz Quadrata TT"
+                notificationsIconSize = 16
             }
         },
         data = {

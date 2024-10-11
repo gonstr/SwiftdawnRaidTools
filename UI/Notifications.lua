@@ -23,7 +23,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     container:SetScale(self.db.profile.options.appearance.notificationsScale)
 
     container.frameLockText = container:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    container.frameLockText:SetFont(self:AppearanceGetFont(), 14)
+    container.frameLockText:SetFont(self:AppearanceGetNotificationsPlayerFontType(), self.db.profile.options.appearance.notificationsPlayerFontSize)
     container.frameLockText:SetTextColor(1, 1, 1, 0.4)
     container.frameLockText:SetPoint("CENTER", 0, 0)
     container.frameLockText:SetText("SRT Notifications Anchor")
@@ -43,12 +43,12 @@ function SwiftdawnRaidTools:NotificationsInit()
     content.header:SetPoint("TOPRIGHT", -20, 0)
 
     content.header.text = content.header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    content.header.text:SetFont(self:AppearanceGetFont(), 10)
+    content.header.text:SetFont(self:AppearanceGetNotificationsHeaderFontType(), self.db.profile.options.appearance.notificationsHeaderFontSize)
     content.header.text:SetTextColor(1, 1, 1, 1)
     content.header.text:SetPoint("BOTTOMLEFT", 10, 5)
 
     content.header.countdown = content.header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    content.header.countdown:SetFont(self:AppearanceGetFont(), 10)
+    content.header.countdown:SetFont(self:AppearanceGetNotificationsHeaderFontType(), self.db.profile.options.appearance.notificationsHeaderFontSize)
     content.header.countdown:SetTextColor(1, 1, 1, 1)
     content.header.countdown:SetPoint("BOTTOMRIGHT", -10, 5)
     content.header.countdown:Hide()
@@ -94,13 +94,16 @@ function SwiftdawnRaidTools:NotificationsUpdateAppearance()
     local r, g, b = self.notificationContentFrame:GetBackdropColor()
     self.notificationContentFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.notificationsBackgroundOpacity)
 
-    self.notificationFrame.frameLockText:SetFont(self:AppearanceGetFont(), 14)
-    self.notificationContentFrame.header.text:SetFont(self:AppearanceGetFont(), 10)
-    self.notificationContentFrame.header.countdown:SetFont(self:AppearanceGetFont(), 10)
+    self.notificationFrame.frameLockText:SetFont(self:AppearanceGetNotificationsPlayerFontType(), self.db.profile.options.appearance.notificationsPlayerFontSize)
+    self.notificationContentFrame.header.text:SetFont(self:AppearanceGetNotificationsHeaderFontType(), self.db.profile.options.appearance.notificationsHeaderFontSize)
+    self.notificationContentFrame.header.countdown:SetFont(self:AppearanceGetNotificationsHeaderFontType(), self.db.profile.options.appearance.notificationsHeaderFontSize)
 
     for _, group in pairs(self.notificationRaidAssignmentGroups) do
         for _, frame in pairs(group.assignments) do
-            frame.text:SetFont(self:AppearanceGetFont(), 10)
+            frame.text:SetFont(self:AppearanceGetNotificationsPlayerFontType(), self.db.profile.options.appearance.notificationsPlayerFontSize)
+            local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
+            frame.iconFrame:SetSize(iconSize, iconSize)
+            frame.text:SetPoint("BOTTOMLEFT", iconSize+13, 8)
         end
     end
 end
@@ -139,7 +142,8 @@ local function createNotificationGroupAssignment(parentFrame)
     local frame = CreateFrame("Frame", nil, parentFrame)
 
     frame.iconFrame = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-    frame.iconFrame:SetSize(16, 16)
+    local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
+    frame.iconFrame:SetSize(iconSize, iconSize)
     frame.iconFrame:SetPoint("BOTTOMLEFT", 10, 6)
 
     frame.cooldownFrame = CreateFrame("Cooldown", nil, frame.iconFrame, "CooldownFrameTemplate")
@@ -152,9 +156,9 @@ local function createNotificationGroupAssignment(parentFrame)
     frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 12)
+    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize)
     frame.text:SetTextColor(1, 1, 1, 1)
-    frame.text:SetPoint("BOTTOMLEFT", 32, 8)
+    frame.text:SetPoint("BOTTOMLEFT", iconSize+13, 8)
 
     return frame
 end

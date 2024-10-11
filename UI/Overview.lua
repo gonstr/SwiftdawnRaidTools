@@ -84,7 +84,7 @@ function SwiftdawnRaidTools:OverviewInit()
     end)
 
     local headerText = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    headerText:SetFont(self:AppearanceGetFont(), 10)
+    headerText:SetFont(self:AppearanceGetOverviewTitleFontType(), self.db.profile.options.appearance.overviewTitleFontSize)
     headerText:SetPoint("TOPLEFT", 10, -5)
     headerText:SetShadowOffset(1, -1)
     headerText:SetShadowColor(0, 0, 0, 1)
@@ -123,24 +123,28 @@ end
 function SwiftdawnRaidTools:OverviewUpdateAppearance()
     self.overviewFrame:SetScale(self.db.profile.options.appearance.overviewScale)
 
-    self.overviewHeaderText:SetFont(self:AppearanceGetFont(), 10)
+    self.overviewHeaderText:SetFont(self:AppearanceGetOverviewTitleFontType(), self.db.profile.options.appearance.overviewTitleFontSize)
 
     local r, g, b = self.overviewFrame:GetBackdropColor()
     self.overviewFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.overviewBackgroundOpacity)
 
     for _, frame in pairs(self.overviewPopupListItems) do
-        frame.text:SetFont(self:AppearanceGetFont(), 10)
+        frame.text:SetFont(self:AppearanceGetOverviewHeaderFontType(), self.db.profile.options.appearance.overviewHeaderFontSize)
     end
 
     for _, frame in pairs(self.overviewMainHeaders) do
-        frame.text:SetFont(self:AppearanceGetFont(), 10)
+        frame.text:SetFont(self:AppearanceGetOverviewHeaderFontType(), self.db.profile.options.appearance.overviewHeaderFontSize)
     end
 
     for _, group in pairs(self.overviewMainRaidAssignmentGroups) do
         for _, frame in pairs(group.assignments) do
-            frame.text:SetFont(self:AppearanceGetFont(), 10)
+            frame.text:SetFont(self:AppearanceGetOverviewPlayerFontType(), self.db.profile.options.appearance.overviewPlayerFontSize)
+            local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize
+            frame.iconFrame:SetSize(iconSize, iconSize)
+            frame.text:SetPoint("BOTTOMLEFT", iconSize+13, 2.5)
         end
     end
+
 end
 
 function SwiftdawnRaidTools:OverviewResize()
@@ -259,7 +263,7 @@ local function createPopupListItem(popupFrame, text, onClick)
     highlight:Hide()
 
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    item.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 10)
+    item.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType(), SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize)
     item.text:SetTextColor(1, 1, 1)
     item.text:SetPoint("BOTTOMLEFT", 15, 5)
     item.text:SetText(text)
@@ -382,7 +386,7 @@ local function createOverviewMainHeader(mainFrame, prevFrame)
     end
 
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 10)
+    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize)
     frame.text:SetTextColor(1, 1, 1, 0.8)
     frame.text:SetPoint("BOTTOMLEFT", 10, 5)
 
@@ -423,8 +427,9 @@ local function createOverviewMainGroupAssignment(parentFrame)
     local frame = CreateFrame("Frame", nil, parentFrame)
 
     frame.iconFrame = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-    frame.iconFrame:SetSize(14, 14)
-    frame.iconFrame:SetPoint("BOTTOMLEFT", 10, 2.5)
+    local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize
+    frame.iconFrame:SetSize(iconSize, iconSize)
+    frame.iconFrame:SetPoint("BOTTOMLEFT", iconSize-6, 2.5)
 
     frame.cooldownFrame = CreateFrame("Cooldown", nil, frame.iconFrame, "CooldownFrameTemplate")
     frame.cooldownFrame:SetAllPoints()
@@ -436,9 +441,9 @@ local function createOverviewMainGroupAssignment(parentFrame)
     frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetFont(), 10)
+    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewTitleFontType(), SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize)
     frame.text:SetTextColor(1, 1, 1, 1)
-    frame.text:SetPoint("BOTTOMLEFT", 28, 4.5)
+    frame.text:SetPoint("BOTTOMLEFT", iconSize+13, 2.5)
 
     return frame
 end

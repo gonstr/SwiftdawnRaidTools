@@ -198,6 +198,22 @@ function SwiftdawnRaidTools:IsPlayerInActiveGroup(part)
     return false
 end
 
-function SwiftdawnRaidTools:AppearanceGetFont()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.font)
+function SwiftdawnRaidTools:AppearanceGetOverviewTitleFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewTitleFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetOverviewHeaderFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewHeaderFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewPlayerFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsHeaderFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsHeaderFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsPlayerFontType)
 end
