@@ -7,6 +7,12 @@ local SONAR_SOUND_FILE = "Interface\\AddOns\\SwiftdawnRaidTools\\Media\\PowerAur
 function SwiftdawnRaidTools:NotificationsInit()
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsNotification", UIParent, "BackdropTemplate")
     container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+    container:SetMovable(true)
+    container:SetUserPlaced(true)
+    container:SetClampedToScreen(true)
+    container:RegisterForDrag("LeftButton")
+    container:SetScript("OnDragStart", function(self) self:StartMoving() end)
+    container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
     container:SetSize(250, 50)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -14,13 +20,6 @@ function SwiftdawnRaidTools:NotificationsInit()
         tileSize = 32,
     })
     container:SetBackdropColor(0, 0, 0, 0)
-    container:SetMovable(true)
-    container:SetUserPlaced(true)
-    container:SetClampedToScreen(true)
-    container:RegisterForDrag("LeftButton")
-    container:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-    container:SetScale(self.db.profile.options.appearance.notificationsScale)
 
     container.frameLockText = container:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     container.frameLockText:SetTextColor(1, 1, 1, 0.4)
@@ -28,31 +27,33 @@ function SwiftdawnRaidTools:NotificationsInit()
     container.frameLockText:SetText("SRT Notifications Anchor")
     container.frameLockText:Hide()
 
-    local content = CreateFrame("Frame", nil, container, "BackdropTemplate")
+    local header = CreateFrame("Frame", "SwiftdawnRaidToolsNotificationHeader", container, "BackdropTemplate")
+    header:SetPoint("TOPLEFT", container, "TOPLEFT", 0, 0)
+    header:SetPoint("TOPRIGHT", container, "TOPRIGHT", 0, 0)
+    header:SetBackdrop({
+        bgFile = "Interface\\Cooldown\\LoC-ShadowBG"
+    })
+    header:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.notificationsBackgroundOpacity)
+    header.text = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    header.text:SetTextColor(1, 1, 1, 1)
+    header.text:SetPoint("RIGHT", -90, -1)
+    header.countdown = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    header.countdown:SetTextColor(1, 1, 1, 1)
+    header.countdown:SetPoint("LEFT", header, "CENTER", 40, -1)
+
+    header:Hide()
+
+    local content = CreateFrame("Frame", "SwiftdawnRaidToolsNotificationContent", container, "BackdropTemplate")
+
+    content:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, 0)
+    content:SetPoint("TOPRIGHT", header, "BOTTOMRIGHT", 0, 0)
     content:SetBackdrop({
         bgFile = "Interface\\Cooldown\\LoC-ShadowBG"
     })
     content:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.notificationsBackgroundOpacity)
-    content:SetAllPoints()
-
-    content.header = CreateFrame("Frame", nil, content)
-    --content.header:SetHeight(20)
-
-    content.header:SetPoint("TOPLEFT", 20, 0)
-    content.header:SetPoint("TOPRIGHT", -20, 0)
-
-    content.header.text = content.header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    content.header.text:SetTextColor(1, 1, 1, 1)
-    content.header.text:SetPoint("RIGHT", -70, -1)
-
-    content.header.countdown = content.header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    content.header.countdown:SetTextColor(1, 1, 1, 1)
-    content.header.countdown:SetPoint("LEFT", content.header, "CENTER", 40, -1)
-    content.header.countdown:Hide()
-
     content:Hide()
 
-    local extraInfo = CreateFrame("Frame", nil, content, "BackdropTemplate")
+    local extraInfo = CreateFrame("Frame", nil, container, "BackdropTemplate")
     extraInfo:SetHeight(30)
     extraInfo:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -72,6 +73,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     extraInfo:Hide()
 
     self.notificationFrameFadeOut = SwiftdawnRaidTools:CreateFadeOut(content, function()
+        SwiftdawnRaidTools.notificationHeaderFrame:Hide()
         SwiftdawnRaidTools.notificationContentFrame:Hide()
     end)
 
@@ -82,6 +84,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     self.notificationsCountdownFade = 2
 
     self.notificationFrame = container
+    self.notificationHeaderFrame = header
     self.notificationContentFrame = content
     self.notificationExtraInfoFrame = extraInfo
 
@@ -93,29 +96,29 @@ function SwiftdawnRaidTools:NotificationsUpdateAppearance()
     local countdownFontSize = self.db.profile.options.appearance.notificationsCountdownFontSize
     local playerFontSize = self.db.profile.options.appearance.notificationsPlayerFontSize
     local iconSize = self.db.profile.options.appearance.notificationsIconSize
-    self.notificationFrame:SetScale(self.db.profile.options.appearance.notificationsScale)
+    local headerHeight = headerFontSize > countdownFontSize and headerFontSize or countdownFontSize
+    local contentHeight = playerFontSize > iconSize and playerFontSize or iconSize
 
+    self.notificationFrame:SetScale(self.db.profile.options.appearance.notificationsScale)
+    self.notificationFrame.frameLockText:SetFont(self:AppearanceGetNotificationsHeaderFontType(), headerFontSize)
+
+    self.notificationHeaderFrame:SetHeight(headerHeight)
+    self.notificationHeaderFrame:SetPoint("BOTTOMLEFT", self.notificationFrame, "TOPLEFT", 0, headerHeight)
+    self.notificationHeaderFrame:SetPoint("BOTTOMRIGHT", self.notificationFrame, "TOPRIGHT", 0, headerHeight)
+    self.notificationHeaderFrame.text:SetFont(self:AppearanceGetNotificationsHeaderFontType(), headerFontSize)
+    self.notificationHeaderFrame.countdown:SetFont(self:AppearanceGetNotificationsCountdownFontType(), countdownFontSize)
+
+    self.notificationContentFrame:SetHeight(contentHeight+14)
+    self.notificationContentFrame:SetPoint("BOTTOMLEFT", self.notificationHeaderFrame, "BOTTOMLEFT", 0, -(contentHeight+14))
+    self.notificationContentFrame:SetPoint("BOTTOMRIGHT", self.notificationHeaderFrame, "BOTTOMRIGHT", 0, -(contentHeight+14))
     local r, g, b = self.notificationContentFrame:GetBackdropColor()
     self.notificationContentFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.notificationsBackgroundOpacity)
 
-    local headerHeight = 5 + (headerFontSize > countdownFontSize and headerFontSize or countdownFontSize)
-    self.notificationContentFrame.header:SetHeight(headerHeight)
-    local contentHeight = 5 + (playerFontSize > iconSize and playerFontSize or iconSize)
-    self.notificationContentFrame:SetHeight(headerHeight + contentHeight)
-
-    self.notificationFrame.frameLockText:SetFont(self:AppearanceGetNotificationsHeaderFontType(), headerFontSize)
-    self.notificationContentFrame.header.text:SetFont(self:AppearanceGetNotificationsHeaderFontType(), headerFontSize)
-    self.notificationContentFrame.header.countdown:SetFont(self:AppearanceGetNotificationsCountdownFontType(), countdownFontSize)
-
-    local frameHeight = 3 + (headerFontSize > countdownFontSize and headerFontSize or countdownFontSize) + 3 + (iconSize > playerFontSize and iconSize or playerFontSize) + 3
-    self.notificationFrame:SetSize(250, frameHeight)
-
-    for _, group in pairs(self.notificationRaidAssignmentGroups) do
-        for _, frame in pairs(group.assignments) do
-            frame.text:SetFont(self:AppearanceGetNotificationsPlayerFontType(), playerFontSize)
-            frame.iconFrame:SetSize(iconSize, iconSize)
-            frame.iconFrame:SetPoint("TOPLEFT", 10, 0)
-            frame.text:SetPoint("LEFT", frame.iconFrame, "CENTER", iconSize/2+4, -1)
+    for _, groupFrame in pairs(self.notificationRaidAssignmentGroups) do
+        for _, assignmentFrame in pairs(groupFrame.assignments) do
+            assignmentFrame.text:SetFont(self:AppearanceGetNotificationsPlayerFontType(), playerFontSize)
+            assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
+            assignmentFrame.text:SetPoint("CENTER", assignmentFrame, "CENTER", iconSize/2, 0)
         end
     end
 end
@@ -129,6 +132,7 @@ function SwiftdawnRaidTools:NotificationsToggleFrameLock(lock)
         self.notificationFrame:EnableMouse(true)
         self.notificationFrame:SetBackdropColor(0, 0, 0, 0.6)
         self.notificationFrame.frameLockText:Show()
+        self.notificationHeaderFrame:Hide()
         self.notificationContentFrame:Hide()
     end
 end
@@ -138,97 +142,110 @@ function SwiftdawnRaidTools:NotificationsIsFrameLocked()
 end
 
 function SwiftdawnRaidTools:NotificationsUpdateHeader(text)
-    self.notificationContentFrame.header.text:SetText(self:StringEllipsis(text, 32))
+    self.notificationHeaderFrame.text:SetText(self:StringEllipsis(text, 32))
 end
 
-local function createNotificationGroup(mainFrame, prevFrame)
-    local frame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
-    frame:SetHeight(30)
+local function createNotificationGroup(contentFrame, assignmentCount)
+    local groupFrame = CreateFrame("Frame", nil, contentFrame, "BackdropTemplate")
 
-    frame.assignments = {}
-
-    return frame
-end
-
-local function createNotificationGroupAssignment(parentFrame)
-    local frame = CreateFrame("Frame", nil, parentFrame)
-
-    frame.iconFrame = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    local playerFontSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize
     local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
-    frame.iconFrame:SetSize(iconSize, iconSize)
-    frame.iconFrame:SetPoint("LEFT", 10, 0)
+    local contentHeight = playerFontSize > iconSize and playerFontSize or iconSize
+    groupFrame:SetSize(120*assignmentCount+10, contentHeight)
 
-    frame.cooldownFrame = CreateFrame("Cooldown", nil, frame.iconFrame, "CooldownFrameTemplate")
-    frame.cooldownFrame:SetAllPoints()
+    groupFrame.assignments = {}
 
-    frame.iconFrame.cooldown = frame.cooldownFrame
-
-    frame.icon = frame.iconFrame:CreateTexture(nil, "ARTWORK")
-    frame.icon:SetAllPoints()
-    frame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-
-    frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize)
-    frame.text:SetTextColor(1, 1, 1, 1)
-    frame.text:SetPoint("LEFT", frame.iconFrame, "CENTER", iconSize/2+4, -1)
-
-    return frame
+    return groupFrame
 end
 
-local function updateNotificationGroupAssignment(frame, assignment, index, total)
-    frame:Show()
+local function createNotificationGroupAssignment(groupFrame)
+    local assignmentFrame = CreateFrame("Frame", nil, groupFrame, "BackdropTemplate")
+    local playerFontSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize
+    local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
+    local contentHeight = playerFontSize > iconSize and playerFontSize or iconSize
+    assignmentFrame:SetSize(120, contentHeight)
+    assignmentFrame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 32,
+    })
+    assignmentFrame:SetBackdropColor(1, 1, 1, 1)
 
-    frame.player = assignment.player
-    frame.spellId = assignment.spell_id
+    assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    assignmentFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize)
+    assignmentFrame.text:SetTextColor(1, 1, 1, 1)
+    assignmentFrame.text:SetPoint("CENTER", assignmentFrame, "CENTER", iconSize/2, 0)
+
+    assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
+    local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
+    assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
+    assignmentFrame.iconFrame:SetPoint("RIGHT", assignmentFrame.text, "LEFT", -4, 0)
+
+    assignmentFrame.cooldownFrame = CreateFrame("Cooldown", nil, assignmentFrame.iconFrame, "CooldownFrameTemplate")
+    assignmentFrame.cooldownFrame:SetAllPoints()
+
+    assignmentFrame.iconFrame.cooldown = assignmentFrame.cooldownFrame
+
+    assignmentFrame.icon = assignmentFrame.iconFrame:CreateTexture(nil, "ARTWORK")
+    assignmentFrame.icon:SetAllPoints()
+    assignmentFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+
+    return assignmentFrame
+end
+
+local function updateNotificationGroupAssignment(assignmentFrame, assignment, index, total)
+    assignmentFrame:Show()
+
+    assignmentFrame.player = assignment.player
+    assignmentFrame.spellId = assignment.spell_id
 
     local _, _, icon = GetSpellInfo(assignment.spell_id)
 
-    frame.icon:SetTexture(icon)
-    frame.text:SetText(assignment.player)
+    assignmentFrame.icon:SetTexture(icon)
+    assignmentFrame.text:SetText(assignment.player)
 
     local color = SwiftdawnRaidTools:GetSpellColor(assignment.spell_id)
 
-    frame.text:SetTextColor(color.r, color.g, color.b)
+    assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
 
-    frame.cooldownFrame:Clear()
+    assignmentFrame.cooldownFrame:Clear()
 
-    frame:ClearAllPoints()
+    assignmentFrame:ClearAllPoints()
 
-    if total > 1 then
-        if index > 1 then
-            frame:SetPoint("BOTTOMLEFT", frame:GetParent(), "BOTTOM")
-            frame:SetPoint("TOPRIGHT")
-        else
-            frame:SetPoint("BOTTOMLEFT")
-            frame:SetPoint("TOPRIGHT", frame:GetParent(), "TOP")
-        end
+    if total == 1 then
+        assignmentFrame:SetPoint("TOPLEFT", assignmentFrame:GetParent(), "TOP", -60, 0)
+        assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 60, 0)
     else
-        frame:SetPoint("BOTTOMLEFT")
-        frame:SetPoint("TOPRIGHT")
+        local offset = (index - 1) * 120 + 4
+        assignmentFrame:SetPoint("TOPLEFT", assignmentFrame:GetParent(), "TOPLEFT", offset, 0)
+        assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOMLEFT", offset, 0)
     end
 end
 
-local function updateNotificationGroup(frame, prevFrame, group, uuid, index)
-    frame:Show()
+local function updateNotificationGroup(groupFrame, previousGroupFrame, group, uuid, index)
+    groupFrame:Show()
 
-    frame.uuid = uuid
-    frame.index = index
+    groupFrame.uuid = uuid
+    groupFrame.index = index
 
-    frame:ClearAllPoints()
-    
-    frame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
-    frame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
+    if previousGroupFrame == nil then
+        groupFrame:SetPoint("TOPLEFT", SwiftdawnRaidTools.notificationContentFrame, "TOPLEFT", 0, -10)
+        groupFrame:SetPoint("TOPRIGHT", SwiftdawnRaidTools.notificationContentFrame, "TOPRIGHT", 0, -10)
+    else
+        groupFrame:SetPoint("TOPLEFT", previousGroupFrame, "BOTTOMLEFT", 0, -4)
+        groupFrame:SetPoint("TOPRIGHT", previousGroupFrame, "BOTTOMRIGHT", 0, -4)
+    end
 
-    for _, cd in pairs(frame.assignments) do
+    for _, cd in pairs(groupFrame.assignments) do
         cd:Hide()
     end
     
     for i, assignment in ipairs(group) do
-        if not frame.assignments[i] then
-            frame.assignments[i] = createNotificationGroupAssignment(frame)
+        if not groupFrame.assignments[i] then
+            groupFrame.assignments[i] = createNotificationGroupAssignment(groupFrame)
         end
 
-        updateNotificationGroupAssignment(frame.assignments[i], assignment, i, #group)
+        updateNotificationGroupAssignment(groupFrame.assignments[i], assignment, i, #group)
     end
 end
 
@@ -294,10 +311,10 @@ local function fadeCountdown(_, elapsed)
     SwiftdawnRaidTools.notificationsCountdownFade = SwiftdawnRaidTools.notificationsCountdownFade - elapsed
     if SwiftdawnRaidTools.notificationsCountdownFade > 0 then
         local opacity = SwiftdawnRaidTools.notificationsCountdownFade / 2
-        SwiftdawnRaidTools.notificationContentFrame.header.countdown:SetTextColor(1, 0, 0, opacity)
+        SwiftdawnRaidTools.notificationHeaderFrame.countdown:SetTextColor(1, 0, 0, opacity)
     else
-        SwiftdawnRaidTools.notificationContentFrame.header.countdown:Hide()
-        SwiftdawnRaidTools.notificationContentFrame.header.countdown:SetTextColor(1, 1, 1, 1)
+        SwiftdawnRaidTools.notificationHeaderFrame.countdown:Hide()
+        SwiftdawnRaidTools.notificationHeaderFrame.countdown:SetTextColor(1, 1, 1, 1)
         SwiftdawnRaidTools.notificationContentFrame:SetScript("OnUpdate", nil)
     end
 end
@@ -306,10 +323,10 @@ local function updateCountdown(_, elapsed)
     SwiftdawnRaidTools.notificationsCountdown = SwiftdawnRaidTools.notificationsCountdown - elapsed
 
     if SwiftdawnRaidTools.notificationsCountdown > 0 then
-        SwiftdawnRaidTools.notificationContentFrame.header.countdown:SetText(string.format("%.1fs", SwiftdawnRaidTools.notificationsCountdown))
+        SwiftdawnRaidTools.notificationHeaderFrame.countdown:SetText(string.format("%.1fs", SwiftdawnRaidTools.notificationsCountdown))
     else
-        SwiftdawnRaidTools.notificationContentFrame.header.countdown:SetText("NOW")
-        SwiftdawnRaidTools.notificationContentFrame.header.countdown:SetTextColor(1, 0, 0, 1)
+        SwiftdawnRaidTools.notificationHeaderFrame.countdown:SetText("NOW")
+        SwiftdawnRaidTools.notificationHeaderFrame.countdown:SetTextColor(1, 0, 0, 1)
         SwiftdawnRaidTools.notificationsCountdownFade = 2
         SwiftdawnRaidTools.notificationContentFrame:SetScript("OnUpdate", fadeCountdown)
     end
@@ -337,7 +354,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
 
     if encounter then            
         local groupIndex = 1
-        local prevFrame = self.notificationContentFrame.header
+        local previousGroupFrame
         for _, part in pairs(encounter) do
             if part.type == "RAID_ASSIGNMENTS" and part.uuid == uuid then
                 local activeGroups = self:GroupsGetActive(uuid)
@@ -349,6 +366,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
                 self:NotificationsToggleFrameLock(true)
     
                 self.notificationFrameFadeOut:Stop()
+                self.notificationHeaderFrame:Show()
                 self.notificationContentFrame:Show()
             
                 if not self.db.profile.options.notifications.mute then
@@ -369,8 +387,8 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
 
                 if countdown > 0 then
                     self.notificationsCountdown = countdown
-                    self.notificationContentFrame.header.countdown:Show()
-                    self.notificationContentFrame:SetScript("OnUpdate", updateCountdown)
+                    self.notificationHeaderFrame.countdown:Show()
+                    self.notificationFrame:SetScript("OnUpdate", updateCountdown)
                 end
 
                 local showId = self:GenerateUUID()
@@ -384,15 +402,17 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
 
                 -- Update groups
                 for _, index in ipairs(activeGroups) do
+                    local assignmentCount = #part.assignments[index]
+
                     if not self.notificationRaidAssignmentGroups[groupIndex] then
-                        self.notificationRaidAssignmentGroups[groupIndex] = createNotificationGroup(self.notificationContentFrame)
+                        self.notificationRaidAssignmentGroups[groupIndex] = createNotificationGroup(self.notificationContentFrame, assignmentCount)
                     end
 
-                    local frame = self.notificationRaidAssignmentGroups[groupIndex]
+                    local groupFrame = self.notificationRaidAssignmentGroups[groupIndex]
 
-                    updateNotificationGroup(frame, prevFrame, part.assignments[index], part.uuid, i)
+                    updateNotificationGroup(groupFrame, previousGroupFrame, part.assignments[index], part.uuid, i)
 
-                    prevFrame = frame
+                    previousGroupFrame = groupFrame
                     groupIndex = groupIndex + 1
                 end
 
