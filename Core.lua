@@ -27,6 +27,7 @@ SwiftdawnRaidTools.defaults = {
                 overviewHeaderFontSize = 10,
                 overviewPlayerFontType = "Friz Quadrata TT",
                 overviewPlayerFontSize = 10,
+                overviewTitleBarOpacity = 0.8,
                 overviewBackgroundOpacity = 0.4,
                 overviewIconSize = 14,
                 notificationsHeaderFontType = "Friz Quadrata TT",

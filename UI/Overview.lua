@@ -68,7 +68,7 @@ function SwiftdawnRaidTools:OverviewInit()
         tile = true,
         tileSize = 16,
     })
-    header:SetBackdropColor(0, 0, 0, 1)
+    header:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewTitleBarOpacity)
     header:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" and container:IsMouseEnabled() then
             self:GetParent():StartMoving()

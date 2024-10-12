@@ -333,11 +333,33 @@ local appearanceOptions = {
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
             end,
         },
+        overviewTitleBarOpacityDescription = {
+            type = "description",
+            name = "Title Bar Opacity",
+            width = "normal",
+            order = 53,
+        },
+        overviewTitleBarOpacity = {
+            type = "range",
+            min = 0,
+            max = 1,
+            isPercent = true,
+            name = "",
+            desc = "Set the Overview Background Opacity.",
+            width = "double",
+            order = 54,
+            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity = value
+
+                SwiftdawnRaidTools:OverviewUpdateAppearance()
+            end,
+        },
         overviewBackgroundOpacityDescription = {
             type = "description",
             name = "Background Opacity",
             width = "normal",
-            order = 53,
+            order = 55,
         },
         overviewBackgroundOpacity = {
             type = "range",
@@ -347,7 +369,7 @@ local appearanceOptions = {
             name = "",
             desc = "Set the Overview Background Opacity.",
             width = "double",
-            order = 54,
+            order = 56,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity end,
             set = function(_, value)
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity = value
@@ -359,26 +381,26 @@ local appearanceOptions = {
             type = "description",
             name = " ",
             width = "full",
-            order = 55,
+            order = 60,
         },
         notificationsOptionsDescription = {
             type = "description",
             name = "Notifications",
             width = "full",
             fontSize = "large",
-            order = 56,
+            order = 61,
         },
         separator4 = {
             type = "description",
             name = " ",
             width = "full",
-            order = 60,
+            order = 62,
         },
         notificationsScaleDescription = {
             type = "description",
             name = "Scale",
             width = "normal",
-            order = 61,
+            order = 63,
         },
         notificationsScale = {
             type = "range",
@@ -388,7 +410,7 @@ local appearanceOptions = {
             name = "",
             desc = "Set the Notifications UI Scale.",
             width = "double",
-            order = 62,
+            order = 64,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale end,
             set = function(_, value)
                 SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale = value
