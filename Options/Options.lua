@@ -226,7 +226,7 @@ local appearanceOptions = {
             name = "",
             desc = "Set the font size used in the overview title",
             min = 8,
-            max = 26,
+            max = 32,
             step = 1,
             width = "normal",
             order = 23,
@@ -263,7 +263,7 @@ local appearanceOptions = {
             name = "",
             desc = "Set the font sze used in the overview header",
             min = 8,
-            max = 26,
+            max = 32,
             step = 1,
             width = "normal",
             order = 33,
@@ -300,7 +300,7 @@ local appearanceOptions = {
             name = "",
             desc = "Set the font size used in the overview player name",
             min = 8,
-            max = 26,
+            max = 32,
             step = 1,
             width = "normal",
             order = 43,
@@ -444,7 +444,7 @@ local appearanceOptions = {
             name = "",
             desc = "Sets the font size used in notification header",
             min = 8,
-            max = 26,
+            max = 32,
             step = 1,
             width = "normal",
             order = 73,
@@ -464,7 +464,7 @@ local appearanceOptions = {
         notificationsPlayerFontType = {
             type = "select",
             name = "",
-            desc = "Set the Font used in Notifications.",
+            desc = "Sets the font used in notification player names",
             values = SharedMedia:HashTable("font"),
             dialogControl = "LSM30_Font",
             width = "normal",
@@ -479,15 +479,52 @@ local appearanceOptions = {
         notificationsPlayerFontSize = {
             type = "range",
             name = "",
-            desc = "Set the Font Size used in Notifications.",
+            desc = "Sets the font size used in notification player names",
             min = 8,
-            max = 26,
+            max = 32,
             step = 1,
             width = "normal",
             order = 83,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize = key
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize = value
+
+                SwiftdawnRaidTools:NotificationsUpdateAppearance()
+            end,
+        },
+        notificationsCountdownFontDescription = {
+            type = "description",
+            name = "Countdown",
+            width = "normal",
+            order = 84,
+        },
+        notificationsCountdownFontType = {
+            type = "select",
+            name = "",
+            desc = "Sets the font used in notification countdown",
+            values = SharedMedia:HashTable("font"),
+            dialogControl = "LSM30_Font",
+            width = "normal",
+            order = 85,
+            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontType end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontType = value
+
+                SwiftdawnRaidTools:NotificationsUpdateAppearance()
+            end,
+        },
+        notificationsCountdownFontSize = {
+            type = "range",
+            name = "",
+            desc = "Sets the font size used in notification countdown",
+            min = 8,
+            max = 32,
+            step = 1,
+            width = "normal",
+            order = 86,
+            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize = value
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,

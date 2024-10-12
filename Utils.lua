@@ -214,6 +214,10 @@ function SwiftdawnRaidTools:AppearanceGetNotificationsHeaderFontType()
     return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsHeaderFontType)
 end
 
+function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsCountdownFontType)
+end
+
 function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType()
     return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsPlayerFontType)
 end
