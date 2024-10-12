@@ -37,9 +37,11 @@ function SwiftdawnRaidTools:NotificationsInit()
     header.text = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     header.text:SetTextColor(1, 1, 1, 1)
     header.text:SetPoint("LEFT", 20, -1)
+    header.text:SetPoint("TOP", 0, -7)
     header.countdown = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     header.countdown:SetTextColor(1, 1, 1, 1)
     header.countdown:SetPoint("RIGHT", -20, -1)
+    header.countdown:SetPoint("TOP", 0, -7)
 
     header:Hide()
 
@@ -73,7 +75,8 @@ function SwiftdawnRaidTools:NotificationsInit()
     extraInfo:Hide()
 
     self.notificationFrameFadeOut = SwiftdawnRaidTools:CreateFadeOut(content, function()
-        SwiftdawnRaidTools.notificationFrame:Hide()
+        SwiftdawnRaidTools.notificationHeaderFrame:Hide()
+        SwiftdawnRaidTools.notificationContentFrame:Hide()
     end)
 
     self.notificationShowId = ""
@@ -102,14 +105,14 @@ function SwiftdawnRaidTools:NotificationsUpdateAppearance()
     self.notificationFrame.frameLockText:SetFont(self:AppearanceGetNotificationsHeaderFontType(), headerFontSize)
 
     self.notificationHeaderFrame:SetHeight(headerHeight)
-    self.notificationHeaderFrame:SetPoint("BOTTOMLEFT", self.notificationFrame, "TOPLEFT", 0, headerHeight)
-    self.notificationHeaderFrame:SetPoint("BOTTOMRIGHT", self.notificationFrame, "TOPRIGHT", 0, headerHeight)
+    self.notificationHeaderFrame:SetPoint("BOTTOMLEFT", self.notificationFrame, "TOPLEFT", 0, headerHeight + 7)
+    self.notificationHeaderFrame:SetPoint("BOTTOMRIGHT", self.notificationFrame, "TOPRIGHT", 0, headerHeight + 7)
     self.notificationHeaderFrame.text:SetFont(self:AppearanceGetNotificationsHeaderFontType(), headerFontSize)
     self.notificationHeaderFrame.countdown:SetFont(self:AppearanceGetNotificationsCountdownFontType(), countdownFontSize)
 
     self.notificationContentFrame:SetHeight(contentHeight+14)
-    self.notificationContentFrame:SetPoint("BOTTOMLEFT", self.notificationHeaderFrame, "BOTTOMLEFT", 0, -(contentHeight+14))
-    self.notificationContentFrame:SetPoint("BOTTOMRIGHT", self.notificationHeaderFrame, "BOTTOMRIGHT", 0, -(contentHeight+14))
+    self.notificationContentFrame:SetPoint("BOTTOMLEFT", self.notificationHeaderFrame, "BOTTOMLEFT", 0, -(contentHeight+18))
+    self.notificationContentFrame:SetPoint("BOTTOMRIGHT", self.notificationHeaderFrame, "BOTTOMRIGHT", 0, -(contentHeight+18))
     local r, g, b = self.notificationContentFrame:GetBackdropColor()
     self.notificationContentFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.notificationsBackgroundOpacity)
 
@@ -365,7 +368,6 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
                 self:NotificationsToggleFrameLock(true)
     
                 self.notificationFrameFadeOut:Stop()
-                self.notificationFrame:Show()
                 self.notificationHeaderFrame:Show()
                 self.notificationContentFrame:Show()
             
