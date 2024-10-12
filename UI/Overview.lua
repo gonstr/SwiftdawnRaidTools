@@ -499,14 +499,14 @@ local function updateAssignmentFrame(assignmentFrame, assignment, index, total)
     if total > 1 then
         if index > 1 then
             assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOM")
-            assignmentFrame:SetPoint("TOPRIGHT")
+            assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
         else
             assignmentFrame:SetPoint("BOTTOMLEFT")
-            assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, -4)
+            assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, 0)
         end
     else
         assignmentFrame:SetPoint("BOTTOMLEFT")
-        assignmentFrame:SetPoint("TOPRIGHT", 0, -4)
+        assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
     end
 end
 
@@ -524,8 +524,8 @@ local function updateAssignmentGroupFrame(groupFrame, prevFrame, group, uuid, in
         groupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
         groupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
     else
-        groupFrame:SetPoint("TOPLEFT", 0)
-        groupFrame:SetPoint("TOPRIGHT", 0)
+        groupFrame:SetPoint("TOPLEFT", 0, -4)
+        groupFrame:SetPoint("TOPRIGHT", 0, -4)
     end
 
     for _, cd in pairs(groupFrame.assignments) do
