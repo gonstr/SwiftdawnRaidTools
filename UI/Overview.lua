@@ -102,8 +102,6 @@ function SwiftdawnRaidTools:OverviewInit()
     headerButton:RegisterForClicks("AnyDown", "AnyUp")
 
     local main = CreateFrame("Frame", "SwiftdawnRaidToolsOverviewMain", container, "BackdropTemplate")
-    main:SetPoint("TOPLEFT", 0, -20)
-    main:SetPoint("TOPRIGHT", 0, -20)
     main:SetPoint("BOTTOMLEFT", 0, 0)
     main:SetPoint("BOTTOMRIGHT", 0, 0)
 
@@ -120,6 +118,17 @@ function SwiftdawnRaidTools:OverviewInit()
     self:OverviewUpdateAppearance()
 end
 
+local function GetBossAbilityHeight()
+    local overviewHeaderFontSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize
+    return overviewHeaderFontSize + 7
+end
+
+local function GetAssignmentGroupHeight()
+    local overviewPlayerFontSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize
+    local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize
+    return (overviewPlayerFontSize > iconSize and overviewPlayerFontSize or iconSize) + 7
+end
+
 function SwiftdawnRaidTools:OverviewUpdateAppearance()
     local overviewTitleFontSize = self.db.profile.options.appearance.overviewTitleFontSize
     local overviewHeaderFontSize = self.db.profile.options.appearance.overviewHeaderFontSize
@@ -134,6 +143,7 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
     self.overviewMain:SetPoint("TOPRIGHT", 0, -headerHeight)
     self.overviewHeaderButton:SetSize(overviewTitleFontSize, overviewTitleFontSize)
 
+    self.overviewHeader:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewTitleBarOpacity)
     local r, g, b = self.overviewFrame:GetBackdropColor()
     self.overviewFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.overviewBackgroundOpacity)
 
@@ -143,13 +153,12 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
 
     for _, bossAbilityFrame in pairs(self.overviewBossAbilities) do
         bossAbilityFrame.text:SetFont(self:AppearanceGetOverviewHeaderFontType(), overviewHeaderFontSize)
-        bossAbilityFrame:SetHeight(overviewHeaderFontSize + 4)
+        bossAbilityFrame:SetHeight(GetBossAbilityHeight())
     end
 
-    for _, group in pairs(self.overviewAssignmentGroups) do
-        local headerSize = overviewPlayerFontSize > iconSize and overviewPlayerFontSize + 4 or iconSize + 4
-        group:SetHeight(headerSize)
-        for _, assignmentFrame in pairs(group.assignments) do
+    for _, assignmentGroupFrame in pairs(self.overviewAssignmentGroups) do
+        assignmentGroupFrame:SetHeight(GetAssignmentGroupHeight())
+        for _, assignmentFrame in pairs(assignmentGroupFrame.assignments) do
             assignmentFrame.text:SetFont(self:AppearanceGetOverviewPlayerFontType(), overviewPlayerFontSize)
             assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
             assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "CENTER", iconSize/2+4, -1)
@@ -384,12 +393,8 @@ function SwiftdawnRaidTools:OverviewUpdatePopup()
 end
 
 local function createBossAbilityFrame(mainFrame, prevFrame)
-    local fontSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize
-
-    local headerSize = fontSize + 4
-
     local bossAbilityFrame = CreateFrame("Frame", nil, mainFrame)
-    bossAbilityFrame:SetHeight(headerSize)
+    bossAbilityFrame:SetHeight(GetBossAbilityHeight())
 
     -- Anchor to main frame or previous row if it exists
     if prevFrame then
@@ -401,7 +406,7 @@ local function createBossAbilityFrame(mainFrame, prevFrame)
     end
 
     bossAbilityFrame.text = bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    bossAbilityFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewHeaderFontType(), fontSize)
+    bossAbilityFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize)
     bossAbilityFrame.text:SetTextColor(1, 1, 1, 0.8)
     bossAbilityFrame.text:SetPoint("LEFT", 10, 0)
 
@@ -411,26 +416,22 @@ end
 local function updateBossAbilityFrame(bossAbilityFrame, prevFrame, name)
     bossAbilityFrame:Show()
 
-    --frame:ClearAllPoints()
+    bossAbilityFrame:ClearAllPoints()
 
     if prevFrame then
-        bossAbilityFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0)
-        bossAbilityFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0)
+        bossAbilityFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, -7)
+        bossAbilityFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, -7)
     else
-        bossAbilityFrame:SetPoint("TOPLEFT", 0)
-        bossAbilityFrame:SetPoint("TOPRIGHT", 0)
+        bossAbilityFrame:SetPoint("TOPLEFT", 0, -4)
+        bossAbilityFrame:SetPoint("TOPRIGHT", 0, -4)
     end
 
     bossAbilityFrame.text:SetText(name)
 end
 
-local function createAssignmentGroupFrame(mainFrame, prevFrame)
-    local fontSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize
-    local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize
-
-    local headerSize = fontSize > iconSize and fontSize + 4 or iconSize + 4
+local function createAssignmentGroupFrame(mainFrame, prevFrame, i)
     local assignmentGroupFrame = CreateFrame("Frame", nil, mainFrame, "BackdropTemplate")
-    assignmentGroupFrame:SetHeight(headerSize)
+    assignmentGroupFrame:SetHeight(GetAssignmentGroupHeight())
     assignmentGroupFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
@@ -438,12 +439,12 @@ local function createAssignmentGroupFrame(mainFrame, prevFrame)
     })
 
     -- Anchor to main frame or previous row if it exists
-    if prevFrame then
+    if i > 1 then
         assignmentGroupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0)
         assignmentGroupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0)
     else
-        assignmentGroupFrame:SetPoint("TOPLEFT", 0)
-        assignmentGroupFrame:SetPoint("TOPRIGHT", 0)
+        assignmentGroupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, -4)
+        assignmentGroupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, -4)
     end
 
     assignmentGroupFrame.assignments = {}
@@ -501,11 +502,11 @@ local function updateAssignmentFrame(assignmentFrame, assignment, index, total)
             assignmentFrame:SetPoint("TOPRIGHT")
         else
             assignmentFrame:SetPoint("BOTTOMLEFT")
-            assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP")
+            assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, -4)
         end
     else
         assignmentFrame:SetPoint("BOTTOMLEFT")
-        assignmentFrame:SetPoint("TOPRIGHT")
+        assignmentFrame:SetPoint("TOPRIGHT", 0, -4)
     end
 end
 
@@ -582,7 +583,7 @@ function SwiftdawnRaidTools:OverviewUpdateMain()
                 -- Update assignment groups
                 for i, group in ipairs(part.assignments) do
                     if not self.overviewAssignmentGroups[groupIndex] then
-                        self.overviewAssignmentGroups[groupIndex] = createAssignmentGroupFrame(self.overviewMain)
+                        self.overviewAssignmentGroups[groupIndex] = createAssignmentGroupFrame(self.overviewMain, prevFrame, groupIndex)
                     end
 
                     local groupFrame = self.overviewAssignmentGroups[groupIndex]
