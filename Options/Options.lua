@@ -219,7 +219,6 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontType = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
         overviewTitleFontSize = {
@@ -232,11 +231,10 @@ local appearanceOptions = {
             width = "normal",
             order = 23,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize end,
-            set = function(self, key, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize = key
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
         overviewHeaderFontDescription = {
@@ -258,7 +256,6 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontType = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
         overviewHeaderFontSize = {
@@ -271,11 +268,10 @@ local appearanceOptions = {
             width = "normal",
             order = 33,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize end,
-            set = function(self, key, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize = key
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
         overviewPlayerFontDescription = {
@@ -297,7 +293,6 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontType = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
         overviewPlayerFontSize = {
@@ -310,11 +305,10 @@ local appearanceOptions = {
             width = "normal",
             order = 43,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize end,
-            set = function(self, key, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize = key
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
         overviewIconSizeDescription = {
@@ -420,7 +414,6 @@ local appearanceOptions = {
             set = function(_, value)
                 SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontType = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
@@ -434,10 +427,9 @@ local appearanceOptions = {
             width = "normal",
             order = 73,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize end,
-            set = function(self, key, value)
+            set = function(self, key)
                 SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize = key
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
@@ -456,10 +448,9 @@ local appearanceOptions = {
             width = "normal",
             order = 82,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType = value
+            set = function(_, key)
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType = key
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
@@ -473,10 +464,9 @@ local appearanceOptions = {
             width = "normal",
             order = 83,
             get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize end,
-            set = function(self, key, value)
+            set = function(_, value)
                 SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize = key
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
