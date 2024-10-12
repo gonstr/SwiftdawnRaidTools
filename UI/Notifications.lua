@@ -103,7 +103,8 @@ function SwiftdawnRaidTools:NotificationsUpdateAppearance()
             frame.text:SetFont(self:AppearanceGetNotificationsPlayerFontType(), self.db.profile.options.appearance.notificationsPlayerFontSize)
             local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
             frame.iconFrame:SetSize(iconSize, iconSize)
-            frame.text:SetPoint("BOTTOMLEFT", iconSize+13, 8)
+            frame.iconFrame:SetPoint("LEFT", 10, 0)
+            frame.text:SetPoint("LEFT", frame.iconFrame, "CENTER", iconSize/2+4, -1)
         end
     end
 end
@@ -144,7 +145,7 @@ local function createNotificationGroupAssignment(parentFrame)
     frame.iconFrame = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
     frame.iconFrame:SetSize(iconSize, iconSize)
-    frame.iconFrame:SetPoint("BOTTOMLEFT", 10, 6)
+    frame.iconFrame:SetPoint("LEFT", 10, 0)
 
     frame.cooldownFrame = CreateFrame("Cooldown", nil, frame.iconFrame, "CooldownFrameTemplate")
     frame.cooldownFrame:SetAllPoints()
@@ -158,7 +159,7 @@ local function createNotificationGroupAssignment(parentFrame)
     frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize)
     frame.text:SetTextColor(1, 1, 1, 1)
-    frame.text:SetPoint("BOTTOMLEFT", iconSize+13, 8)
+    frame.text:SetPoint("LEFT", frame.iconFrame, "CENTER", iconSize/2+4, -1)
 
     return frame
 end
