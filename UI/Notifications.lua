@@ -36,10 +36,10 @@ function SwiftdawnRaidTools:NotificationsInit()
     header:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.notificationsBackgroundOpacity)
     header.text = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     header.text:SetTextColor(1, 1, 1, 1)
-    header.text:SetPoint("RIGHT", -90, -1)
+    header.text:SetPoint("LEFT", 20, -1)
     header.countdown = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     header.countdown:SetTextColor(1, 1, 1, 1)
-    header.countdown:SetPoint("LEFT", header, "CENTER", 40, -1)
+    header.countdown:SetPoint("RIGHT", -20, -1)
 
     header:Hide()
 
@@ -73,8 +73,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     extraInfo:Hide()
 
     self.notificationFrameFadeOut = SwiftdawnRaidTools:CreateFadeOut(content, function()
-        SwiftdawnRaidTools.notificationHeaderFrame:Hide()
-        SwiftdawnRaidTools.notificationContentFrame:Hide()
+        SwiftdawnRaidTools.notificationFrame:Hide()
     end)
 
     self.notificationShowId = ""
@@ -164,12 +163,12 @@ local function createNotificationGroupAssignment(groupFrame)
     local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
     local contentHeight = playerFontSize > iconSize and playerFontSize or iconSize
     assignmentFrame:SetSize(120, contentHeight)
-    assignmentFrame:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 32,
-    })
-    assignmentFrame:SetBackdropColor(1, 1, 1, 1)
+    --assignmentFrame:SetBackdrop({
+    --    bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+    --    tile = true,
+    --    tileSize = 32,
+    --})
+    --assignmentFrame:SetBackdropColor(1, 1, 1, 1)
 
     assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     assignmentFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize)
@@ -366,6 +365,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
                 self:NotificationsToggleFrameLock(true)
     
                 self.notificationFrameFadeOut:Stop()
+                self.notificationFrame:Show()
                 self.notificationHeaderFrame:Show()
                 self.notificationContentFrame:Show()
             
@@ -388,7 +388,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
                 if countdown > 0 then
                     self.notificationsCountdown = countdown
                     self.notificationHeaderFrame.countdown:Show()
-                    self.notificationFrame:SetScript("OnUpdate", updateCountdown)
+                    self.notificationContentFrame:SetScript("OnUpdate", updateCountdown)
                 end
 
                 local showId = self:GenerateUUID()
