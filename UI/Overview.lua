@@ -82,19 +82,36 @@ function SwiftdawnRaidTools:OverviewInit()
             self:GetParent():StopMovingOrSizing()
         end
     end)
+    header:SetScript("OnEnter", function()
+        SwiftdawnRaidTools.overviewHeader:SetBackdropColor(0, 0, 0, 1)
+        SwiftdawnRaidTools.overviewHeaderButton:SetAlpha(1)
+    end)
+    header:SetScript("OnLeave", function()
+        SwiftdawnRaidTools.overviewHeader:SetBackdropColor(0, 0, 0, SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity)
+        SwiftdawnRaidTools.overviewHeaderButton:SetAlpha(SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity)
+    end)
 
     local headerText = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     headerText:SetFont(self:AppearanceGetOverviewTitleFontType(), overviewTitleFontSize)
-    headerText:SetPoint("TOPLEFT", 10, -5)
+    headerText:SetPoint("LEFT", header, "LEFT", 10, 0)
     headerText:SetShadowOffset(1, -1)
     headerText:SetShadowColor(0, 0, 0, 1)
 
     local headerButton = CreateFrame("Button", nil, header)
     headerButton:SetSize(overviewTitleFontSize, overviewTitleFontSize)
-    headerButton:SetPoint("TOPRIGHT", -5, -5)
+    headerButton:SetPoint("RIGHT", header, "RIGHT", -3, 0)
     headerButton:SetNormalTexture("Gamepad_Ltr_Menu_32")
     headerButton:SetHighlightTexture("Gamepad_Ltr_Menu_32")
     headerButton:SetPushedTexture("Gamepad_Ltr_Menu_32")
+    headerButton:SetAlpha(self.db.profile.options.appearance.overviewTitleBarOpacity)
+    headerButton:SetScript("OnEnter", function()
+        SwiftdawnRaidTools.overviewHeader:SetBackdropColor(0, 0, 0, 1)
+        SwiftdawnRaidTools.overviewHeaderButton:SetAlpha(1)
+    end)
+    headerButton:SetScript("OnLeave", function()
+        SwiftdawnRaidTools.overviewHeader:SetBackdropColor(0, 0, 0, SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity)
+        SwiftdawnRaidTools.overviewHeaderButton:SetAlpha(SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity)
+    end)
 
     headerButton:SetScript("OnClick", function()
         showPopup()
@@ -142,17 +159,18 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
     self.overviewMain:SetPoint("TOPLEFT", 0, -headerHeight)
     self.overviewMain:SetPoint("TOPRIGHT", 0, -headerHeight)
     self.overviewHeaderButton:SetSize(overviewTitleFontSize, overviewTitleFontSize)
+    self.overviewHeaderButton:SetAlpha(self.db.profile.options.appearance.overviewTitleBarOpacity)
 
     self.overviewHeader:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewTitleBarOpacity)
     local r, g, b = self.overviewFrame:GetBackdropColor()
     self.overviewFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.overviewBackgroundOpacity)
 
     for _, frame in pairs(self.overviewPopupListItems) do
-        frame.text:SetFont(self:AppearanceGetOverviewHeaderFontType(), 10)
+        frame.text:SetFont(self:AppearanceGetOverviewBossAbilityFontType(), 10)
     end
 
     for _, bossAbilityFrame in pairs(self.overviewBossAbilities) do
-        bossAbilityFrame.text:SetFont(self:AppearanceGetOverviewHeaderFontType(), overviewHeaderFontSize)
+        bossAbilityFrame.text:SetFont(self:AppearanceGetOverviewBossAbilityFontType(), overviewHeaderFontSize)
         bossAbilityFrame:SetHeight(GetBossAbilityHeight())
     end
 
@@ -406,7 +424,7 @@ local function createBossAbilityFrame(mainFrame, prevFrame)
     end
 
     bossAbilityFrame.text = bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    bossAbilityFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize)
+    bossAbilityFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewBossAbilityFontType(), SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize)
     bossAbilityFrame.text:SetTextColor(1, 1, 1, 0.8)
     bossAbilityFrame.text:SetPoint("LEFT", 10, 0)
 

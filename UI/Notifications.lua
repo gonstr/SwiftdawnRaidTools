@@ -43,11 +43,11 @@ function SwiftdawnRaidTools:NotificationsInit()
     content:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.notificationsBackgroundOpacity)
     content.bossAbilityText = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     content.bossAbilityText:SetTextColor(1, 1, 1, 1)
-    content.bossAbilityText:SetPoint("LEFT", 20, -1)
+    content.bossAbilityText:SetPoint("LEFT", 30, -1)
     content.bossAbilityText:SetPoint("TOP", 0, -7)
     content.countdown = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     content.countdown:SetTextColor(1, 1, 1, 1)
-    content.countdown:SetPoint("RIGHT", -20, -1)
+    content.countdown:SetPoint("RIGHT", -30, -1)
     content.countdown:SetPoint("TOP", 0, -7)
 
     content:Hide()
@@ -89,16 +89,16 @@ function SwiftdawnRaidTools:NotificationsInit()
 end
 
 function SwiftdawnRaidTools:NotificationsUpdateAppearance()
-    local headerFontSize = self.db.profile.options.appearance.notificationsHeaderFontSize
-    local countdownFontSize = self.db.profile.options.appearance.notificationsCountdownFontSize
-    local playerFontSize = self.db.profile.options.appearance.notificationsPlayerFontSize
-    local iconSize = self.db.profile.options.appearance.notificationsIconSize
+    local headerFontSize = self:AppearanceGetNotificationsBossAbilityFontSize()
+    local countdownFontSize = self:AppearanceGetNotificationsCountdownFontSize()
+    local playerFontSize = self:AppearanceGetNotificationsPlayerFontSize()
+    local iconSize = self:AppearanceGetNotificationsPlayerIconSize()
 
-    self.notificationFrame:SetSize(250, self:AppearanceGetNotificationHeaderHeight() + self:AppearanceGetNotificationContentHeight())
+    self.notificationFrame:SetSize(250, self:AppearanceGetNotificationsHeaderHeight() + self:AppearanceGetNotificationsContentHeight())
     self.notificationFrame:SetScale(self.db.profile.options.appearance.notificationsScale)
 
     self.notificationContentFrame:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.notificationsBackgroundOpacity)
-    self.notificationContentFrame.bossAbilityText:SetFont(self:AppearanceGetNotificationsHeaderFontType(), headerFontSize)
+    self.notificationContentFrame.bossAbilityText:SetFont(self:AppearanceGetNotificationsBossAbilityFontType(), headerFontSize)
     self.notificationContentFrame.countdown:SetFont(self:AppearanceGetNotificationsCountdownFontType(), countdownFontSize)
 
     for _, groupFrame in pairs(self.notificationRaidAssignmentGroups) do
@@ -133,21 +133,20 @@ end
 
 local function createNotificationGroup(contentFrame, assignmentCount)
     local groupFrame = CreateFrame("Frame", nil, contentFrame, "BackdropTemplate")
-    groupFrame:SetSize(120*assignmentCount+10, SwiftdawnRaidTools:AppearanceGetNotificationContentHeight())
+    groupFrame:SetSize(120*assignmentCount+10, SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight())
     groupFrame.assignments = {}
     return groupFrame
 end
 
 local function createNotificationGroupAssignment(groupFrame)
     local assignmentFrame = CreateFrame("Frame", nil, groupFrame, "BackdropTemplate")
-    local playerFontSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize
-    local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize
-    local contentHeight = playerFontSize > iconSize and playerFontSize or iconSize
+    local iconSize = SwiftdawnRaidTools:AppearanceGetNotificationsPlayerIconSize()
+    local assignmentHeight = SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight()
 
-    assignmentFrame:SetSize(120, contentHeight)
+    assignmentFrame:SetSize(120, assignmentHeight)
 
     assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    assignmentFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderFontType(), SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize)
+    assignmentFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontType(), SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontSize())
     assignmentFrame.text:SetTextColor(1, 1, 1, 1)
     assignmentFrame.text:SetPoint("CENTER", assignmentFrame, "CENTER", iconSize/2, 0)
 
@@ -198,8 +197,9 @@ local function updateNotificationGroup(groupFrame, previousGroupFrame, group, uu
     groupFrame.index = index
 
     if previousGroupFrame == nil then
-        groupFrame:SetPoint("TOPLEFT", SwiftdawnRaidTools.notificationContentFrame, "TOPLEFT", 0, -SwiftdawnRaidTools:AppearanceGetNotificationHeaderHeight())
-        groupFrame:SetPoint("TOPRIGHT", SwiftdawnRaidTools.notificationContentFrame, "TOPRIGHT", 0, -SwiftdawnRaidTools:AppearanceGetNotificationHeaderHeight())
+        local firstGroupOffset = 11
+        groupFrame:SetPoint("TOPLEFT", SwiftdawnRaidTools.notificationContentFrame, "TOPLEFT", 0, -(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()+firstGroupOffset))
+        groupFrame:SetPoint("TOPRIGHT", SwiftdawnRaidTools.notificationContentFrame, "TOPRIGHT", 0, -(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()+firstGroupOffset))
     else
         groupFrame:SetPoint("TOPLEFT", previousGroupFrame, "BOTTOMLEFT", 0, -4)
         groupFrame:SetPoint("TOPRIGHT", previousGroupFrame, "BOTTOMRIGHT", 0, -4)
@@ -282,7 +282,7 @@ local function fadeCountdown(_, elapsed)
         SwiftdawnRaidTools.notificationContentFrame.countdown:Hide()
         SwiftdawnRaidTools.notificationContentFrame.countdown:SetTextColor(1, 1, 1, 1)
         -- Reset countdown font size
-        local countdownFontSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize
+        local countdownFontSize = SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontSize()
         SwiftdawnRaidTools.notificationContentFrame.countdown:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontType(), countdownFontSize)
         SwiftdawnRaidTools.notificationContentFrame:SetScript("OnUpdate", nil)
     end
@@ -296,7 +296,7 @@ local function updateCountdown(_, elapsed)
     else
         SwiftdawnRaidTools.notificationContentFrame.countdown:SetText("NOW")
         -- Make the NOW pop by adding 2 points of font size temporarily
-        local countdownFontSize = SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize
+        local countdownFontSize = SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontSize()
         SwiftdawnRaidTools.notificationContentFrame.countdown:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontType(), countdownFontSize + 2)
         SwiftdawnRaidTools.notificationContentFrame.countdown:SetTextColor(1, 0, 0, 1)
         SwiftdawnRaidTools.notificationsCountdownFade = 2
