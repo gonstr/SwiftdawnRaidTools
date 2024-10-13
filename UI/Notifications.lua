@@ -146,7 +146,7 @@ local function createNotificationGroupAssignment(groupFrame)
     assignmentFrame:SetSize(120, assignmentHeight)
 
     assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    assignmentFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontType(), SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontSize())
+    assignmentFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType(), SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize())
     assignmentFrame.text:SetTextColor(1, 1, 1, 1)
     assignmentFrame.text:SetPoint("CENTER", assignmentFrame, "CENTER", iconSize/2, 0)
 
@@ -182,11 +182,11 @@ local function updateNotificationGroupAssignment(assignmentFrame, assignment, in
 
     if total == 1 then
         assignmentFrame:SetPoint("TOPLEFT", assignmentFrame:GetParent(), "TOP", -60, 0)
-        assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 60, 0)
+        --assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 60, 0)
     else
         local offset = (index - 1) * 120 + 4
         assignmentFrame:SetPoint("TOPLEFT", assignmentFrame:GetParent(), "TOPLEFT", offset, 0)
-        assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOMLEFT", offset, 0)
+        --assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOMLEFT", offset, 0)
     end
 end
 
