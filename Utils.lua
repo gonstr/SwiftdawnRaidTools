@@ -68,7 +68,7 @@ function SwiftdawnRaidTools:CreateFadeOut(frame, onFinished)
     local fadeOut = fadeOutGroup:CreateAnimation("Alpha")
     fadeOut:SetFromAlpha(1)
     fadeOut:SetToAlpha(0)
-    fadeOut:SetDuration(0.1)
+    fadeOut:SetDuration(0.3)
     fadeOut:SetSmoothing("OUT")
 
     fadeOutGroup:SetScript("OnFinished", function(self)
