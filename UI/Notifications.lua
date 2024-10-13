@@ -190,20 +190,15 @@ local function updateNotificationGroupAssignment(assignmentFrame, assignment, in
     end
 end
 
-local function updateNotificationGroup(groupFrame, previousGroupFrame, group, uuid, index)
+local function updateNotificationGroup(groupFrame, group, uuid, index)
     groupFrame:Show()
 
     groupFrame.uuid = uuid
     groupFrame.index = index
 
-    if previousGroupFrame == nil then
-        local firstGroupOffset = 11
-        groupFrame:SetPoint("TOPLEFT", SwiftdawnRaidTools.notificationContentFrame, "TOPLEFT", 0, -(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()+firstGroupOffset))
-        groupFrame:SetPoint("TOPRIGHT", SwiftdawnRaidTools.notificationContentFrame, "TOPRIGHT", 0, -(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()+firstGroupOffset))
-    else
-        groupFrame:SetPoint("TOPLEFT", previousGroupFrame, "BOTTOMLEFT", 0, -4)
-        groupFrame:SetPoint("TOPRIGHT", previousGroupFrame, "BOTTOMRIGHT", 0, -4)
-    end
+    local heightOffset = 11
+    groupFrame:SetPoint("TOPLEFT", SwiftdawnRaidTools.notificationContentFrame, "TOPLEFT", 0, -(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()+ heightOffset))
+    groupFrame:SetPoint("TOPRIGHT", SwiftdawnRaidTools.notificationContentFrame, "TOPRIGHT", 0, -(SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()+ heightOffset))
 
     for _, cd in pairs(groupFrame.assignments) do
         cd:Hide()
@@ -326,7 +321,6 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
 
     if encounter then            
         local groupIndex = 1
-        local previousGroupFrame
         for _, part in pairs(encounter) do
             if part.type == "RAID_ASSIGNMENTS" and part.uuid == uuid then
                 local activeGroups = self:GroupsGetActive(uuid)
@@ -373,17 +367,11 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
 
                 -- Update groups
                 for _, index in ipairs(activeGroups) do
-                    local assignmentCount = #part.assignments[index]
-
                     if not self.notificationRaidAssignmentGroups[groupIndex] then
-                        self.notificationRaidAssignmentGroups[groupIndex] = createNotificationGroup(self.notificationContentFrame, assignmentCount)
+                        self.notificationRaidAssignmentGroups[groupIndex] = createNotificationGroup(self.notificationContentFrame, #part.assignments[index])
                     end
-
                     local groupFrame = self.notificationRaidAssignmentGroups[groupIndex]
-
-                    updateNotificationGroup(groupFrame, previousGroupFrame, part.assignments[index], part.uuid, i)
-
-                    previousGroupFrame = groupFrame
+                    updateNotificationGroup(groupFrame, part.assignments[index], part.uuid, i)
                     groupIndex = groupIndex + 1
                 end
 
