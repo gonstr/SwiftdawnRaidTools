@@ -110,46 +110,6 @@ local mainOptions = {
     },
 }
 
-local notificationOptions = {
-    name = "Notifications",
-    type = "group",
-    args =  {
-        showOnlyOwnNotificationsCheckbox = {
-            type = "toggle",
-            name = "Limit Notifications",
-            desc = "Only show Raid Notifications that apply to You.",
-            width = "full",
-            order = 1,
-            get = function() return SwiftdawnRaidTools.db.profile.options.notifications.showOnlyOwnNotifications end,
-            set = function(_, value) SwiftdawnRaidTools.db.profile.options.notifications.showOnlyOwnNotifications = value end,
-        },
-        showOnlyOwnNotificationsDescription = {
-            type = "description",
-            name = "Only show Raid Notifications that apply to you.",
-            order = 2,
-        },
-        separator1 = {
-            type = "description",
-            name = " ",
-            order = 3,
-        },
-        muteCheckbox = {
-            type = "toggle",
-            name = "Mute Sounds",
-            desc = "Mute all Raid Notification Sounds.",
-            width = "full",
-            order = 4,
-            get = function() return SwiftdawnRaidTools.db.profile.options.notifications.mute end,
-            set = function(_, value) SwiftdawnRaidTools.db.profile.options.notifications.mute = value end,
-        },
-        muteDescription = {
-            type = "description",
-            name = "Mute all Raid Notification Sounds.",
-            order = 5,
-        },
-    },
-}
-
 local appearanceOptions = {
     name = "Appearance",
     type = "group",
