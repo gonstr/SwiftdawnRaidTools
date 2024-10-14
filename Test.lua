@@ -101,6 +101,10 @@ function SwiftdawnRaidTools:TestModeStart()
     insert(timers, C_Timer.NewTimer(47, function()
         SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Treebush", nil, nil, 77764)
     end))
+
+    insert(timers, C_Timer.NewTimer(60, function()
+        SwiftdawnRaidTools:TestModeEnd()
+    end))
 end
 
 function SwiftdawnRaidTools:TestModeEnd()
