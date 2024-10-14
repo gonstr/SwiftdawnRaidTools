@@ -38,6 +38,7 @@ State\Groups.lua
 State\Units.lua
 Controllers\RaidAssignments.lua
 Controllers\Sync.lua
+UI\DebugLog.lua
 UI\Minimap.lua
 UI\Overview.lua
 UI\Notifications.lua

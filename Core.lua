@@ -51,6 +51,9 @@ SwiftdawnRaidTools.defaults = {
             selectedEncounterId = nil,
             locked = false,
             show = true
+        },
+        debugLog = {
+            locked = false
         }
     },
 }
@@ -61,6 +64,7 @@ function SwiftdawnRaidTools:OnInitialize()
     self:MinimapInit()
     self:OverviewInit()
     self:NotificationsInit()
+    self:DebugLogInit()
 
     self:RegisterComm(self.PREFIX_SYNC)
     self:RegisterComm(self.PREFIX_SYNC_PROGRESS)
@@ -115,6 +119,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
     end
 
     self:OverviewUpdate()
+    self:DebugLogUpdate()
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
