@@ -21,6 +21,7 @@ function SwiftdawnRaidTools:OverviewInit()
     container:SetScript("OnDragStart", function(self) self:StartMoving() end)
     container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
     container:SetScale(self.db.profile.options.appearance.overviewScale)
+    container:SetClipsChildren(true)
 
     local popup = CreateFrame("Frame", "SwiftdawnRaidToolsOverviewPopup", UIParent, "BackdropTemplate")
     popup:SetClampedToScreen(true)
@@ -96,6 +97,8 @@ function SwiftdawnRaidTools:OverviewInit()
     headerText:SetPoint("LEFT", header, "LEFT", 10, 0)
     headerText:SetShadowOffset(1, -1)
     headerText:SetShadowColor(0, 0, 0, 1)
+    headerText:SetJustifyH("LEFT")
+    headerText:SetWordWrap(false)
 
     local headerButton = CreateFrame("Button", nil, header)
     headerButton:SetSize(overviewTitleFontSize, overviewTitleFontSize)
@@ -156,6 +159,10 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
     self.overviewHeaderText:SetFont(self:AppearanceGetOverviewTitleFontType(), overviewTitleFontSize)
     local headerHeight = overviewTitleFontSize + 8
     self.overviewHeader:SetHeight(headerHeight)
+
+    local headerWidth = self.overviewFrame:GetWidth()
+    self.overviewHeaderText:SetWidth(headerWidth - 10 - overviewTitleFontSize)
+
     self.overviewMain:SetPoint("TOPLEFT", 0, -headerHeight)
     self.overviewMain:SetPoint("TOPRIGHT", 0, -headerHeight)
     self.overviewHeaderButton:SetSize(overviewTitleFontSize, overviewTitleFontSize)
@@ -278,12 +285,12 @@ end
 
 local function createPopupListItem(popupFrame, text, onClick)
     local item = CreateFrame("Frame", nil, popupFrame, "BackdropTemplate")
+    item.highlight = item:CreateTexture(nil, "HIGHLIGHT")
 
-    local highlight
     item:SetHeight(20)
     item:EnableMouse(true)
-    item:SetScript("OnEnter", function() highlight:Show() end)
-    item:SetScript("OnLeave", function() highlight:Hide() end)
+    item:SetScript("OnEnter", function() item.highlight:Show() end)
+    item:SetScript("OnLeave", function() item.highlight:Hide() end)
     item:EnableMouse(true)
     item:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" then
@@ -291,14 +298,13 @@ local function createPopupListItem(popupFrame, text, onClick)
             popupFrame:Hide()
         end
     end)
-    
-    highlight = item:CreateTexture(nil, "HIGHLIGHT")
-    highlight:SetPoint("TOPLEFT", 10, 0)
-    highlight:SetPoint("BOTTOMRIGHT", -10, 0)
-    highlight:SetTexture("Interface\\Buttons\\UI-Listbox-Highlight")
-    highlight:SetBlendMode("ADD")
-    highlight:SetAlpha(0.5)
-    highlight:Hide()
+
+    item.highlight:SetPoint("TOPLEFT", 10, 0)
+    item.highlight:SetPoint("BOTTOMRIGHT", -10, 0)
+    item.highlight:SetTexture("Interface\\Buttons\\UI-Listbox-Highlight")
+    item.highlight:SetBlendMode("ADD")
+    item.highlight:SetAlpha(0.5)
+    item.highlight:Hide()
 
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     item.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType(), SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize)
