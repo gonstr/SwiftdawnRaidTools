@@ -68,7 +68,7 @@ function SwiftdawnRaidTools:CreateFadeOut(frame, onFinished)
     local fadeOut = fadeOutGroup:CreateAnimation("Alpha")
     fadeOut:SetFromAlpha(1)
     fadeOut:SetToAlpha(0)
-    fadeOut:SetDuration(0.1)
+    fadeOut:SetDuration(0.3)
     fadeOut:SetSmoothing("OUT")
 
     fadeOutGroup:SetScript("OnFinished", function(self)
@@ -198,6 +198,61 @@ function SwiftdawnRaidTools:IsPlayerInActiveGroup(part)
     return false
 end
 
-function SwiftdawnRaidTools:AppearanceGetFont()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.font)
+function SwiftdawnRaidTools:AppearanceGetOverviewTitleFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewTitleFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetOverviewBossAbilityFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewHeaderFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewPlayerFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsHeaderFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontSize()
+    return self.db.profile.options.appearance.notificationsHeaderFontSize
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsCountdownFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontSize()
+    return self.db.profile.options.appearance.notificationsCountdownFontSize
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType()
+    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsPlayerFontType)
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize()
+    return self.db.profile.options.appearance.notificationsPlayerFontSize
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerIconSize()
+    return self.db.profile.options.appearance.notificationsIconSize
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()
+    local bossAbilityFontSize = SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontSize()
+    local countdownFontSize = SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontSize()
+    local padding = 7
+    return (bossAbilityFontSize > countdownFontSize and bossAbilityFontSize or countdownFontSize) + padding
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight()
+    local playerFontSize = SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize()
+    local iconSize = SwiftdawnRaidTools:AppearanceGetNotificationsPlayerIconSize()
+    return playerFontSize > iconSize and playerFontSize or iconSize
+end
+
+function SwiftdawnRaidTools:AppearanceGetNotificationsContentHeight()
+    local assignmentHeight = SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight()
+    local padding = 20
+    return assignmentHeight + padding
 end
