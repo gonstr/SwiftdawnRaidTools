@@ -158,6 +158,7 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewScale = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewTitleFontDescription = {
@@ -179,6 +180,7 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontType = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewTitleFontSize = {
@@ -195,6 +197,7 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewHeaderFontDescription = {
@@ -253,6 +256,7 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontType = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewPlayerFontSize = {
@@ -269,6 +273,7 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewIconSizeDescription = {
@@ -313,6 +318,7 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewBackgroundOpacityDescription = {
@@ -335,6 +341,7 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         separator3 = {

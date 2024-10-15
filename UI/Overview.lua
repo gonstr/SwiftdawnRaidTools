@@ -45,7 +45,7 @@ function SwiftdawnRaidTools:OverviewInit()
     popup:Hide() -- Start hidden
 
     local function showPopup()
-        if InCombatLockdown() or SwiftdawnRaidTools:RaidAssignmentsInEncounter() then
+        if not self.TEST and (InCombatLockdown() or SwiftdawnRaidTools:RaidAssignmentsInEncounter()) then
             return
         end
 

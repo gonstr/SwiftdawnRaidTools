@@ -1,14 +1,13 @@
-local SRTWindow = require("SRTWindow")
-
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 
 local MIN_HEIGHT = 200
 
 function SwiftdawnRaidTools:DebugLogInit()
     local debugLogTitleFontSize = self.db.profile.options.appearance.overviewTitleFontSize
+    local debugLogPlayerFontSize = self.db.profile.options.appearance.overviewPlayerFontSize
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsDebugLog", UIParent, "BackdropTemplate")
     container:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-    container:SetSize(200, MIN_HEIGHT)
+    container:SetSize(400, MIN_HEIGHT)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
@@ -128,6 +127,25 @@ function SwiftdawnRaidTools:DebugLogInit()
     main:SetPoint("BOTTOMLEFT", 0, 0)
     main:SetPoint("BOTTOMRIGHT", 0, 0)
 
+    -- Create the scroll frame
+    local scrollFrame = CreateFrame("ScrollFrame", "MyScrollFrame", main, "UIPanelScrollFrameTemplate")
+    --scrollFrame:SetSize(500, MIN_HEIGHT)  -- Set the size of the scroll frame
+    scrollFrame:SetPoint("TOPLEFT", main, "TOPLEFT", 0, 0)
+    scrollFrame:SetPoint("TOPRIGHT", main, "TOPRIGHT", 0, 0)
+    scrollFrame:SetPoint("BOTTOMLEFT", main, "BOTTOMLEFT", 0, 5)
+    scrollFrame:SetPoint("BOTTOMRIGHT", main, "BOTTOMRIGHT", 0, 5)
+
+    local scrollBar = _G[scrollFrame:GetName() .. "ScrollBar"]
+    scrollBar.scrollStep = debugLogPlayerFontSize  -- Change this value to adjust the scroll amount per tick
+    -- Create a content frame to hold the text
+    local contentFrame = CreateFrame("Frame", "MyContentFrame", scrollFrame)
+    contentFrame:SetSize(500, MIN_HEIGHT)  -- Set the size of the content frame (height is larger for scrolling)
+    contentFrame:SetPoint("TOPLEFT")
+    contentFrame:SetPoint("TOPRIGHT")
+
+    -- Set the content frame as the scroll frame's scroll child
+    scrollFrame:SetScrollChild(contentFrame)
+
     self.debugLogFrame = container
     self.debugLogPopup = popup
     self.debugLogPopupListItems = {}
@@ -138,13 +156,38 @@ function SwiftdawnRaidTools:DebugLogInit()
     self.debugLogBossAbilities = {}
     self.debugLogAssignmentGroups = {}
 
+    self.debugLogScrollFrame = scrollFrame
+    self.debugLogScrollContentFrame = contentFrame
+
+    self.debugLogLines = {}
+
     self:DebugLogUpdateAppearance()
+end
+
+function SwiftdawnRaidTools:DebugLogAddLine(text)
+    local line = self.debugLogScrollContentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    local debugLogPlayerFontSize = self.db.profile.options.appearance.overviewPlayerFontSize
+    line:SetFont(self:AppearanceGetOverviewPlayerFontType(), debugLogPlayerFontSize)
+    if #self.debugLogLines == 0 then
+        line:SetPoint("TOPLEFT", self.debugLogScrollContentFrame, "TOPLEFT", 10, -3)
+    else
+        line:SetPoint("TOPLEFT", self.debugLogLines[#self.debugLogLines], "BOTTOMLEFT", 0, -3)
+    end
+    line:SetShadowOffset(1, -1)
+    line:SetShadowColor(0, 0, 0, 1)
+    line:SetJustifyH("LEFT")
+    line:SetWordWrap(false)
+    line:SetText(#self.debugLogLines+1 .. ": " .. text)
+    self.debugLogLines[#self.debugLogLines+1] = line
+
+    local scrollBar = _G[self.debugLogScrollFrame:GetName() .. "ScrollBar"]
+    scrollBar:SetValue(15 + #self.debugLogLines * (debugLogPlayerFontSize + 3))
 end
 
 function SwiftdawnRaidTools:DebugLogUpdateAppearance()
     local debugLogTitleFontSize = self.db.profile.options.appearance.overviewTitleFontSize
     --local debugLogHeaderFontSize = self.db.profile.options.appearance.overviewHeaderFontSize
-    --local debugLogPlayerFontSize = self.db.profile.options.appearance.overviewPlayerFontSize
+    local debugLogPlayerFontSize = self.db.profile.options.appearance.overviewPlayerFontSize
     --local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize
 
     self.debugLogFrame:SetScale(self.db.profile.options.appearance.overviewScale)
@@ -152,8 +195,16 @@ function SwiftdawnRaidTools:DebugLogUpdateAppearance()
     local headerHeight = debugLogTitleFontSize + 8
     self.debugLogHeader:SetHeight(headerHeight)
 
-    local headerWidth = self.overviewFrame:GetWidth()
+    local headerWidth = self.debugLogFrame:GetWidth()
     self.debugLogHeaderText:SetWidth(headerWidth - 10 - debugLogTitleFontSize)
+
+    self.debugLogScrollContentFrame:SetHeight(15 + #self.debugLogLines * (debugLogPlayerFontSize + 3))
+    for _, line in ipairs(self.debugLogLines) do
+        line:SetWidth(headerWidth - 10)
+        line:SetFont(self:AppearanceGetOverviewPlayerFontType(), debugLogPlayerFontSize)
+    end
+    local scrollBar = _G[self.debugLogScrollFrame:GetName() .. "ScrollBar"]
+    scrollBar.scrollStep = debugLogPlayerFontSize * 2
 
     self.debugLogMain:SetPoint("TOPLEFT", 0, -headerHeight)
     self.debugLogMain:SetPoint("TOPRIGHT", 0, -headerHeight)

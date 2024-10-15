@@ -198,17 +198,20 @@ end
 
 function SwiftdawnRaidTools:SRT_WA_EVENT(_, event, ...)
     if event == "WA_NUMEN_TIMER" then
+        self:DebugLogAddLine(string.format("WA_NUMEN_TIMER: %s", tostring(event)))
         self:RaidAssignmentsHandleFojjiNumenTimer(...)
     end
 end
 
-function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterId)
+function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, encounterName, difficultyID, groupSize)
+    self:DebugLogAddLine(string.format("ENCOUNTER_START: %s, %s", tostring(encounterID), tostring(encounterName)))
     self:TestModeEnd()
     self:OverviewSelectEncounter(encounterId)
     self:RaidAssignmentsStartEncounter(encounterId)
 end
 
-function SwiftdawnRaidTools:ENCOUNTER_END()
+function SwiftdawnRaidTools:ENCOUNTER_END(_, encounterID, encounterName, difficultyID, groupSize, success)
+    self:DebugLogAddLine(string.format("ENCOUNTER_END: %s, %s", tostring(encounterID), tostring(encounterName)))
     self:RaidAssignmentsEndEncounter()
     self:SpellsResetCache()
     self:UnitsResetDeadCache()
@@ -217,6 +220,7 @@ function SwiftdawnRaidTools:ENCOUNTER_END()
 end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
+    self:DebugLogAddLine("ZONE_CHANGED")
     self:TestModeEnd()
     self:RaidAssignmentsEndEncounter()
     self:OverviewUpdateSpells()
@@ -224,6 +228,7 @@ function SwiftdawnRaidTools:ZONE_CHANGED()
 end
 
 function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId)
+    self:DebugLogAddLine(string.format("UNIT_HEALTH: %s", tostring(unitId)))
     local guid = UnitGUID(unitId)
 
     if self:UnitsIsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
@@ -238,6 +243,7 @@ function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId)
 end
 
 function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
+    self:DebugLogAddLine("GROUP_ROSTER_UPDATE")
     self:OverviewUpdateSpells()
     self:NotificationsUpdateSpells()
 
@@ -250,30 +256,37 @@ function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
 end
 
 function SwiftdawnRaidTools:COMBAT_LOG_EVENT_UNFILTERED()
+    --self:DebugLogAddLine("COMBAT_LOG_EVENT_UNFILTERED")
     local _, subEvent, _, _, sourceName, _, _, destGUID, destName, _, _, spellId = CombatLogGetCurrentEventInfo()
     self:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
 end
 
 function SwiftdawnRaidTools:RAID_BOSS_EMOTE(_, text)
+    self:DebugLogAddLine(string.format("RAID_BOSS_EMOTE: %s", tostring(text)))
     self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text)
+    self:DebugLogAddLine(string.format("CHAT_MSG_RAID_BOSS_EMOTE: %s", tostring(text)))
     self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_MONSTER_EMOTE(_, text)
+    self:DebugLogAddLine(string.format("CHAT_MSG_MONSTER_EMOTE: %s", tostring(text)))
     self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(_, text)
+    self:DebugLogAddLine(string.format("CHAT_MSG_MONSTER_YELL: %s", tostring(text)))
     self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
     if subEvent == "SPELL_CAST_START" then
+        self:DebugLogAddLine(string.format("SPELL_CAST_START: %s, %s, %s", tostring(spellId), tostring(sourceName), tostring(destName)))
         self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
+        self:DebugLogAddLine(string.format("SPELL_CAST_SUCCESS: %s, %s", sourceName, spellId))
         self:SpellsCacheCast(sourceName, spellId, function()
             self:RaidAssignmentsUpdateGroups()
             self:OverviewUpdateSpells()
@@ -281,8 +294,10 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
         end)
         self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_AURA_APPLIED" then
+        self:DebugLogAddLine(string.format("SPELL_AURA_APPLIED: %s, %s, %s", tostring(spellId), tostring(sourceName), tostring(destName)))
         self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
+        self:DebugLogAddLine(string.format("UNIT_DIED: %s", destGUID))
         if self:IsFriendlyRaidMemberOrPlayer(destGUID) then
             self:UnitsSetDead(destGUID)
             self:RaidAssignmentsUpdateGroups()
