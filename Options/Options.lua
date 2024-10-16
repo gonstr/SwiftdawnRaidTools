@@ -919,8 +919,18 @@ local appearanceOptions = {
                 SwiftdawnRaidTools.db.profile.notifications.appearance.scale = 1.2
                 SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = 0.9
                 SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = 16
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.scale = 1.0
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.headerFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.headerFontSize = 10
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontSize = 10
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity = 0.8
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.backgroundOpacity = 0.4
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.iconSize = 14
 
+                SwiftdawnRaidTools:OverviewUpdateAppearance()
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
             order = 999,
         },
