@@ -895,6 +895,35 @@ local appearanceOptions = {
                 SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
+        reset = {
+            type = "execute",
+            name = "Reset",
+            desc = "Reset to default settings.",
+            func = function()
+                SwiftdawnRaidTools.db.profile.overview.appearance.scale = 1.0
+                SwiftdawnRaidTools.db.profile.overview.appearance.titleFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.overview.appearance.titleFontSize = 10
+                SwiftdawnRaidTools.db.profile.overview.appearance.headerFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.overview.appearance.headerFontSize = 10
+                SwiftdawnRaidTools.db.profile.overview.appearance.playerFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize = 10
+                SwiftdawnRaidTools.db.profile.overview.appearance.titleBarOpacity = 0.8
+                SwiftdawnRaidTools.db.profile.overview.appearance.backgroundOpacity = 0.4
+                SwiftdawnRaidTools.db.profile.overview.appearance.iconSize = 14
+                SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize = 14
+                SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize = 12
+                SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize = 12
+                SwiftdawnRaidTools.db.profile.notifications.appearance.scale = 1.2
+                SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = 0.9
+                SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = 16
+
+                SwiftdawnRaidTools:NotificationsUpdateAppearance()
+            end,
+            order = 999,
+        },
     },
 }
 

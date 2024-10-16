@@ -44,11 +44,11 @@ function SwiftdawnRaidTools:NotificationsInit()
     content.bossAbilityText = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     content.bossAbilityText:SetTextColor(1, 1, 1, 1)
     content.bossAbilityText:SetPoint("LEFT", 30, -1)
-    content.bossAbilityText:SetPoint("TOP", 0, -7)
+    content.bossAbilityText:SetPoint("TOP", 0, -8)
     content.countdown = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     content.countdown:SetTextColor(1, 1, 1, 1)
     content.countdown:SetPoint("RIGHT", -30, -1)
-    content.countdown:SetPoint("TOP", 0, -7)
+    content.countdown:SetPoint("TOP", 0, -8)
 
     content:Hide()
 
@@ -105,7 +105,6 @@ function SwiftdawnRaidTools:NotificationsUpdateAppearance()
         for _, assignmentFrame in pairs(groupFrame.assignments) do
             assignmentFrame.text:SetFont(self:AppearanceGetNotificationsPlayerFontType(), playerFontSize)
             assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
-            assignmentFrame.text:SetPoint("CENTER", assignmentFrame, "CENTER", iconSize/2, 0)
         end
     end
 end
@@ -145,14 +144,9 @@ local function createNotificationGroupAssignment(groupFrame)
 
     assignmentFrame:SetSize(120, assignmentHeight)
 
-    assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    assignmentFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType(), SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize())
-    assignmentFrame.text:SetTextColor(1, 1, 1, 1)
-    assignmentFrame.text:SetPoint("CENTER", assignmentFrame, "CENTER", iconSize/2, 0)
-
     assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
     assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
-    assignmentFrame.iconFrame:SetPoint("RIGHT", assignmentFrame.text, "LEFT", -4, 0)
+
     assignmentFrame.cooldownFrame = CreateFrame("Cooldown", nil, assignmentFrame.iconFrame, "CooldownFrameTemplate")
     assignmentFrame.cooldownFrame:SetAllPoints()
     assignmentFrame.iconFrame.cooldown = assignmentFrame.cooldownFrame
@@ -160,11 +154,17 @@ local function createNotificationGroupAssignment(groupFrame)
     assignmentFrame.icon:SetAllPoints()
     assignmentFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 
+    assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    assignmentFrame.text:SetFont(SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType(), SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize())
+    assignmentFrame.text:SetTextColor(1, 1, 1, 1)
+
     return assignmentFrame
 end
 
 local function updateNotificationGroupAssignment(assignmentFrame, assignment, index, total)
     assignmentFrame:Show()
+
+    local iconSize = SwiftdawnRaidTools:AppearanceGetNotificationsPlayerIconSize()
 
     assignmentFrame.player = assignment.player
     assignmentFrame.spellId = assignment.spell_id
@@ -180,11 +180,19 @@ local function updateNotificationGroupAssignment(assignmentFrame, assignment, in
 
     assignmentFrame.cooldownFrame:Clear()
 
-    if total == 1 then
-        assignmentFrame:SetPoint("TOPLEFT", assignmentFrame:GetParent(), "TOP", -60, 0)
+    assignmentFrame.text:ClearAllPoints()
+    assignmentFrame.iconFrame:ClearAllPoints()
+
+    local offset = (index - 1) * 120 + 4
+    assignmentFrame:SetPoint("TOPLEFT", assignmentFrame:GetParent(), "TOPLEFT", offset, 0)
+
+    if index == 1 then
+        assignmentFrame.iconFrame:SetPoint("LEFT", assignmentFrame, "LEFT", 26, 0)
+        assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "RIGHT", iconSize / 3, 0)
+
     else
-        local offset = (index - 1) * 120 + 4
-        assignmentFrame:SetPoint("TOPLEFT", assignmentFrame:GetParent(), "TOPLEFT", offset, 0)
+        assignmentFrame.text:SetPoint("RIGHT", assignmentFrame, "RIGHT", -26, 0)
+        assignmentFrame.iconFrame:SetPoint("RIGHT", assignmentFrame.text, "LEFT", iconSize / -3, 0)
     end
 end
 
