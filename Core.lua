@@ -15,31 +15,6 @@ SwiftdawnRaidTools.defaults = {
     profile = {
         options = {
             import = "",
-            notifications = {
-                showOnlyOwnNotifications = false,
-                mute = false
-            },
-            appearance = {
-                overviewScale = 1.0,
-                overviewTitleFontType = "Friz Quadrata TT",
-                overviewTitleFontSize = 10,
-                overviewHeaderFontType = "Friz Quadrata TT",
-                overviewHeaderFontSize = 10,
-                overviewPlayerFontType = "Friz Quadrata TT",
-                overviewPlayerFontSize = 10,
-                overviewTitleBarOpacity = 0.8,
-                overviewBackgroundOpacity = 0.4,
-                overviewIconSize = 14,
-                notificationsHeaderFontType = "Friz Quadrata TT",
-                notificationsHeaderFontSize = 14,
-                notificationsPlayerFontType = "Friz Quadrata TT",
-                notificationsPlayerFontSize = 12,
-                notificationsCountdownFontType = "Friz Quadrata TT",
-                notificationsCountdownFontSize = 12,
-                notificationsScale = 1.2,
-                notificationsBackgroundOpacity = 0.9,
-                notificationsIconSize = 16
-            }
         },
         data = {
             encountersProgress = nil,
@@ -47,13 +22,58 @@ SwiftdawnRaidTools.defaults = {
             encounters = {}
         },
         minimap = {},
+        notifications = {
+            showOnlyOwnNotifications = false,
+            mute = false,
+            anchorX = 0,
+            anchorY = 0,
+            appearance = {
+                scale = 1.2,
+                headerFontType = "Friz Quadrata TT",
+                headerFontSize = 10,
+                playerFontType = "Friz Quadrata TT",
+                playerFontSize = 10,
+                countdownFontType = "Friz Quadrata TT",
+                countdownFontSize = 10,
+                backgroundOpacity = 0.9,
+                iconSize = 16
+            }
+        },
         overview = {
+            anchorX = 0,
+            anchorY = 0,
             selectedEncounterId = nil,
             locked = false,
-            show = true
+            show = true,
+            appearance = {
+                scale = 1.0,
+                titleFontType = "Friz Quadrata TT",
+                titleFontSize = 10,
+                headerFontType = "Friz Quadrata TT",
+                headerFontSize = 10,
+                playerFontType = "Friz Quadrata TT",
+                playerFontSize = 10,
+                titleBarOpacity = 0.8,
+                backgroundOpacity = 0.4,
+                iconSize = 14
+            }
         },
         debugLog = {
-            locked = false
+            anchorX = 0,
+            anchorY = 0,
+            locked = false,
+            show = false,
+            scrollToBottom = true,
+            appearance = {
+                scale = 1.0,
+                titleFontType = "Friz Quadrata TT",
+                titleFontSize = 10,
+                logFontType = "Friz Quadrata TT",
+                logFontSize = 10,
+                titleBarOpacity = 0.8,
+                backgroundOpacity = 0.4,
+                iconSize = 14
+            }
         }
     },
 }

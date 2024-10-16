@@ -75,16 +75,6 @@ local mainOptions = {
             name = "",
             order = 1,
             args = {
-                toggleOverview = {
-                    type = "execute",
-                    name = "Toggle Overview",
-                    desc = "Toggle Overview visiblity.",
-                    func = function()
-                        SwiftdawnRaidTools.db.profile.overview.show = not SwiftdawnRaidTools.db.profile.overview.show
-                        SwiftdawnRaidTools:OverviewUpdate()
-                    end,
-                    order = 1,
-                },
                 toggleAnchors = {
                     type = "execute",
                     name = "Toggle Anchors",
@@ -106,6 +96,67 @@ local mainOptions = {
                     order = 3,
                 },
             },
+        },
+        separator0 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 2,
+        },
+        showEnableWindowsDescription = {
+            type = "description",
+            name = "Enable or Disable Windows",
+            width = "full",
+            fontSize = "large",
+            order = 3,
+        },
+        showOverviewDescription = {
+            type = "description",
+            name = "Show Overview",
+            width = "normal",
+            order = 10,
+        },
+        showOverview = {
+            name = " ",
+            desc = "Enables / Disables Overview window",
+            type = "toggle",
+            width = "double",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.overview.show = value
+                SwiftdawnRaidTools:OverviewUpdate()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.overview.show end,
+            order = 11,
+        },
+        separator1 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 12,
+        },
+        showDebugLogDescription = {
+            type = "description",
+            name = "Show Debug Log",
+            width = "normal",
+            order = 20,
+        },
+        showDebugLog = {
+            name = " ",
+            desc = "Enables / Disables Debug Log window",
+            type = "toggle",
+            width = "double",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.debugLog.show = value
+                SwiftdawnRaidTools:DebugLogUpdate()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.debugLog.show end,
+            order = 21,
+        },
+        separator2 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 22,
         },
     },
 }
@@ -138,11 +189,61 @@ local appearanceOptions = {
             fontSize = "large",
             order = 11,
         },
+        overviewPositionDescription = {
+            type = "description",
+            name = "Position",
+            width = "normal",
+            order = 12,
+        },
+        overviewPositionXDescription = {
+            type = "description",
+            name = "                X",
+            width = "half",
+            order = 13,
+        },
+        overviewPositionX = {
+            type = "input",
+            name = "",
+            width = "half",
+            desc = "Overview anchor X position",
+            set = function(info, value)
+                local numberValue = tonumber(value)
+                if numberValue then
+                    SwiftdawnRaidTools.db.profile.overview.anchorX = value
+                end
+            end,
+            get = function(info)
+                return SwiftdawnRaidTools.db.profile.overview.anchorX
+            end,
+            order = 14
+        },
+        overviewPositionYDescription = {
+            type = "description",
+            name = "                Y",
+            width = "half",
+            order = 15,
+        },
+        overviewPositionY = {
+            type = "input",
+            name = "",
+            width = "half",
+            desc = "Overview anchor Y position",
+            set = function(info, value)
+                local numberValue = tonumber(value)
+                if numberValue then
+                    SwiftdawnRaidTools.db.profile.overview.anchorY = value
+                end
+            end,
+            get = function(info)
+                return SwiftdawnRaidTools.db.profile.overview.anchorY
+            end,
+            order = 16
+        },
         overviewScaleDescription = {
             type = "description",
             name = "Scale",
             width = "normal",
-            order = 12,
+            order = 18,
         },
         overviewScale = {
             type = "range",
@@ -152,13 +253,12 @@ local appearanceOptions = {
             name = "",
             desc = "Set the Overview UI Scale.",
             width = "double",
-            order = 13,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewScale end,
+            order = 19,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.scale end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewScale = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.scale = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewTitleFontDescription = {
@@ -175,12 +275,11 @@ local appearanceOptions = {
             dialogControl = "LSM30_Font",
             width = "normal",
             order = 22,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontType end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.titleFontType end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontType = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.titleFontType = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewTitleFontSize = {
@@ -192,12 +291,11 @@ local appearanceOptions = {
             step = 1,
             width = "normal",
             order = 23,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.titleFontSize end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.titleFontSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewHeaderFontDescription = {
@@ -214,9 +312,9 @@ local appearanceOptions = {
             dialogControl = "LSM30_Font",
             width = "normal",
             order = 32,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontType end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.headerFontType end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontType = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.headerFontType = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
             end,
@@ -230,9 +328,9 @@ local appearanceOptions = {
             step = 1,
             width = "normal",
             order = 33,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.headerFontSize end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.headerFontSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
             end,
@@ -251,12 +349,11 @@ local appearanceOptions = {
             dialogControl = "LSM30_Font",
             width = "normal",
             order = 42,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontType end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.playerFontType end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontType = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.playerFontType = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewPlayerFontSize = {
@@ -268,12 +365,11 @@ local appearanceOptions = {
             step = 1,
             width = "normal",
             order = 43,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewIconSizeDescription = {
@@ -291,9 +387,9 @@ local appearanceOptions = {
             desc = "Set the ability icon size.",
             width = "double",
             order = 52,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.iconSize end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.iconSize = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
             end,
@@ -313,12 +409,11 @@ local appearanceOptions = {
             desc = "Set the Overview Background Opacity.",
             width = "double",
             order = 54,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.titleBarOpacity end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.titleBarOpacity = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         overviewBackgroundOpacityDescription = {
@@ -336,12 +431,11 @@ local appearanceOptions = {
             desc = "Set the Overview Background Opacity.",
             width = "double",
             order = 56,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity end,
+            get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.backgroundOpacity end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity = value
+                SwiftdawnRaidTools.db.profile.overview.appearance.backgroundOpacity = value
 
                 SwiftdawnRaidTools:OverviewUpdateAppearance()
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
         separator3 = {
@@ -363,11 +457,61 @@ local appearanceOptions = {
             width = "full",
             order = 62,
         },
+        notificationsPositionDescription = {
+            type = "description",
+            name = "Position",
+            width = "normal",
+            order = 63,
+        },
+        notificationsPositionXDescription = {
+            type = "description",
+            name = "                X",
+            width = "half",
+            order = 64,
+        },
+        notificationsPositionX = {
+            type = "input",
+            name = "",
+            width = "half",
+            desc = "Notifications anchor X position",
+            set = function(info, value)
+                local numberValue = tonumber(value)
+                if numberValue then
+                    SwiftdawnRaidTools.db.profile.notifications.anchorX = value
+                end
+            end,
+            get = function(info)
+                return SwiftdawnRaidTools.db.profile.notifications.anchorX
+            end,
+            order = 65
+        },
+        notificationsPositionYDescription = {
+            type = "description",
+            name = "                Y",
+            width = "half",
+            order = 66,
+        },
+        notificationsPositionY = {
+            type = "input",
+            name = "",
+            width = "half",
+            desc = "Notifications anchor Y position",
+            set = function(info, value)
+                local numberValue = tonumber(value)
+                if numberValue then
+                    SwiftdawnRaidTools.db.profile.notifications.anchorY = value
+                end
+            end,
+            get = function(info)
+                return SwiftdawnRaidTools.db.profile.notifications.anchorY
+            end,
+            order = 67
+        },
         notificationsScaleDescription = {
             type = "description",
             name = "Scale",
             width = "normal",
-            order = 63,
+            order = 68,
         },
         notificationsScale = {
             type = "range",
@@ -377,10 +521,10 @@ local appearanceOptions = {
             name = "",
             desc = "Set the Notifications UI Scale.",
             width = "double",
-            order = 64,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale end,
+            order = 69,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.scale end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale = value
+                SwiftdawnRaidTools.db.profile.notifications.appearance.scale = value
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
@@ -399,9 +543,9 @@ local appearanceOptions = {
             dialogControl = "LSM30_Font",
             width = "normal",
             order = 72,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontType end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontType = value
+                SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType = value
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
@@ -415,9 +559,9 @@ local appearanceOptions = {
             step = 1,
             width = "normal",
             order = 73,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize end,
             set = function(self, key)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize = key
+                SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize = key
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
@@ -436,9 +580,9 @@ local appearanceOptions = {
             dialogControl = "LSM30_Font",
             width = "normal",
             order = 82,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType end,
             set = function(_, key)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType = key
+                SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType = key
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
@@ -452,9 +596,9 @@ local appearanceOptions = {
             step = 1,
             width = "normal",
             order = 83,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize = value
+                SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize = value
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
@@ -473,9 +617,9 @@ local appearanceOptions = {
             dialogControl = "LSM30_Font",
             width = "normal",
             order = 85,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontType end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontType = value
+                SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType = value
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
@@ -489,9 +633,9 @@ local appearanceOptions = {
             step = 1,
             width = "normal",
             order = 86,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize = value
+                SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize = value
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
@@ -511,9 +655,9 @@ local appearanceOptions = {
             desc = "Set the notification icon size",
             width = "double",
             order = 92,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize = value
+                SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = value
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
@@ -533,11 +677,222 @@ local appearanceOptions = {
             desc = "Set the Notifications Background Opacity.",
             width = "double",
             order = 94,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsBackgroundOpacity end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity end,
             set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsBackgroundOpacity = value
+                SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = value
 
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
+            end,
+        },
+        separator5 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 110,
+        },
+        debugLogOptionsDescription = {
+            type = "description",
+            name = "Debug Log",
+            width = "full",
+            fontSize = "large",
+            order = 111,
+        },
+        debugLogPositionDescription = {
+            type = "description",
+            name = "Position",
+            width = "normal",
+            order = 112,
+        },
+        debugLogPositionXDescription = {
+            type = "description",
+            name = "                X",
+            width = "half",
+            order = 113,
+        },
+        debugLogPositionX = {
+            type = "input",
+            name = "",
+            width = "half",
+            desc = "Debug Log anchor X position",
+            set = function(info, value)
+                --local numberValue = tonumber(value)
+                --if numberValue then
+                print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
+                SwiftdawnRaidTools.db.profile.debugLog.anchorX = value
+                print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                --end
+            end,
+            get = function(info)
+                return SwiftdawnRaidTools.db.profile.debugLog.anchorX
+            end,
+            order = 114
+        },
+        debugLogPositionYDescription = {
+            type = "description",
+            name = "                Y",
+            width = "half",
+            order = 115,
+        },
+        debugLogPositionY = {
+            type = "input",
+            name = "",
+            width = "half",
+            desc = "Debug Log anchor Y position",
+            set = function(info, value)
+                --local numberValue = tonumber(value)
+                --if numberValue then
+                print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
+                SwiftdawnRaidTools.db.profile.debugLog.anchorY = value
+                print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                --end
+            end,
+            get = function(info)
+                return SwiftdawnRaidTools.db.profile.debugLog.anchorY
+            end,
+            order = 116
+        },
+        debugLogScaleDescription = {
+            type = "description",
+            name = "Scale",
+            width = "normal",
+            order = 117,
+        },
+        debugLogScale = {
+            type = "range",
+            min = 0.6,
+            max = 1.4,
+            isPercent = true,
+            name = "",
+            desc = "Set the Debug Log UI Scale.",
+            width = "double",
+            order = 118,
+            get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.scale end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.scale = value
+
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
+            end,
+        },
+        debugLogTitleFontDescription = {
+            type = "description",
+            name = "Title Bar",
+            width = "normal",
+            order = 121,
+        },
+        debugLogTitleFontType = {
+            type = "select",
+            name = "",
+            desc = "Set the font used in the Debug Log title",
+            values = SharedMedia:HashTable("font"),
+            dialogControl = "LSM30_Font",
+            width = "normal",
+            order = 122,
+            get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontType end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontType = value
+
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
+            end,
+        },
+        debugLogTitleFontSize = {
+            type = "range",
+            name = "",
+            desc = "Set the font size used in the Debug Log title",
+            min = 8,
+            max = 32,
+            step = 1,
+            width = "normal",
+            order = 123,
+            get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontSize end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontSize = value
+
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
+            end,
+        },
+        debugLogLineFontDescription = {
+            type = "description",
+            name = "Log Lines",
+            width = "normal",
+            order = 141,
+        },
+        debugLogLineFontType = {
+            type = "select",
+            name = "",
+            desc = "Set the font used in the Debug Log lines",
+            values = SharedMedia:HashTable("font"),
+            dialogControl = "LSM30_Font",
+            width = "normal",
+            order = 142,
+            get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType = value
+
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
+            end,
+        },
+        debugLogLineFontSize = {
+            type = "range",
+            name = "",
+            desc = "Set the font size used in the Debug Log lines",
+            min = 8,
+            max = 32,
+            step = 1,
+            width = "normal",
+            order = 143,
+            get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontSize end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontSize = value
+
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
+            end,
+        },
+        debugLogTitleBarOpacityDescription = {
+            type = "description",
+            name = "Title Bar Opacity",
+            width = "normal",
+            order = 153,
+        },
+        debugLogTitleBarOpacity = {
+            type = "range",
+            min = 0,
+            max = 1,
+            isPercent = true,
+            name = "",
+            desc = "Set the Debug Log title bar background opacity.",
+            width = "double",
+            order = 154,
+            get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity = value
+
+                SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
+            end,
+        },
+        debugLogBackgroundOpacityDescription = {
+            type = "description",
+            name = "Background Opacity",
+            width = "normal",
+            order = 155,
+        },
+        debugLogBackgroundOpacity = {
+            type = "range",
+            min = 0,
+            max = 1,
+            isPercent = true,
+            name = "",
+            desc = "Set the Debug Log background opacity.",
+            width = "double",
+            order = 156,
+            get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.backgroundOpacity end,
+            set = function(_, value)
+                SwiftdawnRaidTools.db.profile.debugLog.appearance.backgroundOpacity = value
+
+                SwiftdawnRaidTools:OverviewUpdateAppearance()
+                SwiftdawnRaidTools:DebugLogUpdateAppearance()
             end,
         },
     },
@@ -553,8 +908,8 @@ local notificationOptions = {
             desc = "Only show Raid Notifications that apply to You.",
             width = "full",
             order = 1,
-            get = function() return SwiftdawnRaidTools.db.profile.options.notifications.showOnlyOwnNotifications end,
-            set = function(_, value) SwiftdawnRaidTools.db.profile.options.notifications.showOnlyOwnNotifications = value end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.showOnlyOwnNotifications end,
+            set = function(_, value) SwiftdawnRaidTools.db.profile.notifications.showOnlyOwnNotifications = value end,
         },
         showOnlyOwnNotificationsDescription = {
             type = "description",
@@ -572,8 +927,8 @@ local notificationOptions = {
             desc = "Mute all Raid Notification Sounds.",
             width = "full",
             order = 4,
-            get = function() return SwiftdawnRaidTools.db.profile.options.notifications.mute end,
-            set = function(_, value)SwiftdawnRaidTools.db.profile.options.notifications.mute = value end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.mute end,
+            set = function(_, value)SwiftdawnRaidTools.db.profile.notifications.mute = value end,
         },
         muteDescription = {
             type = "description",

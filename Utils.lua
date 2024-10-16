@@ -199,43 +199,43 @@ function SwiftdawnRaidTools:IsPlayerInActiveGroup(part)
 end
 
 function SwiftdawnRaidTools:AppearanceGetOverviewTitleFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewTitleFontType)
+    return SharedMedia:Fetch("font", self.db.profile.overview.appearance.titleFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetOverviewBossAbilityFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewHeaderFontType)
+    return SharedMedia:Fetch("font", self.db.profile.overview.appearance.headerFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewPlayerFontType)
+    return SharedMedia:Fetch("font", self.db.profile.overview.appearance.playerFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsHeaderFontType)
+    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.headerFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontSize()
-    return self.db.profile.options.appearance.notificationsHeaderFontSize
+    return self.db.profile.notifications.appearance.headerFontSize
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsCountdownFontType)
+    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.countdownFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontSize()
-    return self.db.profile.options.appearance.notificationsCountdownFontSize
+    return self.db.profile.notifications.appearance.countdownFontSize
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsPlayerFontType)
+    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.playerFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize()
-    return self.db.profile.options.appearance.notificationsPlayerFontSize
+    return self.db.profile.notifications.appearance.playerFontSize
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerIconSize()
-    return self.db.profile.options.appearance.notificationsIconSize
+    return self.db.profile.notifications.appearance.iconSize
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()
@@ -255,4 +255,15 @@ function SwiftdawnRaidTools:AppearanceGetNotificationsContentHeight()
     local assignmentHeight = SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight()
     local padding = 18
     return assignmentHeight + padding
+end
+
+function SwiftdawnRaidTools:GetTimestamp()
+    local totalSeconds = GetTime() -- Returns time in seconds with fractional part for milliseconds
+    local hours = floor(totalSeconds / 3600)
+    local minutes = floor((totalSeconds % 3600) / 60)
+    local seconds = floor(totalSeconds % 60)
+    local milliseconds = floor((totalSeconds % 1) * 1000) -- Get milliseconds
+
+    -- Format the time string
+    return string.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds)
 end

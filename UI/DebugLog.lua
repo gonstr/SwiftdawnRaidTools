@@ -1,27 +1,62 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
+local SharedMedia = LibStub("LibSharedMedia-3.0")
 
 local MIN_HEIGHT = 200
+local MAX_SCROLLBACK = 200
+
+local function getTitleFontType()
+    return SharedMedia:Fetch("font", SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontType)
+end
+
+local function getLogFontType()
+    return SharedMedia:Fetch("font", SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType)
+end
+
+local function GetFrameCenter(frame)
+    local left = frame:GetLeft()
+    local right = frame:GetRight()
+    local top = frame:GetTop()
+    local bottom = frame:GetBottom()
+
+    if left and right and top and bottom then
+        local centerX = (left + right) / 2
+        local centerY = (top + bottom) / 2
+        return centerX, centerY
+    else
+        return nil, nil  -- Return nil if the frame is not shown or has no position
+    end
+end
 
 function SwiftdawnRaidTools:DebugLogInit()
-    local debugLogTitleFontSize = self.db.profile.options.appearance.overviewTitleFontSize
-    local debugLogPlayerFontSize = self.db.profile.options.appearance.overviewPlayerFontSize
+    local titleFontSize = self.db.profile.debugLog.appearance.titleFontSize
+    local logFontSize = self.db.profile.debugLog.appearance.logFontSize
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsDebugLog", UIParent, "BackdropTemplate")
-    container:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    container:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
     container:SetSize(400, MIN_HEIGHT)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
         tileSize = 32,
     })
-    container:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewBackgroundOpacity)
+    container:SetBackdropColor(0, 0, 0, self.db.profile.debugLog.appearance.backgroundOpacity)
     container:SetMovable(true)
     container:EnableMouse(true)
     container:SetUserPlaced(true)
     container:SetClampedToScreen(true)
     container:RegisterForDrag("LeftButton")
-    container:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-    container:SetScale(self.db.profile.options.appearance.overviewScale)
+    container:SetScript("OnDragStart", function(self)
+        self:StartMoving()
+    end)
+    container:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        print("Drag stopped")
+        local x, y = GetFrameCenter(self)
+        print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
+        SwiftdawnRaidTools.db.profile.debugLog.anchorX = x
+        SwiftdawnRaidTools.db.profile.debugLog.anchorY = y
+        print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
+    end)
+    container:SetScale(self.db.profile.debugLog.appearance.scale)
     container:SetClipsChildren(true)
 
     local popup = CreateFrame("Frame", "SwiftdawnRaidToolsDebugLogPopup", UIParent, "BackdropTemplate")
@@ -70,7 +105,7 @@ function SwiftdawnRaidTools:DebugLogInit()
         tile = true,
         tileSize = 16,
     })
-    header:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewTitleBarOpacity)
+    header:SetBackdropColor(0, 0, 0, self.db.profile.debugLog.appearance.titleBarOpacity)
     header:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" and container:IsMouseEnabled() then
             self:GetParent():StartMoving()
@@ -89,12 +124,12 @@ function SwiftdawnRaidTools:DebugLogInit()
         SwiftdawnRaidTools.debugLogHeaderButton:SetAlpha(1)
     end)
     header:SetScript("OnLeave", function()
-        SwiftdawnRaidTools.debugLogHeader:SetBackdropColor(0, 0, 0, SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity)
-        SwiftdawnRaidTools.debugLogHeaderButton:SetAlpha(SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity)
+        SwiftdawnRaidTools.debugLogHeader:SetBackdropColor(0, 0, 0, SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity)
+        SwiftdawnRaidTools.debugLogHeaderButton:SetAlpha(SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity)
     end)
 
     local headerText = header:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    headerText:SetFont(self:AppearanceGetOverviewTitleFontType(), debugLogTitleFontSize)
+    headerText:SetFont(getTitleFontType(), titleFontSize)
     headerText:SetPoint("LEFT", header, "LEFT", 10, 0)
     headerText:SetShadowOffset(1, -1)
     headerText:SetShadowColor(0, 0, 0, 1)
@@ -103,19 +138,19 @@ function SwiftdawnRaidTools:DebugLogInit()
     headerText:SetText("Debug Log")
 
     local headerButton = CreateFrame("Button", nil, header)
-    headerButton:SetSize(debugLogTitleFontSize, debugLogTitleFontSize)
+    headerButton:SetSize(titleFontSize, titleFontSize)
     headerButton:SetPoint("RIGHT", header, "RIGHT", -3, 0)
     headerButton:SetNormalTexture("Gamepad_Ltr_Menu_32")
     headerButton:SetHighlightTexture("Gamepad_Ltr_Menu_32")
     headerButton:SetPushedTexture("Gamepad_Ltr_Menu_32")
-    headerButton:SetAlpha(self.db.profile.options.appearance.overviewTitleBarOpacity)
+    headerButton:SetAlpha(self.db.profile.debugLog.appearance.titleBarOpacity)
     headerButton:SetScript("OnEnter", function()
         SwiftdawnRaidTools.debugLogHeader:SetBackdropColor(0, 0, 0, 1)
         SwiftdawnRaidTools.debugLogHeaderButton:SetAlpha(1)
     end)
     headerButton:SetScript("OnLeave", function()
-        SwiftdawnRaidTools.debugLogHeader:SetBackdropColor(0, 0, 0, SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity)
-        SwiftdawnRaidTools.debugLogHeaderButton:SetAlpha(SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity)
+        SwiftdawnRaidTools.debugLogHeader:SetBackdropColor(0, 0, 0, SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity)
+        SwiftdawnRaidTools.debugLogHeaderButton:SetAlpha(SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity)
     end)
 
     headerButton:SetScript("OnClick", function()
@@ -136,7 +171,7 @@ function SwiftdawnRaidTools:DebugLogInit()
     scrollFrame:SetPoint("BOTTOMRIGHT", main, "BOTTOMRIGHT", 0, 5)
 
     local scrollBar = _G[scrollFrame:GetName() .. "ScrollBar"]
-    scrollBar.scrollStep = debugLogPlayerFontSize  -- Change this value to adjust the scroll amount per tick
+    scrollBar.scrollStep = logFontSize  -- Change this value to adjust the scroll amount per tick
     -- Create a content frame to hold the text
     local contentFrame = CreateFrame("Frame", "MyContentFrame", scrollFrame)
     contentFrame:SetSize(500, MIN_HEIGHT)  -- Set the size of the content frame (height is larger for scrolling)
@@ -164,85 +199,102 @@ function SwiftdawnRaidTools:DebugLogInit()
     self:DebugLogUpdateAppearance()
 end
 
-function SwiftdawnRaidTools:DebugLogAddLine(text)
-    local line = self.debugLogScrollContentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    local debugLogPlayerFontSize = self.db.profile.options.appearance.overviewPlayerFontSize
-    line:SetFont(self:AppearanceGetOverviewPlayerFontType(), debugLogPlayerFontSize)
-    if #self.debugLogLines == 0 then
-        line:SetPoint("TOPLEFT", self.debugLogScrollContentFrame, "TOPLEFT", 10, -3)
-    else
-        line:SetPoint("TOPLEFT", self.debugLogLines[#self.debugLogLines], "BOTTOMLEFT", 0, -3)
-    end
-    line:SetShadowOffset(1, -1)
-    line:SetShadowColor(0, 0, 0, 1)
-    line:SetJustifyH("LEFT")
-    line:SetWordWrap(false)
-    line:SetText(#self.debugLogLines+1 .. ": " .. text)
-    self.debugLogLines[#self.debugLogLines+1] = line
-
+function SwiftdawnRaidTools:DebugLogScrollToBottom()
+    local logFontSize = self.db.profile.debugLog.appearance.logFontSize
     local scrollBar = _G[self.debugLogScrollFrame:GetName() .. "ScrollBar"]
-    scrollBar:SetValue(15 + #self.debugLogLines * (debugLogPlayerFontSize + 3))
+    scrollBar:SetValue(15 + #self.debugLogLines * (logFontSize + 3))
+end
+
+function SwiftdawnRaidTools:DebugLogAddLine(text)
+    local logFontSize = self.db.profile.debugLog.appearance.logFontSize
+    local line = {}
+    line.timestamp = self.debugLogScrollContentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    line.timestamp:SetFont(getLogFontType(), logFontSize)
+    line.timestamp:SetShadowOffset(1, -1)
+    line.timestamp:SetShadowColor(0, 0, 0, 1)
+    line.timestamp:SetJustifyH("LEFT")
+    line.timestamp:SetWordWrap(false)
+    line.timestamp:SetText(self:GetTimestamp() .. ": ")
+    line.timestamp:SetTextColor(1, 1, 1)
+    line.timestamp:SetWidth(line.timestamp:GetStringWidth())
+    line.text = self.debugLogScrollContentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    line.text:SetFont(getLogFontType(), logFontSize)
+    line.text:SetShadowOffset(1, -1)
+    line.text:SetShadowColor(0, 0, 0, 1)
+    line.text:SetJustifyH("LEFT")
+    line.text:SetWordWrap(false)
+    line.text:SetText(text)
+    line.text:SetPoint("LEFT", line.timestamp, "RIGHT", 0, 0)
+    -- fix connection points for new and old lines
+    if #self.debugLogLines == 0 then
+        -- no other lines, so connect to top
+        line.timestamp:SetPoint("TOPLEFT", self.debugLogScrollContentFrame, "TOPLEFT", 5, -3)
+    else
+        if #self.debugLogLines > MAX_SCROLLBACK then
+            -- too many lines; remove first line in log
+            local removedLine = table.remove(self.debugLogLines, 1)
+            removedLine.timestamp:Hide()
+            removedLine.timestamp:ClearAllPoints()
+            removedLine.timestamp = nil
+            removedLine.text:Hide()
+            removedLine.text:ClearAllPoints()
+            removedLine.text = nil
+            removedLine = nil
+            -- connect new first line to top
+            self.debugLogLines[1].timestamp:SetPoint("TOPLEFT", self.debugLogScrollContentFrame, "TOPLEFT", 5, -3)
+        end
+        -- connect to last line in log
+        line.timestamp:SetPoint("TOPLEFT", self.debugLogLines[#self.debugLogLines].timestamp, "BOTTOMLEFT", 0, -3)
+    end
+    -- add line to the list
+    self.debugLogLines[#self.debugLogLines+1] = line
+    if self.db.profile.debugLog.scrollToBottom then
+        self:DebugLogScrollToBottom()
+    end
 end
 
 function SwiftdawnRaidTools:DebugLogUpdateAppearance()
-    local debugLogTitleFontSize = self.db.profile.options.appearance.overviewTitleFontSize
-    --local debugLogHeaderFontSize = self.db.profile.options.appearance.overviewHeaderFontSize
-    local debugLogPlayerFontSize = self.db.profile.options.appearance.overviewPlayerFontSize
-    --local iconSize = SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize
+    self.debugLogFrame:ClearAllPoints()
+    self.debugLogFrame:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
+    local titleFontSize = self.db.profile.debugLog.appearance.titleFontSize
+    local logFontSize = self.db.profile.debugLog.appearance.logFontSize
 
-    self.debugLogFrame:SetScale(self.db.profile.options.appearance.overviewScale)
-    self.debugLogHeaderText:SetFont(self:AppearanceGetOverviewTitleFontType(), debugLogTitleFontSize)
-    local headerHeight = debugLogTitleFontSize + 8
+    self.debugLogFrame:SetScale(self.db.profile.debugLog.appearance.scale)
+    self.debugLogHeaderText:SetFont(getTitleFontType(), titleFontSize)
+    local headerHeight = titleFontSize + 8
     self.debugLogHeader:SetHeight(headerHeight)
 
     local headerWidth = self.debugLogFrame:GetWidth()
-    self.debugLogHeaderText:SetWidth(headerWidth - 10 - debugLogTitleFontSize)
+    self.debugLogHeaderText:SetWidth(headerWidth - 10 - titleFontSize)
 
-    self.debugLogScrollContentFrame:SetHeight(15 + #self.debugLogLines * (debugLogPlayerFontSize + 3))
+    self.debugLogScrollContentFrame:SetHeight(15 + #self.debugLogLines * (logFontSize + 3))
     for _, line in ipairs(self.debugLogLines) do
-        line:SetWidth(headerWidth - 10)
-        line:SetFont(self:AppearanceGetOverviewPlayerFontType(), debugLogPlayerFontSize)
+        line.timestamp:SetFont(getLogFontType(), logFontSize)
+        line.text:SetFont(getLogFontType(), logFontSize)
+        line.timestamp:SetWidth(line.timestamp:GetStringWidth())
+        line.text:SetWidth(headerWidth - 5 - line.timestamp:GetStringWidth() - 2)
     end
     local scrollBar = _G[self.debugLogScrollFrame:GetName() .. "ScrollBar"]
-    scrollBar.scrollStep = debugLogPlayerFontSize * 2
+    scrollBar.scrollStep = logFontSize * 2
 
     self.debugLogMain:SetPoint("TOPLEFT", 0, -headerHeight)
     self.debugLogMain:SetPoint("TOPRIGHT", 0, -headerHeight)
-    self.debugLogHeaderButton:SetSize(debugLogTitleFontSize, debugLogTitleFontSize)
-    self.debugLogHeaderButton:SetAlpha(self.db.profile.options.appearance.overviewTitleBarOpacity)
+    self.debugLogHeaderButton:SetSize(titleFontSize, titleFontSize)
+    self.debugLogHeaderButton:SetAlpha(self.db.profile.debugLog.appearance.titleBarOpacity)
 
-    self.debugLogHeader:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.overviewTitleBarOpacity)
+    self.debugLogHeader:SetBackdropColor(0, 0, 0, self.db.profile.debugLog.appearance.titleBarOpacity)
     local r, g, b = self.overviewFrame:GetBackdropColor()
-    self.debugLogFrame:SetBackdropColor(r, g, b, self.db.profile.options.appearance.overviewBackgroundOpacity)
+    self.debugLogFrame:SetBackdropColor(r, g, b, self.db.profile.debugLog.appearance.backgroundOpacity)
 end
 
 function SwiftdawnRaidTools:DebugLogUpdate()
-    --if not self.DEBUG then
-    --    self.debugLog:Hide()
-    --    return
-    --end
+    local show = self.db.profile.debugLog.show
 
-    --local selectedEncounterIdFound = false
-    --
-    --for encounterId, _ in pairs(encounters) do
-    --    if self.db.profile.overview.selectedEncounterId == encounterId then
-    --        selectedEncounterIdFound = true
-    --    end
-    --end
-    --
-    --if not selectedEncounterIdFound then
-    --    local encounterIndexes = {}
-    --    for encounterId in pairs(self:GetEncounters()) do
-    --        table.insert(encounterIndexes, encounterId)
-    --    end
-    --    table.sort(encounterIndexes)
-    --
-    --    self.db.profile.overview.selectedEncounterId = encounterIndexes[1]
-    --end
+    if not show then
+        self.debugLogFrame:Hide()
+        return
+    end
 
-    --self:OverviewUpdateHeaderText()
-    --self:OverviewUpdateMain()
-    --self:OverviewUpdateSpells()
     self:DebugLogUpdateLocked()
     self.debugLogFrame:Show()
 end
@@ -254,6 +306,17 @@ end
 function SwiftdawnRaidTools:DebugLogToggleLock()
     self.db.profile.debugLog.locked = not self.db.profile.debugLog.locked
     self:DebugLogUpdateLocked()
+end
+
+function SwiftdawnRaidTools:DebugLogUpdateAutoScroll()
+    if self.db.profile.debugLog.scrollToBottom then
+        self:DebugLogScrollToBottom()
+    end
+end
+
+function SwiftdawnRaidTools:DebugLogToggleAutoScroll()
+    self.db.profile.debugLog.scrollToBottom = not self.db.profile.debugLog.scrollToBottom
+    self:DebugLogUpdateAutoScroll()
 end
 
 local function createPopupListItem(popupFrame, text, onClick)
@@ -280,7 +343,7 @@ local function createPopupListItem(popupFrame, text, onClick)
     item.highlight:Hide()
 
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    item.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType(), SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize)
+    item.text:SetFont(getLogFontType(), SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontSize)
     item.text:SetTextColor(1, 1, 1)
     item.text:SetPoint("BOTTOMLEFT", 15, 5)
     item.text:SetText(text)
@@ -323,9 +386,14 @@ function SwiftdawnRaidTools:DebugLogUpdatePopup()
     local index = 1
 
     local lockFunc = function() self:DebugLogToggleLock() end
-
     local lockedText = self.db.profile.debugLog.locked and "Unlock Debug Log" or "Lock Debug Log"
     self:DebugLogShowPopupListItem(index, lockedText, true, lockFunc, 0, false)
+
+    index = index + 1
+
+    local scrollFunc = function() self:DebugLogToggleAutoScroll() end
+    local scrollText = self.db.profile.debugLog.scrollToBottom and "Don't autoscroll" or "Scroll to bottom"
+    self:DebugLogShowPopupListItem(index, scrollText, true, scrollFunc, 0, false)
 
     index = index + 1
 

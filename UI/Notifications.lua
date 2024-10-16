@@ -40,7 +40,7 @@ function SwiftdawnRaidTools:NotificationsInit()
     content:SetBackdrop({
         bgFile = "Interface\\Cooldown\\LoC-ShadowBG"
     })
-    content:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.notificationsBackgroundOpacity)
+    content:SetBackdropColor(0, 0, 0, self.db.profile.notifications.appearance.backgroundOpacity)
     content.bossAbilityText = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     content.bossAbilityText:SetTextColor(1, 1, 1, 1)
     content.bossAbilityText:SetPoint("LEFT", 30, -1)
@@ -95,9 +95,9 @@ function SwiftdawnRaidTools:NotificationsUpdateAppearance()
     local iconSize = self:AppearanceGetNotificationsPlayerIconSize()
 
     self.notificationFrame:SetSize(250, self:AppearanceGetNotificationsHeaderHeight() + self:AppearanceGetNotificationsContentHeight())
-    self.notificationFrame:SetScale(self.db.profile.options.appearance.notificationsScale)
+    self.notificationFrame:SetScale(self.db.profile.notifications.appearance.scale)
 
-    self.notificationContentFrame:SetBackdropColor(0, 0, 0, self.db.profile.options.appearance.notificationsBackgroundOpacity)
+    self.notificationContentFrame:SetBackdropColor(0, 0, 0, self.db.profile.notifications.appearance.backgroundOpacity)
     self.notificationContentFrame.bossAbilityText:SetFont(self:AppearanceGetNotificationsBossAbilityFontType(), headerFontSize)
     self.notificationContentFrame.countdown:SetFont(self:AppearanceGetNotificationsCountdownFontType(), countdownFontSize)
 
@@ -302,7 +302,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
     local encounter = self:GetEncounters()[selectedEncounterId]
 
     if not self.TEST then
-        if self.db.profile.options.notifications.showOnlyOwnNotifications then
+        if self.db.profile.notifications.showOnlyOwnNotifications then
             local part = self:GetRaidAssignmentPart(uuid)
 
             if part and not self:IsPlayerInActiveGroup(part) then
@@ -332,7 +332,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
                 self.notificationFrameFadeOut:Stop()
                 self.notificationContentFrame:Show()
             
-                if not self.db.profile.options.notifications.mute then
+                if not self.db.profile.notifications.mute then
                     PlaySoundFile(SONAR_SOUND_FILE, "Master")
                 end
 
