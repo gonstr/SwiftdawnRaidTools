@@ -253,6 +253,6 @@ end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsContentHeight()
     local assignmentHeight = SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight()
-    local padding = 18
+    local padding = 20
     return assignmentHeight + padding
 end

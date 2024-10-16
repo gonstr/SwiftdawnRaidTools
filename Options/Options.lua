@@ -533,6 +533,35 @@ local appearanceOptions = {
                 SwiftdawnRaidTools:NotificationsUpdateAppearance()
             end,
         },
+        reset = {
+            type = "execute",
+            name = "Reset",
+            desc = "Reset to default settings.",
+            func = function()
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewScale = 1.0
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize = 10
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize = 10
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize = 10
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity = 0.8
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity = 0.4
+                SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize = 14
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize = 14
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize = 12
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontType = "Friz Quadrata TT"
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize = 12
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale = 1.2
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsBackgroundOpacity = 0.9
+                SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize = 16
+
+                SwiftdawnRaidTools:NotificationsUpdateAppearance()
+            end,
+            order = 100,
+        },
     },
 }
 
