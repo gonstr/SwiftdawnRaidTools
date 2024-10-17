@@ -714,18 +714,17 @@ local appearanceOptions = {
             name = "",
             width = "half",
             desc = "Debug Log anchor X position",
+            get = function(info) return tostring(SwiftdawnRaidTools.db.profile.debugLog.anchorX) end,
             set = function(info, value)
-                --local numberValue = tonumber(value)
-                --if numberValue then
-                print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
-                SwiftdawnRaidTools.db.profile.debugLog.anchorX = value
-                print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
-                --end
+                local numValue = tonumber(value)
+                if numValue then
+                    SwiftdawnRaidTools.db.profile.debugLog.anchorX = numValue
+                    SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                else
+                    print("Please enter a valid number for X position.")
+                end
             end,
-            get = function(info)
-                return SwiftdawnRaidTools.db.profile.debugLog.anchorX
-            end,
+            pattern = "^-?%d+$",  -- Allows negative and positive integers
             order = 114
         },
         debugLogPositionYDescription = {
@@ -739,18 +738,17 @@ local appearanceOptions = {
             name = "",
             width = "half",
             desc = "Debug Log anchor Y position",
+            get = function(info) return tostring(SwiftdawnRaidTools.db.profile.debugLog.anchorY) end,
             set = function(info, value)
-                --local numberValue = tonumber(value)
-                --if numberValue then
-                print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
-                SwiftdawnRaidTools.db.profile.debugLog.anchorY = value
-                print("X: "..SwiftdawnRaidTools.db.profile.debugLog.anchorX.."    Y: "..SwiftdawnRaidTools.db.profile.debugLog.anchorY)
-                SwiftdawnRaidTools:DebugLogUpdateAppearance()
-                --end
+                local numValue = tonumber(value)
+                if numValue then
+                    SwiftdawnRaidTools.db.profile.debugLog.anchorY = numValue
+                    SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                else
+                    print("Please enter a valid number for Y position.")
+                end
             end,
-            get = function(info)
-                return SwiftdawnRaidTools.db.profile.debugLog.anchorY
-            end,
+            pattern = "^-?%d+$",  -- Allows negative and positive integers
             order = 116
         },
         debugLogScaleDescription = {

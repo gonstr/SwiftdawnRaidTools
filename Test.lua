@@ -55,54 +55,54 @@ function SwiftdawnRaidTools:TestModeStart()
     self:UnitsResetDeadCache()
     self:OverviewUpdate()
 
-    self:OverviewSelectEncounter(1027)
-    self:RaidAssignmentsStartEncounter(1027)
+    self:OverviewSelectEncounter(42001)
+    self:RaidAssignmentsStartEncounter(42001)
+
+    -- Phase 1
 
     insert(timers, C_Timer.NewTimer(2, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_AURA_APPLIED", "Boss", nil, nil, 81572)
+    end))
+
+    insert(timers, C_Timer.NewTimer(3, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Aeolyne", nil, nil, 740)
+    end))
+
+    insert(timers, C_Timer.NewTimer(3.5, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Kondec", nil, nil, 62618)
     end))
 
     insert(timers, C_Timer.NewTimer(4, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ant", nil, nil, 31821)
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Aeolyne", nil, nil, 740)
     end))
 
-    insert(timers, C_Timer.NewTimer(15, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+    insert(timers, C_Timer.NewTimer(4.5, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Kondec", nil, nil, 62618)
     end))
 
-    insert(timers, C_Timer.NewTimer(17, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Condoc", nil, nil, 62618)
+    -- Phase 2
+
+    insert(timers, C_Timer.NewTimer(12, function()
+        SwiftdawnRaidTools:RAID_BOSS_EMOTE(nil, "I will breathe fire on you!")
     end))
 
-    insert(timers, C_Timer.NewTimer(17, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Mirven", nil, nil, 98008)
+    insert(timers, C_Timer.NewTimer(14.5, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Anticipâte", nil, nil, 31821)
     end))
 
-    insert(timers, C_Timer.NewTimer(25, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+    insert(timers, C_Timer.NewTimer(15.5, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Anticipâte", nil, nil, 31821)
     end))
 
-    insert(timers, C_Timer.NewTimer(28, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Elli", nil, nil, 31821)
+    -- Phase 3
+
+    insert(timers, C_Timer.NewTimer(20, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Boss", nil, nil, 88853)
     end))
 
-    insert(timers, C_Timer.NewTimer(33, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
-    end))
+    -- End of Test
 
-    insert(timers, C_Timer.NewTimer(35, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Claytox", nil, nil, 77764)
-    end))
-
-    insert(timers, C_Timer.NewTimer(46, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
-    end))
-
-    insert(timers, C_Timer.NewTimer(47, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Treebush", nil, nil, 77764)
-    end))
-
-    insert(timers, C_Timer.NewTimer(60, function()
+    insert(timers, C_Timer.NewTimer(27, function()
         SwiftdawnRaidTools:TestModeEnd()
     end))
 end
@@ -123,86 +123,195 @@ end
 function SwiftdawnRaidTools:GetEncounters()
     if self.TEST then
         return {
-            [1027] = {
+            [42001] = {
                 {
-                    uuid = "1",
-                    type = "RAID_ASSIGNMENTS",
-                    version = 1,
-                    encounter = 1027,
-                    metadata = {
-                        name = "Incineration"
+                    ["assignments"] = {
+                        {
+                            {
+                                ["spell_id"] = 740,
+                                ["type"] = "SPELL",
+                                ["player"] = "Aeolyne",
+                            }, -- [1]
+                            {
+                                ["spell_id"] = 62618,
+                                ["type"] = "SPELL",
+                                ["player"] = "Kondec",
+                            }, -- [2]
+                        }, -- [1]
                     },
-                    triggers = {
+                    ["type"] = "RAID_ASSIGNMENTS",
+                    ["version"] = 1,
+                    ["encounter"] = 42001,
+                    ["triggers"] = {
                         {
-                            type = "SPELL_CAST",
-                            spell_id = 79023
-                        }
+                            ["spell_id"] = 81572,
+                            ["type"] = "SPELL_AURA",
+                        }, -- [1]
                     },
-                    assignments = {
-                        {
-                            {
-                                type = "SPELL",
-                                player = "Ant",
-                                spell_id = 31821
-                            },
-                            {
-                                type = "SPELL",
-                                player = "Eline",
-                                spell_id = 740
-                            }
-                        },
-                        {
-                            {
-                                type = "SPELL",
-                                player = "Mirven",
-                                spell_id = 98008
-                            },
-                            {
-                                type = "SPELL",
-                                player = "Condoc",
-                                spell_id = 62618
-                            }
-                        },
-                        {
-                            {
-                                type = "SPELL",
-                                player = "Elli",
-                                spell_id = 31821
-                            }
-                        }
-                    }
-                },
+                    ["uuid"] = "437efe45-3fe2-4dd2-85a9-0e0b51689f69",
+                    ["metadata"] = {
+                        ["name"] = "Spell Aura Trigger Test",
+                    },
+                }, -- [1]  Spell Aura Phase
                 {
-                    uuid = "2",
-                    type = "RAID_ASSIGNMENTS",
-                    version = 1,
-                    encounter = 1027,
-                    metadata = {
-                        name = "Grip of Death"
-                    },
-                    triggers = {
-                        {
-                            type = "SPELL_CAST",
-                            spell_id = 91849
-                        }
-                    },
-                    assignments = {
+                    ["assignments"] = {
                         {
                             {
-                                type = "SPELL",
-                                player = "Claytox",
-                                spell_id = 77764
-                            }
-                        },
+                                ["spell_id"] = 31821,
+                                ["type"] = "SPELL",
+                                ["player"] = "Anticipâte",
+                            }, -- [1]
+                        }, -- [1]
+                    },
+                    ["type"] = "RAID_ASSIGNMENTS",
+                    ["version"] = 1,
+                    ["untriggers"] = {
+                        {
+                            ["type"] = "RAID_BOSS_EMOTE",
+                            ["text"] = "I will spill water on you!",
+                        }, -- [1]
+                    },
+                    ["encounter"] = 42001,
+                    ["triggers"] = {
+                        {
+                            ["countdown"] = 3,
+                            ["type"] = "RAID_BOSS_EMOTE",
+                            ["delay"] = 1,
+                            ["text"] = "I will breathe fire on you!",
+                        }, -- [1]
+                    },
+                    ["uuid"] = "5450a7eb-cb42-4719-ba6d-e8a7ecca8f98",
+                    ["metadata"] = {
+                        ["name"] = "Raid Boss Emote Test",
+                    },
+                }, -- [2]  Raid Boss Emote Phase
+                {
+                    ["assignments"] = {
                         {
                             {
-                                type = "SPELL",
-                                player = "Treebush",
-                                spell_id = 77764
-                            }
-                        }
-                    }
-                }
+                                ["spell_id"] = 740,
+                                ["type"] = "SPELL",
+                                ["player"] = "Clutex",
+                            }, -- [1]
+                            {
+                                ["spell_id"] = 31821,
+                                ["type"] = "SPELL",
+                                ["player"] = "Elí",
+                            }, -- [2]
+                        }, -- [1]
+                        {
+                            {
+                                ["spell_id"] = 64843,
+                                ["type"] = "SPELL",
+                                ["player"] = "Managobrr",
+                            }, -- [1]
+                            {
+                                ["spell_id"] = 31821,
+                                ["type"] = "SPELL",
+                                ["player"] = "Anticipâte",
+                            }, -- [2]
+                        }, -- [2]
+                    },
+                    ["type"] = "RAID_ASSIGNMENTS",
+                    ["version"] = 1,
+                    ["encounter"] = 1023,
+                    ["triggers"] = {
+                        {
+                            ["spell_id"] = 88853,
+                            ["type"] = "SPELL_CAST",
+                        }, -- [1]
+                    },
+                    ["uuid"] = "e8b42653-abbe-418d-b675-6d323d8d78c8",
+                    ["metadata"] = {
+                        ["name"] = "Spell Cast Test",
+                    },
+                }, -- [3]  Spell Cast Phase
+                --{
+                --    ["assignments"] = {
+                --        {
+                --            {
+                --                ["spell_id"] = 64843,
+                --                ["type"] = "SPELL",
+                --                ["player"] = "Kondec",
+                --            }, -- [1]
+                --            {
+                --                ["spell_id"] = 98008,
+                --                ["type"] = "SPELL",
+                --                ["player"] = "Venmir",
+                --            }, -- [2]
+                --        }, -- [1]
+                --        {
+                --            {
+                --                ["spell_id"] = 740,
+                --                ["type"] = "SPELL",
+                --                ["player"] = "Aeolyne",
+                --            }, -- [1]
+                --            {
+                --                ["spell_id"] = 740,
+                --                ["type"] = "SPELL",
+                --                ["player"] = "Crawlern",
+                --            }, -- [2]
+                --        }, -- [2]
+                --    },
+                --    ["type"] = "RAID_ASSIGNMENTS",
+                --    ["version"] = 1,
+                --    ["encounter"] = 1023,
+                --    ["triggers"] = {
+                --        {
+                --            ["spell_id"] = 82848,
+                --            ["type"] = "SPELL_CAST",
+                --            ["conditions"] = {
+                --                {
+                --                    ["pct_lt"] = 25,
+                --                    ["type"] = "UNIT_HEALTH",
+                --                    ["unit"] = "boss1",
+                --                }, -- [1]
+                --            },
+                --        }, -- [1]
+                --    },
+                --    ["uuid"] = "765b0f4c-141a-4286-b97f-24390a8001c5",
+                --    ["metadata"] = {
+                --        ["name"] = "Conditional Spell Cast Test",
+                --    },
+                --}, -- [4]  Conditional Spell Cast Phase
+                --{
+                --    ["assignments"] = {
+                --        {
+                --            {
+                --                ["spell_id"] = 64843,
+                --                ["type"] = "SPELL",
+                --                ["player"] = "Kondec",
+                --            }, -- [1]
+                --        }, -- [1]
+                --        {
+                --            {
+                --                ["spell_id"] = 740,
+                --                ["type"] = "SPELL",
+                --                ["player"] = "Aeolyne",
+                --            }, -- [1]
+                --        }, -- [2]
+                --    },
+                --    ["type"] = "RAID_ASSIGNMENTS",
+                --    ["version"] = 1,
+                --    ["encounter"] = 42001,
+                --    ["triggers"] = {
+                --        {
+                --            ["pct_lt"] = 70,
+                --            ["type"] = "UNIT_HEALTH",
+                --            ["unit"] = "boss1",
+                --        }, -- [1]
+                --        {
+                --            ["pct_lt"] = 70,
+                --            ["type"] = "UNIT_HEALTH",
+                --            ["delay"] = 10,
+                --            ["unit"] = "boss1",
+                --        }, -- [2]
+                --    },
+                --    ["uuid"] = "b5aeb9ec-9f2a-4f03-b5bf-764ac5cec091",
+                --    ["metadata"] = {
+                --        ["name"] = "Unit Health Test",
+                --    },
+                --}, -- [5]  Unit Health Phase
             }
         }
     else

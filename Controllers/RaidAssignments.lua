@@ -407,7 +407,7 @@ local function cancelDelayTimers(uuid)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
+function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit, logItem)
     if not activeEncounter then
         return
     end
@@ -441,16 +441,20 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
 
                 if shouldTrigger then
                     trigger.triggered = true
-
-                    self:RaidAssignmentsTrigger(trigger, {
+                    local context = {
                         unit_name = UnitName(unit),
                         health = health,
                         health_pct = pct
-                    })
+                    }
+                    self:RaidAssignmentsTrigger(trigger, context)
+                    logItem:SetEffect(trigger, context)
+                    self:DebugLogAddLine(logItem)
                 end
             end
         end
     end
+
+    -- TODO: Should probably log something about this as well
 
     local untriggers = unitHealthUntriggersCache[unit]
 
@@ -485,7 +489,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourceName, destName)
+function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourceName, destName, logItem)
     if not activeEncounter then
         return
     end
@@ -504,7 +508,10 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourc
         -- We don't want to handle a spellcast twice so we only look for start events or success events for instant cast spells
         if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not castTime or castTime == 0)) then
             for _, trigger in ipairs(triggers) do
-                self:RaidAssignmentsTrigger(trigger, ctx, castTime / 1000)
+                local countdown = castTime / 1000
+                self:RaidAssignmentsTrigger(trigger, ctx, countdown)
+                logItem:SetEffect(trigger, ctx, countdown)
+                self:DebugLogAddLine(logItem)
             end
         end
     end
@@ -522,7 +529,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourc
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceName, destName)
+function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceName, destName, logItem)
     if not activeEncounter then
         return
     end
@@ -540,6 +547,8 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceNam
     if triggers then
         for _, trigger in ipairs(triggers) do
             self:RaidAssignmentsTrigger(trigger, ctx)
+            logItem:SetEffect(trigger, ctx)
+            self:DebugLogAddLine(logItem)
         end
     end
 
@@ -552,7 +561,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceNam
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
+function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text, logItem)
     if not activeEncounter then
         return
     end
@@ -564,6 +573,8 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
             if text:match(trigger.text) ~= nil then
                 if self.DEBUG then self:Print("Found raid boss emote TRIGGER match") end
                 self:RaidAssignmentsTrigger(trigger)
+                logItem:SetEffect(trigger)
+                self:DebugLogAddLine(logItem)
             end
         end
     end
@@ -587,7 +598,7 @@ local function cancelFojjiNumenTimer(key)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleFojjiNumenTimer(key, countdown)
+function SwiftdawnRaidTools:RaidAssignmentsHandleFojjiNumenTimer(key, countdown, logItem)
     if not activeEncounter or not countdown then
         return
     end
@@ -598,11 +609,15 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleFojjiNumenTimer(key, countdown)
         for _, trigger in ipairs(triggers) do
             if countdown <= 5 then
                 self:RaidAssignmentsTrigger(trigger, nil, countdown)
+                logItem:SetEffect(trigger, nil, countdown)
+                self:DebugLogAddLine(logItem)
             else
                 cancelFojjiNumenTimer(key)
 
                 fojjiNumenTimers[key] = C_Timer.NewTimer(countdown - 5, function()
                     self:RaidAssignmentsTrigger(trigger, nil, 5)
+                    logItem:SetEffect(trigger, nil, 5)
+                    self:DebugLogAddLine(logItem)
                 end)
             end
         end
