@@ -106,7 +106,7 @@ function SwiftdawnRaidTools:TestModeStart()
 
     -- End of Test
 
-    insert(timers, C_Timer.NewTimer(27, function()
+    insert(timers, C_Timer.NewTimer(35, function()
         SwiftdawnRaidTools:TestModeEnd()
     end))
 end
