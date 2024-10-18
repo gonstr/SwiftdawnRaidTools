@@ -26,7 +26,7 @@ SwiftdawnRaidTools.defaults = {
             showOnlyOwnNotifications = false,
             mute = false,
             anchorX = 0,
-            anchorY = 0,
+            anchorY = 200,
             appearance = {
                 scale = 1.2,
                 headerFontType = "Friz Quadrata TT",
@@ -40,8 +40,8 @@ SwiftdawnRaidTools.defaults = {
             }
         },
         overview = {
-            anchorX = 0,
-            anchorY = 0,
+            anchorX = -800,
+            anchorY = 200,
             selectedEncounterId = nil,
             locked = false,
             show = true,
@@ -59,7 +59,7 @@ SwiftdawnRaidTools.defaults = {
             }
         },
         debugLog = {
-            anchorX = 0,
+            anchorX = -800,
             anchorY = 0,
             locked = false,
             show = false,

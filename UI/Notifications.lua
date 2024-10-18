@@ -7,13 +7,26 @@ local SONAR_SOUND_FILE = "Interface\\AddOns\\SwiftdawnRaidTools\\Media\\PowerAur
 function SwiftdawnRaidTools:NotificationsInit()
     -- The base frame that dictates the size of the notification
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsNotification", UIParent, "BackdropTemplate")
-    container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+    container:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.notifications.anchorX, self.db.profile.notifications.anchorY)
+    container:SetSize(250, self:AppearanceGetNotificationsHeaderHeight() + self:AppearanceGetNotificationsContentHeight())
     container:SetMovable(true)
     container:SetUserPlaced(true)
     container:SetClampedToScreen(true)
     container:RegisterForDrag("LeftButton")
-    container:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+    container:SetScript("OnDragStart", function(self)
+        self:StartMoving()
+        self:SetScript("OnUpdate", function()  -- Continuously update the frame size
+            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
+            SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(string.format("%.2f", x))
+            SwiftdawnRaidTools.db.profile.notifications.anchorY = tonumber(string.format("%.2f", y))
+            LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
+            SwiftdawnRaidTools:NotificationsUpdateAppearance()
+        end)
+    end)
+    container:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        self:SetScript("OnUpdate", nil)
+    end)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
@@ -24,19 +37,13 @@ function SwiftdawnRaidTools:NotificationsInit()
     -- The unlocked frame anchor; only visible if anchors are unlocked
     container.frameLockText = container:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     container.frameLockText:SetTextColor(1, 1, 1, 0.4)
-    container.frameLockText:SetPoint("TOPLEFT", container, "TOPLEFT", 0, 0)
-    container.frameLockText:SetPoint("TOPRIGHT", container, "TOPRIGHT", 0, 0)
-    container.frameLockText:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", 0, 0)
-    container.frameLockText:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", 0, 0)
+    container.frameLockText:SetAllPoints()
     container.frameLockText:SetText("SRT Notifications Anchor")
     container.frameLockText:Hide()
 
     -- The notification itself
     local content = CreateFrame("Frame", "SwiftdawnRaidToolsNotificationContent", container, "BackdropTemplate")
-    content:SetPoint("TOPLEFT", container, "TOPLEFT", 0, 0)
-    content:SetPoint("TOPRIGHT", container, "TOPRIGHT", 0, 0)
-    content:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", 0, 0)
-    content:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", 0, 0)
+    content:SetAllPoints()
     content:SetBackdrop({
         bgFile = "Interface\\Cooldown\\LoC-ShadowBG"
     })
@@ -89,6 +96,9 @@ function SwiftdawnRaidTools:NotificationsInit()
 end
 
 function SwiftdawnRaidTools:NotificationsUpdateAppearance()
+    self.notificationFrame:ClearAllPoints()
+    self.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.notifications.anchorX, self.db.profile.notifications.anchorY)
+
     local headerFontSize = self:AppearanceGetNotificationsBossAbilityFontSize()
     local countdownFontSize = self:AppearanceGetNotificationsCountdownFontSize()
     local playerFontSize = self:AppearanceGetNotificationsPlayerFontSize()

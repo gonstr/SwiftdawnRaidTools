@@ -100,6 +100,10 @@ function SwiftdawnRaidTools:TestModeStart()
         SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Boss", nil, nil, 88853)
     end))
 
+    insert(timers, C_Timer.NewTimer(25, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Boss", nil, nil, 88853)
+    end))
+
     -- End of Test
 
     insert(timers, C_Timer.NewTimer(27, function()

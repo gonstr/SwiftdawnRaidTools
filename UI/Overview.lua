@@ -1,11 +1,12 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 
-local MIN_HEIGHT = 200
+local MIN_HEIGHT = 100
+local MIN_WIDTH = 100
 
 function SwiftdawnRaidTools:OverviewInit()
     local overviewTitleFontSize = self.db.profile.overview.appearance.titleFontSize
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsOverview", UIParent, "BackdropTemplate")
-    container:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    container:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.overview.anchorX, self.db.profile.overview.anchorY)
     container:SetSize(200, MIN_HEIGHT)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -18,10 +19,23 @@ function SwiftdawnRaidTools:OverviewInit()
     container:SetUserPlaced(true)
     container:SetClampedToScreen(true)
     container:RegisterForDrag("LeftButton")
-    container:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    container:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+    container:SetScript("OnDragStart", function(self)
+        self:StartMoving()
+        self:SetScript("OnUpdate", function()  -- Continuously update the frame size
+            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
+            SwiftdawnRaidTools.db.profile.overview.anchorX = tonumber(string.format("%.2f", x))
+            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", y))
+            LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
+            SwiftdawnRaidTools:OverviewUpdateAppearance()
+        end)
+    end)
+    container:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        self:SetScript("OnUpdate", nil)
+    end)
     container:SetScale(self.db.profile.overview.appearance.scale)
     container:SetClipsChildren(true)
+    container:SetResizable(true)
 
     local popup = CreateFrame("Frame", "SwiftdawnRaidToolsOverviewPopup", UIParent, "BackdropTemplate")
     popup:SetClampedToScreen(true)
@@ -63,7 +77,9 @@ function SwiftdawnRaidTools:OverviewInit()
     local header = CreateFrame("Frame", "SwiftdawnRaidToolsOverviewHeader", container, "BackdropTemplate")
     header:SetPoint("TOPLEFT", 0, 0)
     header:SetPoint("TOPRIGHT", 0, 0)
+    header:SetMovable(true)
     header:EnableMouse(true)
+    header:RegisterForDrag("LeftButton")
     header:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         tile = true,
@@ -71,18 +87,25 @@ function SwiftdawnRaidTools:OverviewInit()
     })
     header:SetBackdropColor(0, 0, 0, self.db.profile.overview.appearance.titleBarOpacity)
     header:SetScript("OnMouseDown", function(self, button)
-        if button == "LeftButton" and container:IsMouseEnabled() then
-            self:GetParent():StartMoving()
-        elseif button == "RightButton" then
+        if button == "RightButton" then
             showPopup()
         end
     end)
-
-    header:SetScript("OnMouseUp", function(self, button)
-        if button == "LeftButton" then
-            self:GetParent():StopMovingOrSizing()
-        end
+    header:SetScript("OnDragStart", function(self)
+        container:StartMoving()
+        container:SetScript("OnUpdate", function()  -- Continuously update the frame size
+            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
+            SwiftdawnRaidTools.db.profile.overview.anchorX = tonumber(string.format("%.2f", x))
+            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", y))
+            LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
+            SwiftdawnRaidTools:OverviewUpdateAppearance()
+        end)
     end)
+    header:SetScript("OnDragStop", function(self)
+        container:StopMovingOrSizing()
+        container:SetScript("OnUpdate", nil)
+    end)
+
     header:SetScript("OnEnter", function()
         SwiftdawnRaidTools.overviewHeader:SetBackdropColor(0, 0, 0, 1)
         SwiftdawnRaidTools.overviewHeaderButton:SetAlpha(1)
@@ -124,6 +147,43 @@ function SwiftdawnRaidTools:OverviewInit()
     local main = CreateFrame("Frame", "SwiftdawnRaidToolsOverviewMain", container, "BackdropTemplate")
     main:SetPoint("BOTTOMLEFT", 0, 0)
     main:SetPoint("BOTTOMRIGHT", 0, 0)
+
+    -- Create a button in the bottom-right corner (resize handle)
+    local resizeButton = CreateFrame("Button", nil, container)
+    resizeButton:SetSize(12, 12)
+    resizeButton:SetPoint("BOTTOMRIGHT")
+    local resizeTexture = resizeButton:CreateTexture(nil, "BACKGROUND")
+    resizeTexture:SetAllPoints(resizeButton)
+    resizeTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up") -- Use a default WoW texture for resize
+    resizeButton:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    resizeButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    resizeButton:SetAlpha(0)
+    resizeButton:SetScript("OnMouseDown", function(self, button)
+        if button == "LeftButton" then
+            container:StartSizing("BOTTOMRIGHT")  -- Start resizing from bottom-right corner
+            container:SetScript("OnUpdate", function()  -- Continuously update the frame size
+                SwiftdawnRaidTools:OverviewUpdateAppearance()
+            end)
+
+        end
+    end)
+    resizeButton:SetScript("OnEnter", function()
+        resizeButton:SetAlpha(1)
+    end)
+    resizeButton:SetScript("OnLeave", function()
+        resizeButton:SetAlpha(0)
+    end)
+    resizeButton:SetScript("OnMouseUp", function(self, button)
+        if button == "LeftButton" then
+            container:StopMovingOrSizing()  -- Stop the resizing action
+            container:SetScript("OnUpdate", nil)  -- Stop updating frame size
+        end
+    end)
+    container:SetScript("OnSizeChanged", function(self, width, height)
+        if width < MIN_WIDTH then width = MIN_WIDTH end
+        if height < MIN_HEIGHT then height = MIN_HEIGHT end
+        container:SetSize(width, height)
+    end)
 
     self.overviewFrame = container
     self.overviewPopup = popup
@@ -256,7 +316,17 @@ function SwiftdawnRaidTools:OverviewUpdate()
 end
 
 function SwiftdawnRaidTools:OverviewUpdateLocked()
-    self.overviewFrame:EnableMouse(not self.db.profile.overview.locked)
+    if self.db.profile.overview.locked then
+        self.overviewFrame:EnableMouse(false)
+        self.overviewHeader:EnableMouse(false)
+        self.overviewResizeButton:EnableMouse(false)
+        self.overviewResizeButton:Hide()
+    else
+        self.overviewFrame:EnableMouse(true)
+        self.overviewHeader:EnableMouse(true)
+        self.overviewResizeButton:EnableMouse(true)
+        self.overviewResizeButton:Show()
+    end
 end
 
 function SwiftdawnRaidTools:OverviewUpdateHeaderText()

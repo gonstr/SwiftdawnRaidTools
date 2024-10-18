@@ -267,3 +267,17 @@ function SwiftdawnRaidTools:GetTimestamp()
     -- Format the time string
     return string.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds)
 end
+
+function SwiftdawnRaidTools:GetFrameRelativeCenter(frame)
+    -- Get the frame's center
+    local frameX, frameY = frame:GetCenter()
+
+    -- Get the screen's (UIParent's) center
+    local screenX, screenY = UIParent:GetCenter()
+
+    -- Calculate relative position to screen center
+    local relativeX = frameX - screenX
+    local relativeY = frameY - screenY
+
+    return relativeX, relativeY
+end

@@ -13,26 +13,11 @@ local function getLogFontType()
     return SharedMedia:Fetch("font", SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType)
 end
 
-local function GetFrameCenter(frame)
-    local left = frame:GetLeft()
-    local right = frame:GetRight()
-    local top = frame:GetTop()
-    local bottom = frame:GetBottom()
-
-    if left and right and top and bottom then
-        local centerX = (left + right) / 2
-        local centerY = (top + bottom) / 2
-        return centerX, centerY
-    else
-        return nil, nil  -- Return nil if the frame is not shown or has no position
-    end
-end
-
 function SwiftdawnRaidTools:DebugLogInit()
     local titleFontSize = self.db.profile.debugLog.appearance.titleFontSize
     local logFontSize = self.db.profile.debugLog.appearance.logFontSize
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsDebugLog", UIParent, "BackdropTemplate")
-    container:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
+    container:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
     container:SetSize(400, MIN_HEIGHT)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -48,8 +33,9 @@ function SwiftdawnRaidTools:DebugLogInit()
     container:SetScript("OnDragStart", function(self)
         self:StartMoving()
         self:SetScript("OnUpdate", function()  -- Continuously update the frame size
-            SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
-            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", self:GetTop()))
+            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
+            SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", x))
+            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", y))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:DebugLogUpdateAppearance()
         end)
@@ -87,15 +73,11 @@ function SwiftdawnRaidTools:DebugLogInit()
         if InCombatLockdown() or SwiftdawnRaidTools:RaidAssignmentsInEncounter() then
             return
         end
-
         SwiftdawnRaidTools:DebugLogUpdatePopup()
-
         local scale = UIParent:GetEffectiveScale()
         local x, y = GetCursorPosition()
         x, y = x / scale, y / scale
-
         popup:SetPoint("TOPRIGHT", UIParent, "BOTTOMLEFT", x, y)
-
         popup:Show()
     end
 
@@ -119,8 +101,9 @@ function SwiftdawnRaidTools:DebugLogInit()
     header:SetScript("OnDragStart", function(self)
         container:StartMoving()
         container:SetScript("OnUpdate", function()  -- Continuously update the frame size
-            SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
-            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", self:GetTop()))
+            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
+            SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", x))
+            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", y))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:DebugLogUpdateAppearance()
         end)
@@ -130,11 +113,6 @@ function SwiftdawnRaidTools:DebugLogInit()
         container:SetScript("OnUpdate", nil)
     end)
 
-    --header:SetScript("OnMouseUp", function(self, button)
-    --    if button == "LeftButton" then
-    --        self:GetParent():StopMovingOrSizing()
-    --    end
-    --end)
     header:SetScript("OnEnter", function()
         SwiftdawnRaidTools.debugLogHeader:SetBackdropColor(0, 0, 0, 1)
         SwiftdawnRaidTools.debugLogHeaderButton:SetAlpha(1)
@@ -198,21 +176,15 @@ function SwiftdawnRaidTools:DebugLogInit()
     scrollFrame:SetScrollChild(contentFrame)
 
     -- Create a button in the bottom-right corner (resize handle)
-    local resizeButton = CreateFrame("Button", "MyResizeButton", container)
+    local resizeButton = CreateFrame("Button", nil, container)
     resizeButton:SetSize(12, 12)
     resizeButton:SetPoint("BOTTOMRIGHT")
-
-    -- Add texture to the button (to visualize it)
     local resizeTexture = resizeButton:CreateTexture(nil, "BACKGROUND")
     resizeTexture:SetAllPoints(resizeButton)
     resizeTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up") -- Use a default WoW texture for resize
-
-    -- Change the texture on button press/release (optional, for feedback)
     resizeButton:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
     resizeButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
     resizeButton:SetAlpha(0)
-
-    -- Start resizing when the button is clicked
     resizeButton:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" then
             container:StartSizing("BOTTOMRIGHT")  -- Start resizing from bottom-right corner
@@ -228,8 +200,6 @@ function SwiftdawnRaidTools:DebugLogInit()
     resizeButton:SetScript("OnLeave", function()
         resizeButton:SetAlpha(0)
     end)
-
-    -- Stop resizing when the button is released
     resizeButton:SetScript("OnMouseUp", function(self, button)
         if button == "LeftButton" then
             container:StopMovingOrSizing()  -- Stop the resizing action
@@ -237,11 +207,8 @@ function SwiftdawnRaidTools:DebugLogInit()
         end
     end)
     container:SetScript("OnSizeChanged", function(self, width, height)
-        -- Enforce minimum width and height
         if width < MIN_WIDTH then width = MIN_WIDTH end
         if height < MIN_HEIGHT then height = MIN_HEIGHT end
-
-        -- Apply the minimum width/height
         container:SetSize(width, height)
     end)
 
@@ -329,7 +296,7 @@ end
 
 function SwiftdawnRaidTools:DebugLogUpdateAppearance()
     self.debugLogFrame:ClearAllPoints()
-    self.debugLogFrame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
+    self.debugLogFrame:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
     local titleFontSize = self.db.profile.debugLog.appearance.titleFontSize
     local logFontSize = self.db.profile.debugLog.appearance.logFontSize
 
@@ -374,7 +341,17 @@ function SwiftdawnRaidTools:DebugLogUpdate()
 end
 
 function SwiftdawnRaidTools:DebugLogUpdateLocked()
-    self.debugLogFrame:EnableMouse(not self.db.profile.debugLog.locked)
+    if self.db.profile.debugLog.locked then
+        self.debugLogFrame:EnableMouse(false)
+        self.debugLogHeader:EnableMouse(false)
+        self.debugLogResizeButton:EnableMouse(false)
+        self.debugLogResizeButton:Hide()
+    else
+        self.debugLogFrame:EnableMouse(true)
+        self.debugLogHeader:EnableMouse(true)
+        self.debugLogResizeButton:EnableMouse(true)
+        self.debugLogResizeButton:Show()
+    end
 end
 
 function SwiftdawnRaidTools:DebugLogToggleLock()
