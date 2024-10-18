@@ -194,6 +194,7 @@ function SwiftdawnRaidTools:OverviewInit()
     self.overviewMain = main
     self.overviewBossAbilities = {}
     self.overviewAssignmentGroups = {}
+    self.overviewResizeButton = resizeButton
 
     self:OverviewUpdateAppearance()
 end
