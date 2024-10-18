@@ -75,7 +75,6 @@ function SwiftdawnRaidTools:OnEnable()
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:RegisterEvent("UNIT_HEALTH")
     self:RegisterEvent("GROUP_ROSTER_UPDATE")
-    self:RegisterEvent("RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
     self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE")
@@ -93,7 +92,6 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:UnregisterEvent("UNIT_HEALTH")
     self:UnregisterEvent("GROUP_ROSTER_UPDATE")
-    self:UnregisterEvent("RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
     self:UnregisterEvent("CHAT_MSG_MONSTER_EMOTE")
@@ -247,10 +245,6 @@ end
 function SwiftdawnRaidTools:COMBAT_LOG_EVENT_UNFILTERED()
     local _, subEvent, _, _, sourceName, _, _, destGUID, destName, _, _, spellId = CombatLogGetCurrentEventInfo()
     self:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
-end
-
-function SwiftdawnRaidTools:RAID_BOSS_EMOTE(_, text)
-    self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text)

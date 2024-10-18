@@ -18,13 +18,13 @@ function SwiftdawnRaidTools:InternalTestStart()
 
     self:ENCOUNTER_START(nil, 1082)
 
-    C_Timer.After(2, function()
-        SwiftdawnRaidTools:RAID_BOSS_EMOTE(nil, "throws a |cff6699FFred|r vial into the cauldron!")
+    C_Timer.NewTimer(20, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Sinestra", nil, nil, 90125)
     end)
 
-    C_Timer.After(4, function()
-        SwiftdawnRaidTools:RAID_BOSS_EMOTE(nil, "throws a |cff5599FFdark|r magic into the cauldron!")
-    end)
+    -- C_Timer.NewTimer(40, function()
+    --     SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Sinestra", nil, nil, 90125)
+    -- end)
 end
 
 function SwiftdawnRaidTools:InternalTestEnd()
