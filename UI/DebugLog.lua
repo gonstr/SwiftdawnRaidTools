@@ -9,10 +9,6 @@ local function getTitleFontType()
     return SharedMedia:Fetch("font", SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontType)
 end
 
-local function getLogFontType()
-    return SharedMedia:Fetch("font", SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType)
-end
-
 function SwiftdawnRaidTools:DebugLogInit()
     local titleFontSize = self.db.profile.debugLog.appearance.titleFontSize
     local logFontSize = self.db.profile.debugLog.appearance.logFontSize
@@ -226,7 +222,7 @@ function SwiftdawnRaidTools:DebugLogInit()
     self.debugLogScrollContentFrame = contentFrame
     self.debugLogResizeButton = resizeButton
 
-    self.debugLogLines = {}
+    self.debugLogItems = {}
 
     self:DebugLogUpdateAppearance()
 end
@@ -234,61 +230,28 @@ end
 function SwiftdawnRaidTools:DebugLogScrollToBottom()
     local logFontSize = self.db.profile.debugLog.appearance.logFontSize
     local scrollBar = _G[self.debugLogScrollFrame:GetName() .. "ScrollBar"]
-    scrollBar:SetValue(15 + #self.debugLogLines * (logFontSize + 3))
+    scrollBar:SetValue(15 + #self.debugLogItems * (logFontSize + 3))
 end
 
-function SwiftdawnRaidTools:DebugLogItemCreate(cause, ...)
-    return {
-        cause = {
-            trigger = cause,
-            args = ...
-        }
-    }
-end
-
-function SwiftdawnRaidTools:DebugLogAddLine(logItem)
-    local logFontSize = self.db.profile.debugLog.appearance.logFontSize
-    local line = {}
-    line.timestamp = self.debugLogScrollContentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    line.timestamp:SetFont(getLogFontType(), logFontSize)
-    line.timestamp:SetShadowOffset(1, -1)
-    line.timestamp:SetShadowColor(0, 0, 0, 1)
-    line.timestamp:SetJustifyH("LEFT")
-    line.timestamp:SetWordWrap(false)
-    line.timestamp:SetText(self:GetTimestamp() .. ": ")
-    line.timestamp:SetTextColor(1, 1, 1)
-    line.timestamp:SetWidth(line.timestamp:GetStringWidth())
-    line.text = self.debugLogScrollContentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    line.text:SetFont(getLogFontType(), logFontSize)
-    line.text:SetShadowOffset(1, -1)
-    line.text:SetShadowColor(0, 0, 0, 1)
-    line.text:SetJustifyH("LEFT")
-    line.text:SetWordWrap(false)
-    line.text:SetText(logItem:GetString())
-    line.text:SetPoint("LEFT", line.timestamp, "RIGHT", 0, 0)
+function SwiftdawnRaidTools:DebugLogAddItem(logItem)
+    logItem:CreateFrame(self.debugLogScrollContentFrame, SwiftdawnRaidTools.db.profile)
     -- fix connection points for new and old lines
-    if #self.debugLogLines == 0 then
+    if #self.debugLogItems == 0 then
         -- no other lines, so connect to top
-        line.timestamp:SetPoint("TOPLEFT", self.debugLogScrollContentFrame, "TOPLEFT", 5, -3)
+        logItem.frame:SetPoint("TOPLEFT", self.debugLogScrollContentFrame, "TOPLEFT", 5, -3)
     else
-        if #self.debugLogLines > MAX_SCROLLBACK then
+        if #self.debugLogItems > MAX_SCROLLBACK then
             -- too many lines; remove first line in log
-            local removedLine = table.remove(self.debugLogLines, 1)
-            removedLine.timestamp:Hide()
-            removedLine.timestamp:ClearAllPoints()
-            removedLine.timestamp = nil
-            removedLine.text:Hide()
-            removedLine.text:ClearAllPoints()
-            removedLine.text = nil
-            removedLine = nil
+            local removedItem = table.remove(self.debugLogItems, 1)
+            removedItem:DeleteFrame()
             -- connect new first line to top
-            self.debugLogLines[1].timestamp:SetPoint("TOPLEFT", self.debugLogScrollContentFrame, "TOPLEFT", 5, -3)
+            self.debugLogItems[1].frame:SetPoint("TOPLEFT", self.debugLogScrollContentFrame, "TOPLEFT", 5, -3)
         end
         -- connect to last line in log
-        line.timestamp:SetPoint("TOPLEFT", self.debugLogLines[#self.debugLogLines].timestamp, "BOTTOMLEFT", 0, -3)
+        logItem.frame:SetPoint("TOPLEFT", self.debugLogItems[#self.debugLogItems].frame, "BOTTOMLEFT", 0, -3)
     end
     -- add line to the list
-    self.debugLogLines[#self.debugLogLines+1] = line
+    self.debugLogItems[#self.debugLogItems +1] = logItem
     if self.db.profile.debugLog.scrollToBottom then
         self:DebugLogScrollToBottom()
     end
@@ -308,12 +271,9 @@ function SwiftdawnRaidTools:DebugLogUpdateAppearance()
     local headerWidth = self.debugLogFrame:GetWidth()
     self.debugLogHeaderText:SetWidth(headerWidth - 10 - titleFontSize)
 
-    self.debugLogScrollContentFrame:SetHeight(15 + #self.debugLogLines * (logFontSize + 3))
-    for _, line in ipairs(self.debugLogLines) do
-        line.timestamp:SetFont(getLogFontType(), logFontSize)
-        line.text:SetFont(getLogFontType(), logFontSize)
-        line.timestamp:SetWidth(line.timestamp:GetStringWidth())
-        line.text:SetWidth(headerWidth - 5 - line.timestamp:GetStringWidth() - 2)
+    self.debugLogScrollContentFrame:SetHeight(15 + #self.debugLogItems * (logFontSize + 3))
+    for _, item in ipairs(self.debugLogItems) do
+        item:UpdateAppearance(SwiftdawnRaidTools.db.profile)
     end
     local scrollBar = _G[self.debugLogScrollFrame:GetName() .. "ScrollBar"]
     scrollBar.scrollStep = logFontSize * 2
@@ -394,7 +354,7 @@ local function createPopupListItem(popupFrame, text, onClick)
     item.highlight:Hide()
 
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    item.text:SetFont(getLogFontType(), SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontSize)
+    item.text:SetFont(SwiftdawnRaidTools:AppearancePopupFontType(), 10)
     item.text:SetTextColor(1, 1, 1)
     item.text:SetPoint("BOTTOMLEFT", 15, 5)
     item.text:SetText(text)
@@ -430,17 +390,10 @@ function SwiftdawnRaidTools:DebugLogShowPopupListItem(index, text, setting, onCl
 end
 
 function SwiftdawnRaidTools:DebugLogClearWindow()
-    for i, _ in ipairs(self.debugLogLines) do
-        local removedLine = self.debugLogLines[i]
-        removedLine.timestamp:Hide()
-        removedLine.timestamp:ClearAllPoints()
-        removedLine.timestamp = nil
-        removedLine.text:Hide()
-        removedLine.text:ClearAllPoints()
-        removedLine.text = nil
-        removedLine = nil
+    for i, _ in ipairs(self.debugLogItems) do
+        self.debugLogItems[i]:DeleteFrame()
     end
-    self.debugLogLines = {}
+    self.debugLogItems = {}
     self:DebugLogUpdateAppearance()
 end
 

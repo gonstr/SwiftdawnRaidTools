@@ -378,7 +378,7 @@ local function createPopupListItem(popupFrame, text, onClick)
     item.highlight:Hide()
 
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    item.text:SetFont(SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType(), SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize)
+    item.text:SetFont(SwiftdawnRaidTools:AppearancePopupFontType(), 10)
     item.text:SetTextColor(1, 1, 1)
     item.text:SetPoint("BOTTOMLEFT", 15, 5)
     item.text:SetText(text)

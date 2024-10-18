@@ -198,6 +198,10 @@ function SwiftdawnRaidTools:IsPlayerInActiveGroup(part)
     return false
 end
 
+function SwiftdawnRaidTools:AppearancePopupFontType()
+    return SharedMedia:Fetch("font", "Friz Quadrata TT")
+end
+
 function SwiftdawnRaidTools:AppearanceGetOverviewTitleFontType()
     return SharedMedia:Fetch("font", self.db.profile.overview.appearance.titleFontType)
 end
@@ -257,15 +261,11 @@ function SwiftdawnRaidTools:AppearanceGetNotificationsContentHeight()
     return assignmentHeight + padding
 end
 
-function SwiftdawnRaidTools:GetTimestamp()
-    local totalSeconds = GetTime() -- Returns time in seconds with fractional part for milliseconds
-    local hours = floor(totalSeconds / 3600)
-    local minutes = floor((totalSeconds % 3600) / 60)
-    local seconds = floor(totalSeconds % 60)
-    local milliseconds = floor((totalSeconds % 1) * 1000) -- Get milliseconds
-
-    -- Format the time string
-    return string.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds)
+function GetTimestamp()
+    local timeInSeconds = GetTime()
+    local seconds = math.floor(timeInSeconds)
+    local milliseconds = math.floor((timeInSeconds - seconds) * 1000)
+    return string.format("%s.%03d", date("%H:%M:%S"), milliseconds)
 end
 
 function SwiftdawnRaidTools:GetFrameRelativeCenter(frame)
@@ -280,4 +280,39 @@ function SwiftdawnRaidTools:GetFrameRelativeCenter(frame)
     local relativeY = frameY - screenY
 
     return relativeX, relativeY
+end
+
+function TableToString(tbl, indent, seen)
+    if type(tbl) == "string" then
+        return tbl
+    elseif tbl == nil then
+        return "nil"
+    end
+    indent = indent or 0
+    seen = seen or {}
+    local result = "{\n"
+    local indentStr = string.rep("  ", indent)
+
+    -- Detect cyclic references
+    if seen[tbl] then
+        return indentStr .. "[Cyclic Reference]"
+    end
+    seen[tbl] = true
+
+    for k, v in pairs(tbl) do
+        result = result .. indentStr .. "  [" .. tostring(k) .. "] = "
+
+        if type(v) == "table" then
+            result = result .. TableToString(v, indent + 1, seen) .. ",\n"
+        elseif type(v) == "string" then
+            result = result .. '"' .. v .. '",\n'
+        elseif type(v) == "function" or type(v) == "userdata" then
+            result = result .. "[Unsupported Type: " .. type(v) .. "],\n"
+        else
+            result = result .. tostring(v) .. ",\n"
+        end
+    end
+
+    result = result .. indentStr .. "}"
+    return result
 end

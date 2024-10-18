@@ -448,7 +448,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit, logItem)
                     }
                     self:RaidAssignmentsTrigger(trigger, context)
                     logItem:SetEffect(trigger, context)
-                    self:DebugLogAddLine(logItem)
+                    self:DebugLogAddItem(logItem)
                 end
             end
         end
@@ -511,7 +511,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourc
                 local countdown = castTime / 1000
                 self:RaidAssignmentsTrigger(trigger, ctx, countdown)
                 logItem:SetEffect(trigger, ctx, countdown)
-                self:DebugLogAddLine(logItem)
+                self:DebugLogAddItem(logItem)
             end
         end
     end
@@ -548,7 +548,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceNam
         for _, trigger in ipairs(triggers) do
             self:RaidAssignmentsTrigger(trigger, ctx)
             logItem:SetEffect(trigger, ctx)
-            self:DebugLogAddLine(logItem)
+            self:DebugLogAddItem(logItem)
         end
     end
 
@@ -574,7 +574,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text, logItem)
                 if self.DEBUG then self:Print("Found raid boss emote TRIGGER match") end
                 self:RaidAssignmentsTrigger(trigger)
                 logItem:SetEffect(trigger)
-                self:DebugLogAddLine(logItem)
+                self:DebugLogAddItem(logItem)
             end
         end
     end
@@ -610,14 +610,14 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleFojjiNumenTimer(key, countdown,
             if countdown <= 5 then
                 self:RaidAssignmentsTrigger(trigger, nil, countdown)
                 logItem:SetEffect(trigger, nil, countdown)
-                self:DebugLogAddLine(logItem)
+                self:DebugLogAddItem(logItem)
             else
                 cancelFojjiNumenTimer(key)
 
                 fojjiNumenTimers[key] = C_Timer.NewTimer(countdown - 5, function()
                     self:RaidAssignmentsTrigger(trigger, nil, 5)
                     logItem:SetEffect(trigger, nil, 5)
-                    self:DebugLogAddLine(logItem)
+                    self:DebugLogAddItem(logItem)
                 end)
             end
         end
