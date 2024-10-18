@@ -385,8 +385,20 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
             end
 
             insert(delayTimers[trigger.uuid], C_Timer.NewTimer(trigger.delay, function()
-                trigger.lastTriggerTime = GetTime()
-                SwiftdawnRaidTools:SendRaidMessage("TRIGGER", data)
+                local activeGroups = self:GroupsGetActive(trigger.uuid)
+
+                if activeGroups and #activeGroups > 0 then
+                    local data = {
+                        uuid = trigger.uuid,
+                        activeGroups = activeGroups,
+                        countdown = countdown,
+                        delay = delay,
+                        context = context
+                    }
+
+                    trigger.lastTriggerTime = GetTime()
+                    SwiftdawnRaidTools:SendRaidMessage("TRIGGER", data)
+                end
             end))
         else
             trigger.lastTriggerTime = GetTime()
