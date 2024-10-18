@@ -22,9 +22,8 @@ function SwiftdawnRaidTools:OverviewInit()
     container:SetScript("OnDragStart", function(self)
         self:StartMoving()
         self:SetScript("OnUpdate", function()  -- Continuously update the frame size
-            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
-            SwiftdawnRaidTools.db.profile.overview.anchorX = tonumber(string.format("%.2f", x))
-            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", y))
+            SwiftdawnRaidTools.db.profile.overview.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
+            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", UIParent:GetHeight() * -1 + self:GetTop()))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:OverviewUpdateAppearance()
         end)
@@ -94,9 +93,8 @@ function SwiftdawnRaidTools:OverviewInit()
     header:SetScript("OnDragStart", function(self)
         container:StartMoving()
         container:SetScript("OnUpdate", function()  -- Continuously update the frame size
-            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
-            SwiftdawnRaidTools.db.profile.overview.anchorX = tonumber(string.format("%.2f", x))
-            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", y))
+            SwiftdawnRaidTools.db.profile.overview.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
+            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", UIParent:GetHeight() * -1 + self:GetTop()))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:OverviewUpdateAppearance()
         end)
@@ -216,6 +214,7 @@ function SwiftdawnRaidTools:OverviewUpdateAppearance()
     local overviewPlayerFontSize = self.db.profile.overview.appearance.playerFontSize
     local iconSize = SwiftdawnRaidTools.db.profile.overview.appearance.iconSize
 
+    self.overviewFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self.db.profile.overview.anchorX, self.db.profile.overview.anchorY)
     self.overviewFrame:SetScale(self.db.profile.overview.appearance.scale)
     self.overviewHeaderText:SetFont(self:AppearanceGetOverviewTitleFontType(), overviewTitleFontSize)
     local headerHeight = overviewTitleFontSize + 8

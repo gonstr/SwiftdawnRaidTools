@@ -13,7 +13,6 @@ function SwiftdawnRaidTools:DebugLogInit()
     local titleFontSize = self.db.profile.debugLog.appearance.titleFontSize
     local logFontSize = self.db.profile.debugLog.appearance.logFontSize
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsDebugLog", UIParent, "BackdropTemplate")
-    container:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
     container:SetSize(400, MIN_HEIGHT)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -29,9 +28,8 @@ function SwiftdawnRaidTools:DebugLogInit()
     container:SetScript("OnDragStart", function(self)
         self:StartMoving()
         self:SetScript("OnUpdate", function()  -- Continuously update the frame size
-            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
-            SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", x))
-            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", y))
+            SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
+            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", UIParent:GetHeight() * -1 + self:GetTop()))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:DebugLogUpdateAppearance()
         end)
@@ -97,9 +95,8 @@ function SwiftdawnRaidTools:DebugLogInit()
     header:SetScript("OnDragStart", function(self)
         container:StartMoving()
         container:SetScript("OnUpdate", function()  -- Continuously update the frame size
-            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
-            SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", x))
-            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", y))
+            SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
+            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", UIParent:GetHeight() * -1 + self:GetTop()))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:DebugLogUpdateAppearance()
         end)
@@ -259,7 +256,8 @@ end
 
 function SwiftdawnRaidTools:DebugLogUpdateAppearance()
     self.debugLogFrame:ClearAllPoints()
-    self.debugLogFrame:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
+    self.debugLogFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self.db.profile.debugLog.anchorX, self.db.profile.debugLog.anchorY)
+
     local titleFontSize = self.db.profile.debugLog.appearance.titleFontSize
     local logFontSize = self.db.profile.debugLog.appearance.logFontSize
 
