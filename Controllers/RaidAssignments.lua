@@ -345,7 +345,7 @@ local function triggerConditionsTrue(conditions)
     return true
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
+function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown, ignoreTriggerDelay)
     if self.DEBUG then self:Print("Sending TRIGGER start") end
 
     if trigger.throttle then
@@ -379,26 +379,14 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
 
         if self.DEBUG then self:Print("Sending TRIGGER found groups") end
 
-        if trigger.delay and trigger.delay > 0 then
+        if not ignoreTriggerDelay and (trigger.delay and trigger.delay > 0) then
             if not delayTimers[trigger.uuid] then
                 delayTimers[trigger.uuid] = {}
             end
 
             insert(delayTimers[trigger.uuid], C_Timer.NewTimer(trigger.delay, function()
-                local activeGroups = self:GroupsGetActive(trigger.uuid)
-
-                if activeGroups and #activeGroups > 0 then
-                    local data = {
-                        uuid = trigger.uuid,
-                        activeGroups = activeGroups,
-                        countdown = countdown,
-                        delay = delay,
-                        context = context
-                    }
-
-                    trigger.lastTriggerTime = GetTime()
-                    SwiftdawnRaidTools:SendRaidMessage("TRIGGER", data)
-                end
+                -- We trigger it at a delay with the ignoreTriggerDelay on so it wont be delayed again
+                SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown, true)
             end))
         else
             trigger.lastTriggerTime = GetTime()
