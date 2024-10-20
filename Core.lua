@@ -99,7 +99,6 @@ function SwiftdawnRaidTools:OnEnable()
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:RegisterEvent("UNIT_HEALTH")
     self:RegisterEvent("GROUP_ROSTER_UPDATE")
-    self:RegisterEvent("RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
     self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE")
@@ -117,7 +116,6 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:UnregisterEvent("UNIT_HEALTH")
     self:UnregisterEvent("GROUP_ROSTER_UPDATE")
-    self:UnregisterEvent("RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     self:UnregisterEvent("CHAT_MSG_MONSTER_YELL")
     self:UnregisterEvent("CHAT_MSG_MONSTER_EMOTE")
@@ -206,15 +204,11 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self:OverviewUpdate()
     elseif payload.e == "ACT_GRPS" then
         if self.DEBUG then self:Print("Received message ACT_GRPS") end
-        DevTool:AddData(payload, "ACT_GRPS")
         self:GroupsSetAllActive(payload.d)
         self:OverviewUpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         if self.DEBUG then self:Print("Received message TRIGGER") end
-        DevTool:AddData(payload, "TRIGGER")
-
         self:DebugLogAddItem(LogItem:New(payload.d))
-
         self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
         self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
         self:NotificationsUpdateSpells()
@@ -280,11 +274,7 @@ function SwiftdawnRaidTools:COMBAT_LOG_EVENT_UNFILTERED()
     self:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
 end
 
-function SwiftdawnRaidTools:RAID_BOSS_EMOTE(_, text, ...)
-    self:RaidAssignmentsHandleRaidBossEmote(text)
-end
-
-function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text, ...)
+function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text)
     self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
