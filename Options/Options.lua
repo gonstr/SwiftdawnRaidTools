@@ -93,6 +93,12 @@ local mainOptions = {
                             SwiftdawnRaidTools:TestModeToggle()
                         end
                     end,
+                    order = 2,
+                },
+                separator01 = {
+                    type = "description",
+                    name = " ",
+                    width = "full",
                     order = 3,
                 },
                 resetAppearance = {
@@ -134,7 +140,7 @@ local mainOptions = {
                     end,
                     order = 5,
                 },
-                resetAppearance = {
+                resetAnchors = {
                     type = "execute",
                     name = "Reset Anchors",
                     desc = "Reset to default locations.",
@@ -150,7 +156,7 @@ local mainOptions = {
                         SwiftdawnRaidTools:NotificationsUpdateAppearance()
                         SwiftdawnRaidTools:DebugLogUpdateAppearance()
                     end,
-                    order = 5,
+                    order = 6,
                 },
             },
         },
@@ -183,13 +189,31 @@ local mainOptions = {
             name = " ",
             desc = "Enables / Disables Overview window",
             type = "toggle",
-            width = "double",
+            width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.overview.show = value
                 SwiftdawnRaidTools:OverviewUpdate()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.overview.show end,
             order = 11,
+        },
+        lockOverviewDescription = {
+            type = "description",
+            name = "Lock Overview",
+            width = "normal",
+            order = 12,
+        },
+        lockOverview = {
+            name = " ",
+            desc = "Lock / Unlocks Overview window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.overview.locked = value
+                SwiftdawnRaidTools:OverviewUpdate()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.overview.locked end,
+            order = 13,
         },
         showDebugLogDescription = {
             type = "description",
@@ -201,7 +225,7 @@ local mainOptions = {
             name = " ",
             desc = "Enables / Disables Debug Log window",
             type = "toggle",
-            width = "double",
+            width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.debugLog.show = value
                 SwiftdawnRaidTools:DebugLogUpdate()
@@ -209,8 +233,63 @@ local mainOptions = {
             get = function(info) return SwiftdawnRaidTools.db.profile.debugLog.show end,
             order = 21,
         },
+        lockDebugLogDescription = {
+            type = "description",
+            name = "Lock Debug Log",
+            width = "normal",
+            order = 22,
+        },
+        lockDebugLog = {
+            name = " ",
+            desc = "Lock / Unlocks Debug Log window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.debugLog.locked = value
+                SwiftdawnRaidTools:DebugLogUpdate()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.debugLog.locked end,
+            order = 23,
+        },
     },
 }
+
+-- Convert from TOPLEFT to CENTER coordinates
+function TopLeftToCenterX(topLeftX, frameWidth)
+    local screenWidth = GetScreenWidth()
+    -- Adjust for center point and correct for Y-axis inversion
+    local centerX = topLeftX - (screenWidth / 2) + (frameWidth / 2)
+    print(string.format("TopLeftX: %.2d  CenterX: %.2d", topLeftX, centerX))
+    return centerX
+end
+
+-- Convert from TOPLEFT to CENTER coordinates
+function TopLeftToCenterY(topLeftY, frameHeight)
+    local screenHeight = GetScreenHeight()
+    -- Adjust for center point and correct for Y-axis inversion
+    local centerY = -(topLeftY - (screenHeight / 2) + (frameHeight / 2))
+    return centerY
+end
+
+-- Convert from CENTER to TOPLEFT coordinates
+function CenterToTopLeftX(centerX, frameWidth)
+    local screenWidth = GetScreenWidth()
+
+    -- Adjust for center point and correct for Y-axis inversion
+    local topLeftX = centerX + (screenWidth / 2) - (frameWidth / 2)
+
+    return topLeftX
+end
+
+-- Convert from CENTER to TOPLEFT coordinates
+function CenterToTopLeftY(centerY, frameHeight)
+    local screenHeight = GetScreenHeight()
+
+    -- Adjust for center point and correct for Y-axis inversion
+    local topLeftY = -(centerY - (screenHeight / 2) + (frameHeight / 2)) + screenHeight
+
+    return topLeftY
+end
 
 local appearanceOptions = {
     name = "Appearance",
@@ -220,7 +299,7 @@ local appearanceOptions = {
         overview = {
             type = "group",
             name = "Overview",
-            order = 1,
+            order = 1, 
             args = {
                 overviewPositionDescription = {
                     type = "description",
@@ -239,17 +318,19 @@ local appearanceOptions = {
                     name = "",
                     width = "half",
                     desc = "Overview anchor X position",
-                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.overview.anchorX) end,
+                    get = function(info)
+                        return string.format("%.1f", TopLeftToCenterX(SwiftdawnRaidTools.db.profile.overview.anchorX, SwiftdawnRaidTools.overviewFrame:GetWidth()))
+                    end,
                     set = function(info, value)
                         local numValue = tonumber(value)
                         if numValue then
-                            SwiftdawnRaidTools.db.profile.overview.anchorX = numValue
+                            SwiftdawnRaidTools.db.profile.overview.anchorX = CenterToTopLeftX(numValue, SwiftdawnRaidTools.overviewFrame:GetWidth())
                             SwiftdawnRaidTools:OverviewUpdateAppearance()
                         else
                             print("Please enter a valid number for X position.")
                         end
                     end,
-                    pattern = "^-?%d+$",  -- Allows negative and positive integers
+                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
                     order = 14
                 },
                 overviewPositionYDescription = {
@@ -263,17 +344,20 @@ local appearanceOptions = {
                     name = "",
                     width = "half",
                     desc = "Overview anchor Y position",
-                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.overview.anchorY) end,
+                    get = function(info)
+                        return string.format("%.1f", SwiftdawnRaidTools.db.profile.overview.anchorY)
+                    end,
                     set = function(info, value)
                         local numValue = tonumber(value)
                         if numValue then
+                            print("New Y: "..numValue)
                             SwiftdawnRaidTools.db.profile.overview.anchorY = numValue
                             SwiftdawnRaidTools:OverviewUpdateAppearance()
                         else
                             print("Please enter a valid number for Y position.")
                         end
                     end,
-                    pattern = "^-?%d+$",  -- Allows negative and positive integers
+                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
                     order = 16
                 },
                 overviewScaleDescription = {
@@ -499,17 +583,19 @@ local appearanceOptions = {
                     name = "",
                     width = "half",
                     desc = "Notifications anchor X position",
-                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.notifications.anchorX) end,
+                    get = function(info)
+                        return string.format("%.1f", TopLeftToCenterX(SwiftdawnRaidTools.db.profile.notifications.anchorX, SwiftdawnRaidTools.notificationFrame:GetWidth()))
+                    end,
                     set = function(info, value)
                         local numValue = tonumber(value)
                         if numValue then
-                            SwiftdawnRaidTools.db.profile.notifications.anchorX = numValue
+                            SwiftdawnRaidTools.db.profile.notifications.anchorX = CenterToTopLeftX(numValue, SwiftdawnRaidTools.notificationFrame:GetWidth())
                             SwiftdawnRaidTools:NotificationsUpdateAppearance()
                         else
                             print("Please enter a valid number for X position.")
                         end
                     end,
-                    pattern = "^-?%d+$",  -- Allows negative and positive integers
+                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
                     order = 65
                 },
                 notificationsPositionYDescription = {
@@ -533,7 +619,7 @@ local appearanceOptions = {
                             print("Please enter a valid number for Y position.")
                         end
                     end,
-                    pattern = "^-?%d+$",  -- Allows negative and positive integers
+                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
                     order = 67
                 },
                 notificationsScaleDescription = {
@@ -747,7 +833,7 @@ local appearanceOptions = {
                             print("Please enter a valid number for X position.")
                         end
                     end,
-                    pattern = "^-?%d+$",  -- Allows negative and positive integers
+                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
                     order = 3
                 },
                 debugLogPositionYDescription = {
@@ -771,7 +857,7 @@ local appearanceOptions = {
                             print("Please enter a valid number for Y position.")
                         end
                     end,
-                    pattern = "^-?%d+$",  -- Allows negative and positive integers
+                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
                     order = 6
                 },
                 debugLogScaleDescription = {

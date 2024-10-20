@@ -6,7 +6,6 @@ local MIN_WIDTH = 100
 function SwiftdawnRaidTools:OverviewInit()
     local overviewTitleFontSize = self.db.profile.overview.appearance.titleFontSize
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsOverview", UIParent, "BackdropTemplate")
-    container:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.overview.anchorX, self.db.profile.overview.anchorY)
     container:SetSize(200, MIN_HEIGHT)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -23,7 +22,7 @@ function SwiftdawnRaidTools:OverviewInit()
         self:StartMoving()
         self:SetScript("OnUpdate", function()  -- Continuously update the frame size
             SwiftdawnRaidTools.db.profile.overview.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
-            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", UIParent:GetHeight() * -1 + self:GetTop()))
+            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", self:GetTop() - GetScreenHeight()))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:OverviewUpdateAppearance()
         end)
@@ -94,7 +93,7 @@ function SwiftdawnRaidTools:OverviewInit()
         container:StartMoving()
         container:SetScript("OnUpdate", function()  -- Continuously update the frame size
             SwiftdawnRaidTools.db.profile.overview.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
-            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", UIParent:GetHeight() * -1 + self:GetTop()))
+            SwiftdawnRaidTools.db.profile.overview.anchorY = tonumber(string.format("%.2f", self:GetTop() - GetScreenHeight()))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:OverviewUpdateAppearance()
         end)
@@ -466,7 +465,10 @@ function SwiftdawnRaidTools:OverviewUpdatePopup()
 
     index = index + 1
 
-    local lockFunc = function() self:OverviewToggleLock() end
+    local lockFunc = function()
+        LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools")
+        self:OverviewToggleLock()
+    end
     local lockedText = "Lock Overview"
     if self.db.profile.overview.locked then lockedText = "Unlock Overview" end
     self:OverviewShowPopupListItem(index, lockedText, true, lockFunc, 0, encounterListItems)

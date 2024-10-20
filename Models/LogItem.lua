@@ -1,58 +1,53 @@
 local SharedMedia = LibStub("LibSharedMedia-3.0")
 
 LogItem = {
-    cause = {},
-    effect = {},
     showExtra = false
 }
 LogItem.__index = LogItem
 
-function LogItem:New(cause, ...)
+function LogItem:New(data)
     local obj = {}
     setmetatable(obj, LogItem)
     obj.db = SwiftdawnRaidTools.db.profile
-    obj.cause = cause
-    obj.causeArgs = ...
-    return obj
-end
+    obj.triggerType = data.triggerType
+    obj.assignmentId = data.uuid
+    obj.activeGroups = data.activeGroups
+    obj.countdown = data.countdown
+    obj.delay = data.delay
+    obj.context = data.context
 
-function LogItem:SetEffect(trigger, context, countdown)
-    self.effectTrigger = trigger
-    self.context = context
-    self.countdown = countdown
+    return obj
 end
 
 function LogItem:GetString()
     local line
-    if self.cause == "SPELL_CAST_START" then
-        line = self.context.source_name .. " is casting " .. self.context.spell_name
-        if self.context.dest_name ~= nil then
-            line = line  .. " on " .. self.effect.context.dest_name
-        end
+
+    if self.triggerType == "ENCOUNTER_START" then
+        line = "Encounter with " .. self.context.encounterName .. " has started"
         return line
-    elseif self.cause == "SPELL_CAST_SUCCESS" then
-        line = self.context.source_name .. " is finished casting " .. self.context.spell_name
+    elseif self.triggerType == "SPELL_CAST" then
+        line = self.context.source_name .. " is casting " .. self.context.spell_name
         if self.context.dest_name ~= nil then
             line = line  .. " on " .. self.context.dest_name
         end
         return line
-    elseif self.cause == "SPELL_AURA_APPLIED" then
+    elseif self.triggerType == "SPELL_AURA" then
         line = self.context.source_name .. " has applied aura " .. self.context.spell_name
         if self.context.dest_name ~= nil then
             line = line  .. " on " .. self.context.dest_name
         end
         return line
-    elseif self.cause == "RAID_BOSS_EMOTE" then
-        return "Boss emotes '" .. self.causeArgs .. "'"
+    elseif self.triggerType == "RAID_BOSS_EMOTE" then
+        return "Boss emotes '" .. self.context.text .. "'"
     else
-        return self.cause .. " => " .. self.causeArgs
+        return self.triggerType
     end
 end
 
 function LogItem:GetExtraString()
-    DevTool:AddData(self, "LogItem")
-    local causeArgsString = TableToString(self.context)
-    return string.format("%s: %s", self.cause, causeArgsString)
+    return string.format(
+            "type: %s\nassignment: %s\nactiveGroups: %s\ncountdown: %d\ndelay: %d\ncontext: %s",
+            tostring(self.triggerType), tostring(self.assignmentId), TableToString(self.activeGroups), tostring(self.countdown), tostring(self.delay), TableToString(self.context))
 end
 
 function LogItem:getLogFontType(db)
@@ -83,7 +78,7 @@ function LogItem:CreateFrame(parentFrame, db)
     self.extraText:SetJustifyH("LEFT")
     self.extraText:SetWordWrap(true)
     self.extraText:SetText(self:GetExtraString())
-    self.extraText:SetTextColor(0.7, 0.7, 0.7)
+    self.extraText:SetTextColor(0.80, 0.80, 0.80)
     self.extraText:SetPoint("TOPLEFT", self.timestamp, "BOTTOMLEFT", 5, -3)
     self.extraText:Hide()
     self.frame:SetScript("OnMouseDown", function(_, button)

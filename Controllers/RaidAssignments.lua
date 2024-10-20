@@ -64,7 +64,7 @@ local function resetState()
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId)
+function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId, encounterName)
     resetState()
 
     if not self.TEST and not self:IsPlayerRaidLeader() then
@@ -73,87 +73,90 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId)
 
     activeEncounter = self:GetEncounters()[encounterId]
 
-    if activeEncounter then
-        if self.DEBUG then self:Print("Encounter starting") end
+    if not activeEncounter then
+        if self.DEBUG then self:Print("No active encounter found!") end
+        return
+    end
 
-        self:RaidAssignmentsUpdateGroups()
+    if self.DEBUG then self:Print("Encounter starting") end
 
-        -- Populate caches
-        for _, part in ipairs(activeEncounter) do
-            if part.type == "RAID_ASSIGNMENTS" then
-                local triggerClones = self:DeepClone(part.triggers)
+    self:RaidAssignmentsUpdateGroups()
 
-                for _, trigger in ipairs(triggerClones) do
-                    trigger.triggered = false
-                    trigger.uuid = part.uuid
+    -- Populate caches
+    for _, part in ipairs(activeEncounter) do
+        if part.type == "RAID_ASSIGNMENTS" then
+            local triggerClones = self:DeepClone(part.triggers)
 
-                    if trigger.type == "ENCOUNTER_START" then
-                        self:RaidAssignmentsTrigger(trigger)
-                    elseif trigger.type == "UNIT_HEALTH" then
-                        if not unitHealthTriggersCache[trigger.unit] then
-                            unitHealthTriggersCache[trigger.unit] = {}
-                        end
+            for _, trigger in ipairs(triggerClones) do
+                trigger.triggered = false
+                trigger.uuid = part.uuid
 
-                        insert(unitHealthTriggersCache[trigger.unit], trigger)
-                    elseif trigger.type == "SPELL_CAST" then
-                        if not spellCastTriggersCache[trigger.spell_id] then
-                            spellCastTriggersCache[trigger.spell_id] = {}
-                        end
-
-                        insert(spellCastTriggersCache[trigger.spell_id], trigger)
-                    elseif trigger.type == "SPELL_AURA" then
-                        if not spellAuraTriggersCache[trigger.spell_id] then
-                            spellAuraTriggersCache[trigger.spell_id] = {}
-                        end
-
-                        insert(spellAuraTriggersCache[trigger.spell_id], trigger)
-                    elseif trigger.type == "RAID_BOSS_EMOTE" then
-                        if not raidBossEmoteTriggersCache[trigger.text] then
-                            raidBossEmoteTriggersCache[trigger.text] = {}
-                        end
-
-                        insert(raidBossEmoteTriggersCache[trigger.text], trigger)
-                    elseif trigger.type == "FOJJI_NUMEN_TIMER" then
-                        if not fojjiNumenTimersTriggersCache[trigger.key] then
-                            fojjiNumenTimersTriggersCache[trigger.key] = {}
-                        end
-
-                        insert(fojjiNumenTimersTriggersCache[trigger.key], trigger)
+                if trigger.type == "ENCOUNTER_START" then
+                    self:RaidAssignmentsTrigger(trigger, { encounterName = encounterName })
+                elseif trigger.type == "UNIT_HEALTH" then
+                    if not unitHealthTriggersCache[trigger.unit] then
+                        unitHealthTriggersCache[trigger.unit] = {}
                     end
+
+                    insert(unitHealthTriggersCache[trigger.unit], trigger)
+                elseif trigger.type == "SPELL_CAST" then
+                    if not spellCastTriggersCache[trigger.spell_id] then
+                        spellCastTriggersCache[trigger.spell_id] = {}
+                    end
+
+                    insert(spellCastTriggersCache[trigger.spell_id], trigger)
+                elseif trigger.type == "SPELL_AURA" then
+                    if not spellAuraTriggersCache[trigger.spell_id] then
+                        spellAuraTriggersCache[trigger.spell_id] = {}
+                    end
+
+                    insert(spellAuraTriggersCache[trigger.spell_id], trigger)
+                elseif trigger.type == "RAID_BOSS_EMOTE" then
+                    if not raidBossEmoteTriggersCache[trigger.text] then
+                        raidBossEmoteTriggersCache[trigger.text] = {}
+                    end
+
+                    insert(raidBossEmoteTriggersCache[trigger.text], trigger)
+                elseif trigger.type == "FOJJI_NUMEN_TIMER" then
+                    if not fojjiNumenTimersTriggersCache[trigger.key] then
+                        fojjiNumenTimersTriggersCache[trigger.key] = {}
+                    end
+
+                    insert(fojjiNumenTimersTriggersCache[trigger.key], trigger)
                 end
+            end
 
-                if part.untriggers then
-                    local untriggerClones = self:DeepClone(part.untriggers)
+            if part.untriggers then
+                local untriggerClones = self:DeepClone(part.untriggers)
 
-                    for _, untrigger in ipairs(untriggerClones) do
-                        untrigger.triggered = false
-                        untrigger.uuid = part.uuid
+                for _, untrigger in ipairs(untriggerClones) do
+                    untrigger.triggered = false
+                    untrigger.uuid = part.uuid
 
-                        if untrigger.type == "UNIT_HEALTH" then
-                            if not unitHealthUntriggersCache[untrigger.unit] then
-                                unitHealthUntriggersCache[untrigger.unit] = {}
-                            end
-
-                            insert(unitHealthUntriggersCache[untrigger.unit], untrigger)
-                        elseif untrigger.type == "SPELL_CAST" then
-                            if not spellCastUntriggersCache[untrigger.spell_id] then
-                                spellCastUntriggersCache[untrigger.spell_id] = {}
-                            end
-
-                            insert(spellCastUntriggersCache[untrigger.spell_id], untrigger)
-                        elseif untrigger.type == "SPELL_AURA" then
-                            if not spellAuraUntriggersCache[untrigger.spell_id] then
-                                spellAuraUntriggersCache[untrigger.spell_id] = {}
-                            end
-
-                            insert(spellAuraUntriggersCache[untrigger.spell_id], untrigger)
-                        elseif untrigger.type == "RAID_BOSS_EMOTE" then
-                            if not raidBossEmoteUntriggersCache[untrigger.text] then
-                                raidBossEmoteUntriggersCache[untrigger.text] = {}
-                            end
-
-                            insert(raidBossEmoteUntriggersCache[untrigger.text], untrigger)
+                    if untrigger.type == "UNIT_HEALTH" then
+                        if not unitHealthUntriggersCache[untrigger.unit] then
+                            unitHealthUntriggersCache[untrigger.unit] = {}
                         end
+
+                        insert(unitHealthUntriggersCache[untrigger.unit], untrigger)
+                    elseif untrigger.type == "SPELL_CAST" then
+                        if not spellCastUntriggersCache[untrigger.spell_id] then
+                            spellCastUntriggersCache[untrigger.spell_id] = {}
+                        end
+
+                        insert(spellCastUntriggersCache[untrigger.spell_id], untrigger)
+                    elseif untrigger.type == "SPELL_AURA" then
+                        if not spellAuraUntriggersCache[untrigger.spell_id] then
+                            spellAuraUntriggersCache[untrigger.spell_id] = {}
+                        end
+
+                        insert(spellAuraUntriggersCache[untrigger.spell_id], untrigger)
+                    elseif untrigger.type == "RAID_BOSS_EMOTE" then
+                        if not raidBossEmoteUntriggersCache[untrigger.text] then
+                            raidBossEmoteUntriggersCache[untrigger.text] = {}
+                        end
+
+                        insert(raidBossEmoteUntriggersCache[untrigger.text], untrigger)
                     end
                 end
             end
@@ -370,6 +373,7 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown)
 
     if activeGroups and #activeGroups > 0 then
         local data = {
+            triggerType = trigger.type,
             uuid = trigger.uuid,
             activeGroups = activeGroups,
             countdown = countdown,
@@ -407,7 +411,7 @@ local function cancelDelayTimers(uuid)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit, logItem)
+function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit)
     if not activeEncounter then
         return
     end
@@ -447,8 +451,6 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit, logItem)
                         health_pct = pct
                     }
                     self:RaidAssignmentsTrigger(trigger, context)
-                    logItem:SetEffect(trigger, context)
-                    self:DebugLogAddItem(logItem)
                 end
             end
         end
@@ -489,7 +491,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleUnitHealth(unit, logItem)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourceName, destName, logItem)
+function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourceName, destName)
     if not activeEncounter then
         return
     end
@@ -510,8 +512,6 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourc
             for _, trigger in ipairs(triggers) do
                 local countdown = castTime / 1000
                 self:RaidAssignmentsTrigger(trigger, ctx, countdown)
-                logItem:SetEffect(trigger, ctx, countdown)
-                self:DebugLogAddItem(logItem)
             end
         end
     end
@@ -529,7 +529,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourc
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceName, destName, logItem)
+function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceName, destName)
     if not activeEncounter then
         return
     end
@@ -547,8 +547,6 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceNam
     if triggers then
         for _, trigger in ipairs(triggers) do
             self:RaidAssignmentsTrigger(trigger, ctx)
-            logItem:SetEffect(trigger, ctx)
-            self:DebugLogAddItem(logItem)
         end
     end
 
@@ -561,7 +559,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceNam
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text, logItem)
+function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
     if not activeEncounter then
         return
     end
@@ -572,9 +570,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text, logItem)
         for _, trigger in ipairs(triggers) do
             if text:match(trigger.text) ~= nil then
                 if self.DEBUG then self:Print("Found raid boss emote TRIGGER match") end
-                self:RaidAssignmentsTrigger(trigger)
-                logItem:SetEffect(trigger)
-                self:DebugLogAddItem(logItem)
+                self:RaidAssignmentsTrigger(trigger, { text = text })
             end
         end
     end
@@ -598,7 +594,7 @@ local function cancelFojjiNumenTimer(key)
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleFojjiNumenTimer(key, countdown, logItem)
+function SwiftdawnRaidTools:RaidAssignmentsHandleFojjiNumenTimer(key, countdown)
     if not activeEncounter or not countdown then
         return
     end
@@ -609,15 +605,11 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleFojjiNumenTimer(key, countdown,
         for _, trigger in ipairs(triggers) do
             if countdown <= 5 then
                 self:RaidAssignmentsTrigger(trigger, nil, countdown)
-                logItem:SetEffect(trigger, nil, countdown)
-                self:DebugLogAddItem(logItem)
             else
                 cancelFojjiNumenTimer(key)
 
                 fojjiNumenTimers[key] = C_Timer.NewTimer(countdown - 5, function()
                     self:RaidAssignmentsTrigger(trigger, nil, 5)
-                    logItem:SetEffect(trigger, nil, 5)
-                    self:DebugLogAddItem(logItem)
                 end)
             end
         end

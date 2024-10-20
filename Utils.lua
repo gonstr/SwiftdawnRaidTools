@@ -271,13 +271,18 @@ end
 function SwiftdawnRaidTools:GetFrameRelativeCenter(frame)
     -- Get the frame's center
     local frameX, frameY = frame:GetCenter()
+    DevTool:AddData({ frameX = frameX, frameY = frameY}, "frame")
 
     -- Get the screen's (UIParent's) center
     local screenX, screenY = UIParent:GetCenter()
 
+    DevTool:AddData({ screenX = screenX, screenY = screenY}, "screen")
+
     -- Calculate relative position to screen center
     local relativeX = frameX - screenX
     local relativeY = frameY - screenY
+
+    DevTool:AddData({ relativeX = relativeX, relativeY = relativeY}, "relative")
 
     return relativeX, relativeY
 end

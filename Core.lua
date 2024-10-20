@@ -25,8 +25,8 @@ SwiftdawnRaidTools.defaults = {
         notifications = {
             showOnlyOwnNotifications = false,
             mute = false,
-            anchorX = 0,
-            anchorY = 200,
+            anchorX = GetScreenWidth()/2,
+            anchorY = -(GetScreenHeight()/2) + 200,
             appearance = {
                 scale = 1.2,
                 headerFontType = "Friz Quadrata TT",
@@ -40,8 +40,8 @@ SwiftdawnRaidTools.defaults = {
             }
         },
         overview = {
-            anchorX = -800,
-            anchorY = 200,
+            anchorX = 0,
+            anchorY = 0,
             selectedEncounterId = nil,
             locked = false,
             show = true,
@@ -59,8 +59,8 @@ SwiftdawnRaidTools.defaults = {
             }
         },
         debugLog = {
-            anchorX = -800,
-            anchorY = 0,
+            anchorX = 0,
+            anchorY = -(GetScreenHeight()/2),
             locked = false,
             show = false,
             scrollToBottom = true,
@@ -206,10 +206,15 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self:OverviewUpdate()
     elseif payload.e == "ACT_GRPS" then
         if self.DEBUG then self:Print("Received message ACT_GRPS") end
+        DevTool:AddData(payload, "ACT_GRPS")
         self:GroupsSetAllActive(payload.d)
         self:OverviewUpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         if self.DEBUG then self:Print("Received message TRIGGER") end
+        DevTool:AddData(payload, "TRIGGER")
+
+        self:DebugLogAddItem(LogItem:New(payload.d))
+
         self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
         self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
         self:NotificationsUpdateSpells()
@@ -219,15 +224,14 @@ end
 function SwiftdawnRaidTools:SRT_WA_EVENT(_, event, ...)
     if event == "WA_NUMEN_TIMER" then
         local key, countdown = ...
-        local logItem = LogItem:New("SRT_WA_EVENT", event, key, countdown)
-        self:RaidAssignmentsHandleFojjiNumenTimer(key, countdown, logItem)
+        self:RaidAssignmentsHandleFojjiNumenTimer(key, countdown)
     end
 end
 
-function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, ...)
+function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, encounterName, ...)
     self:TestModeEnd()
     self:OverviewSelectEncounter(encounterID)
-    self:RaidAssignmentsStartEncounter(encounterID)
+    self:RaidAssignmentsStartEncounter(encounterID, encounterName)
 end
 
 function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
@@ -246,7 +250,6 @@ function SwiftdawnRaidTools:ZONE_CHANGED()
 end
 
 function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
-    local logItem = LogItem:New("UNIT_HEALTH", unitId, ...)
     local guid = UnitGUID(unitId)
 
     if self:UnitsIsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
@@ -257,7 +260,7 @@ function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
         self:NotificationsUpdateSpells()
     end
 
-    self:RaidAssignmentsHandleUnitHealth(unitId, logItem)
+    self:RaidAssignmentsHandleUnitHealth(unitId)
 end
 
 function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
@@ -278,40 +281,33 @@ function SwiftdawnRaidTools:COMBAT_LOG_EVENT_UNFILTERED()
 end
 
 function SwiftdawnRaidTools:RAID_BOSS_EMOTE(_, text, ...)
-    local logItem = LogItem:New("RAID_BOSS_EMOTE", text, ...)
-    self:RaidAssignmentsHandleRaidBossEmote(text, logItem)
+    self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text, ...)
-    local logItem = LogItem:New("CHAT_MSG_RAID_BOSS_EMOTE", text, ...)
-    self:RaidAssignmentsHandleRaidBossEmote(text, logItem)
+    self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_MONSTER_EMOTE(_, text, ...)
-    local logItem = LogItem:New("CHAT_MSG_MONSTER_EMOTE", text, ...)
-    self:RaidAssignmentsHandleRaidBossEmote(text, logItem)
+    self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(_, text, ...)
-    local logItem = LogItem:New("CHAT_MSG_MONSTER_YELL", text, ...)
-    self:RaidAssignmentsHandleRaidBossEmote(text, logItem)
+    self:RaidAssignmentsHandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
     if subEvent == "SPELL_CAST_START" then
-        local logItem = LogItem:New(subEvent, sourceName, destGUID, destName, spellId)
-        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName, logItem)
+        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
         self:SpellsCacheCast(sourceName, spellId, function()
             self:RaidAssignmentsUpdateGroups()
             self:OverviewUpdateSpells()
             self:NotificationsUpdateSpells()
         end)
-        local logItem = LogItem:New(subEvent, sourceName, destGUID, destName, spellId)
-        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName, logItem)
+        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_AURA_APPLIED" then
-        local logItem = LogItem:New(subEvent, sourceName, destGUID, destName, spellId)
-        self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName, logItem)
+        self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
         if self:IsFriendlyRaidMemberOrPlayer(destGUID) then
             self:UnitsSetDead(destGUID)

@@ -7,18 +7,16 @@ local SONAR_SOUND_FILE = "Interface\\AddOns\\SwiftdawnRaidTools\\Media\\PowerAur
 function SwiftdawnRaidTools:NotificationsInit()
     -- The base frame that dictates the size of the notification
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsNotification", UIParent, "BackdropTemplate")
-    container:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.notifications.anchorX, self.db.profile.notifications.anchorY)
-    container:SetSize(250, self:AppearanceGetNotificationsHeaderHeight() + self:AppearanceGetNotificationsContentHeight())
     container:SetMovable(true)
     container:SetUserPlaced(true)
     container:SetClampedToScreen(true)
     container:RegisterForDrag("LeftButton")
     container:SetScript("OnDragStart", function(self)
         self:StartMoving()
-        self:SetScript("OnUpdate", function()  -- Continuously update the frame size
-            local x, y = SwiftdawnRaidTools:GetFrameRelativeCenter(container)
-            SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(string.format("%.2f", x))
-            SwiftdawnRaidTools.db.profile.notifications.anchorY = tonumber(string.format("%.2f", y))
+        container:SetScript("OnUpdate", function()  -- Continuously update the frame size
+            local point, relativeTo, relativePoint, xOffset, yOffset = container:GetPoint()
+            SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(string.format("%.2f", xOffset))
+            SwiftdawnRaidTools.db.profile.notifications.anchorY = tonumber(string.format("%.2f", yOffset))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:NotificationsUpdateAppearance()
         end)
@@ -47,7 +45,6 @@ function SwiftdawnRaidTools:NotificationsInit()
     content:SetBackdrop({
         bgFile = "Interface\\Cooldown\\LoC-ShadowBG"
     })
-    content:SetBackdropColor(0, 0, 0, self.db.profile.notifications.appearance.backgroundOpacity)
     content.bossAbilityText = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     content.bossAbilityText:SetTextColor(1, 1, 1, 1)
     content.bossAbilityText:SetPoint("LEFT", 30, -1)
@@ -97,7 +94,7 @@ end
 
 function SwiftdawnRaidTools:NotificationsUpdateAppearance()
     self.notificationFrame:ClearAllPoints()
-    self.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", self.db.profile.notifications.anchorX, self.db.profile.notifications.anchorY)
+    self.notificationFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self.db.profile.notifications.anchorX, self.db.profile.notifications.anchorY)
 
     local headerFontSize = self:AppearanceGetNotificationsBossAbilityFontSize()
     local countdownFontSize = self:AppearanceGetNotificationsCountdownFontSize()

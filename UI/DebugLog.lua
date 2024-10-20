@@ -29,7 +29,7 @@ function SwiftdawnRaidTools:DebugLogInit()
         self:StartMoving()
         self:SetScript("OnUpdate", function()  -- Continuously update the frame size
             SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
-            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", UIParent:GetHeight() * -1 + self:GetTop()))
+            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", self:GetTop() - GetScreenHeight()))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:DebugLogUpdateAppearance()
         end)
@@ -64,7 +64,7 @@ function SwiftdawnRaidTools:DebugLogInit()
     popup:Hide() -- Start hidden
 
     local function showPopup()
-        if InCombatLockdown() or SwiftdawnRaidTools:RaidAssignmentsInEncounter() then
+        if not self.TEST and (InCombatLockdown() or SwiftdawnRaidTools:RaidAssignmentsInEncounter()) then
             return
         end
         SwiftdawnRaidTools:DebugLogUpdatePopup()
@@ -96,7 +96,7 @@ function SwiftdawnRaidTools:DebugLogInit()
         container:StartMoving()
         container:SetScript("OnUpdate", function()  -- Continuously update the frame size
             SwiftdawnRaidTools.db.profile.debugLog.anchorX = tonumber(string.format("%.2f", self:GetLeft()))
-            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", UIParent:GetHeight() * -1 + self:GetTop()))
+            SwiftdawnRaidTools.db.profile.debugLog.anchorY = tonumber(string.format("%.2f", self:GetTop() - GetScreenHeight()))
             LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
             SwiftdawnRaidTools:DebugLogUpdateAppearance()
         end)
@@ -314,6 +314,7 @@ end
 
 function SwiftdawnRaidTools:DebugLogToggleLock()
     self.db.profile.debugLog.locked = not self.db.profile.debugLog.locked
+    LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools")
     self:DebugLogUpdateLocked()
 end
 
