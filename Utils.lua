@@ -198,44 +198,48 @@ function SwiftdawnRaidTools:IsPlayerInActiveGroup(part)
     return false
 end
 
+function SwiftdawnRaidTools:AppearancePopupFontType()
+    return SharedMedia:Fetch("font", "Friz Quadrata TT")
+end
+
 function SwiftdawnRaidTools:AppearanceGetOverviewTitleFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewTitleFontType)
+    return SharedMedia:Fetch("font", self.db.profile.overview.appearance.titleFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetOverviewBossAbilityFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewHeaderFontType)
+    return SharedMedia:Fetch("font", self.db.profile.overview.appearance.headerFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.overviewPlayerFontType)
+    return SharedMedia:Fetch("font", self.db.profile.overview.appearance.playerFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsHeaderFontType)
+    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.headerFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontSize()
-    return self.db.profile.options.appearance.notificationsHeaderFontSize
+    return self.db.profile.notifications.appearance.headerFontSize
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsCountdownFontType)
+    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.countdownFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontSize()
-    return self.db.profile.options.appearance.notificationsCountdownFontSize
+    return self.db.profile.notifications.appearance.countdownFontSize
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType()
-    return SharedMedia:Fetch("font", self.db.profile.options.appearance.notificationsPlayerFontType)
+    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.playerFontType)
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize()
-    return self.db.profile.options.appearance.notificationsPlayerFontSize
+    return self.db.profile.notifications.appearance.playerFontSize
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerIconSize()
-    return self.db.profile.options.appearance.notificationsIconSize
+    return self.db.profile.notifications.appearance.iconSize
 end
 
 function SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()
@@ -255,4 +259,65 @@ function SwiftdawnRaidTools:AppearanceGetNotificationsContentHeight()
     local assignmentHeight = SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight()
     local padding = 20
     return assignmentHeight + padding
+end
+
+function GetTimestamp()
+    local timeInSeconds = GetTime()
+    local seconds = math.floor(timeInSeconds)
+    local milliseconds = math.floor((timeInSeconds - seconds) * 1000)
+    return string.format("%s.%03d", date("%H:%M:%S"), milliseconds)
+end
+
+function SwiftdawnRaidTools:GetFrameRelativeCenter(frame)
+    -- Get the frame's center
+    local frameX, frameY = frame:GetCenter()
+    DevTool:AddData({ frameX = frameX, frameY = frameY}, "frame")
+
+    -- Get the screen's (UIParent's) center
+    local screenX, screenY = UIParent:GetCenter()
+
+    DevTool:AddData({ screenX = screenX, screenY = screenY}, "screen")
+
+    -- Calculate relative position to screen center
+    local relativeX = frameX - screenX
+    local relativeY = frameY - screenY
+
+    DevTool:AddData({ relativeX = relativeX, relativeY = relativeY}, "relative")
+
+    return relativeX, relativeY
+end
+
+function TableToString(tbl, indent, seen)
+    if type(tbl) == "string" then
+        return tbl
+    elseif tbl == nil then
+        return "nil"
+    end
+    indent = indent or 0
+    seen = seen or {}
+    local result = "{\n"
+    local indentStr = string.rep("  ", indent)
+
+    -- Detect cyclic references
+    if seen[tbl] then
+        return indentStr .. "[Cyclic Reference]"
+    end
+    seen[tbl] = true
+
+    for k, v in pairs(tbl) do
+        result = result .. indentStr .. "  [" .. tostring(k) .. "] = "
+
+        if type(v) == "table" then
+            result = result .. TableToString(v, indent + 1, seen) .. ",\n"
+        elseif type(v) == "string" then
+            result = result .. '"' .. v .. '",\n'
+        elseif type(v) == "function" or type(v) == "userdata" then
+            result = result .. "[Unsupported Type: " .. type(v) .. "],\n"
+        else
+            result = result .. tostring(v) .. ",\n"
+        end
+    end
+
+    result = result .. indentStr .. "}"
+    return result
 end
