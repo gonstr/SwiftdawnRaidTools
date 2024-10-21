@@ -74,6 +74,24 @@ SwiftdawnRaidTools.defaults = {
                 backgroundOpacity = 0.4,
                 iconSize = 14
             }
+        },
+        assignments = {
+            anchorX = GetScreenWidth()/2,
+            anchorY = -(GetScreenHeight()/2),
+            locked = false,
+            show = false,
+            appearance = {
+                scale = 1.0,
+                titleFontType = "Friz Quadrata TT",
+                titleFontSize = 10,
+                headerFontType = "Friz Quadrata TT",
+                headerFontSize = 10,
+                playerFontType = "Friz Quadrata TT",
+                playerFontSize = 10,
+                titleBarOpacity = 0.8,
+                backgroundOpacity = 0.4,
+                iconSize = 14
+            }
         }
     },
 }

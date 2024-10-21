@@ -44,4 +44,5 @@ UI\DebugLog.lua
 UI\Minimap.lua
 UI\Overview.lua
 UI\Notifications.lua
+UI\AssignmentsWindow.lua
 Models\LogItem.lua
