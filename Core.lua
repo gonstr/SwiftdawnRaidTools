@@ -1,88 +1,11 @@
-SwiftdawnRaidTools = LibStub("AceAddon-3.0"):NewAddon("SwiftdawnRaidTools", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
-
-SwiftdawnRaidTools.DEBUG = false
-SwiftdawnRaidTools.TEST = false
-
-SwiftdawnRaidTools.PREFIX_SYNC = "SRT-S"
-SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS = "SRT-SP"
-SwiftdawnRaidTools.PREFIX_MAIN = "SRT-M"
-
-SwiftdawnRaidTools.VERSION = GetAddOnMetadata("SwiftdawnRaidTools", "Version")
-SwiftdawnRaidTools.IS_DEV = SwiftdawnRaidTools.VERSION == '\@project-version\@'
-
--- AceDB defaults
-SwiftdawnRaidTools.defaults = {
-    profile = {
-        options = {
-            import = "",
-        },
-        data = {
-            encountersProgress = nil,
-            encountersId = nil,
-            encounters = {}
-        },
-        minimap = {},
-        notifications = {
-            showOnlyOwnNotifications = false,
-            mute = false,
-            anchorX = GetScreenWidth()/2,
-            anchorY = -(GetScreenHeight()/2) + 200,
-            appearance = {
-                scale = 1.2,
-                headerFontType = "Friz Quadrata TT",
-                headerFontSize = 10,
-                playerFontType = "Friz Quadrata TT",
-                playerFontSize = 10,
-                countdownFontType = "Friz Quadrata TT",
-                countdownFontSize = 10,
-                backgroundOpacity = 0.9,
-                iconSize = 16
-            }
-        },
-        overview = {
-            anchorX = 0,
-            anchorY = 0,
-            selectedEncounterId = nil,
-            locked = false,
-            show = true,
-            appearance = {
-                scale = 1.0,
-                titleFontType = "Friz Quadrata TT",
-                titleFontSize = 10,
-                headerFontType = "Friz Quadrata TT",
-                headerFontSize = 10,
-                playerFontType = "Friz Quadrata TT",
-                playerFontSize = 10,
-                titleBarOpacity = 0.8,
-                backgroundOpacity = 0.4,
-                iconSize = 14
-            }
-        },
-        debugLog = {
-            anchorX = 0,
-            anchorY = -(GetScreenHeight()/2),
-            locked = false,
-            show = false,
-            scrollToBottom = true,
-            appearance = {
-                scale = 1.0,
-                titleFontType = "Friz Quadrata TT",
-                titleFontSize = 10,
-                logFontType = "Friz Quadrata TT",
-                logFontSize = 10,
-                titleBarOpacity = 0.8,
-                backgroundOpacity = 0.4,
-                iconSize = 14
-            }
-        }
-    },
-}
-
 function SwiftdawnRaidTools:OnInitialize()
     self:DBInit() 
     self:OptionsInit()
     self:MinimapInit()
-    self:OverviewInit()
+
+    self.overview = SRTOverview:New(180, 300)
+    self.overview:Initialize()
+
     self:NotificationsInit()
     self:DebugLogInit()
 
@@ -136,7 +59,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
         self:SyncSchedule()
     end
 
-    self:OverviewUpdate()
+    self.overview:Update()
     self:DebugLogUpdate()
 end
 
@@ -194,18 +117,18 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
             self.db.profile.data.encountersProgress = payload.d.progress
             self.db.profile.data.encountersId = nil
             self.db.profile.data.encounters = {}
-            self:OverviewUpdate()
+            self.overview:Update()
         end
     elseif payload.e == "SYNC" then
         if self.DEBUG then self:Print("Received message SYNC") end
         self.db.profile.data.encountersProgress = nil
         self.db.profile.data.encountersId = payload.d.encountersId
         self.db.profile.data.encounters = payload.d.encounters
-        self:OverviewUpdate()
+        self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         if self.DEBUG then self:Print("Received message ACT_GRPS") end
         self:GroupsSetAllActive(payload.d)
-        self:OverviewUpdateActiveGroups()
+        self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         if self.DEBUG then self:Print("Received message TRIGGER") end
         self:DebugLogAddItem(LogItem:New(payload.d))
@@ -224,7 +147,7 @@ end
 
 function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, encounterName, ...)
     self:TestModeEnd()
-    self:OverviewSelectEncounter(encounterID)
+    self.overview:SelectEncounter(encounterID)
     self:RaidAssignmentsStartEncounter(encounterID, encounterName)
 end
 
@@ -232,14 +155,14 @@ function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
     self:RaidAssignmentsEndEncounter()
     self:SpellsResetCache()
     self:UnitsResetDeadCache()
-    self:OverviewUpdateSpells()
+    self.overview:UpdateSpells()
     self:NotificationsUpdateSpells()
 end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
     self:TestModeEnd()
     self:RaidAssignmentsEndEncounter()
-    self:OverviewUpdateSpells()
+    self.overview:UpdateSpells()
     self:NotificationsUpdateSpells()
 end
 
@@ -250,7 +173,7 @@ function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
         if self.DEBUG then self:Print("Handling cached unit coming back to life") end
         self:UnitsClearDead(guid)
         self:RaidAssignmentsUpdateGroups()
-        self:OverviewUpdateSpells()
+        self.overview:UpdateSpells()
         self:NotificationsUpdateSpells()
     end
 
@@ -258,7 +181,7 @@ function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
 end
 
 function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
-    self:OverviewUpdateSpells()
+    self.overview:UpdateSpells()
     self:NotificationsUpdateSpells()
 
     if IsInRaid() and not self.sentRaidSync then
@@ -292,7 +215,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
     elseif subEvent == "SPELL_CAST_SUCCESS" then
         self:SpellsCacheCast(sourceName, spellId, function()
             self:RaidAssignmentsUpdateGroups()
-            self:OverviewUpdateSpells()
+            self.overview:UpdateSpells()
             self:NotificationsUpdateSpells()
         end)
         self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
@@ -302,7 +225,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
         if self:IsFriendlyRaidMemberOrPlayer(destGUID) then
             self:UnitsSetDead(destGUID)
             self:RaidAssignmentsUpdateGroups()
-            self:OverviewUpdateSpells()
+            self.overview:UpdateSpells()
             self:NotificationsUpdateSpells()
         end
     end

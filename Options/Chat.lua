@@ -12,7 +12,7 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
             InterfaceOptionsFrame_OpenToCategory("Swiftdawn Raid Tools")
         elseif trimmed == "show" or trimmed == "hide" then
             self.db.profile.overview.show = trimmed == "show" and true or false
-            self:OverviewUpdate()
+            self.overview:Update()
         elseif trimmed == "versions" then
             if not reqVersionsTimer then
                 self:SyncReqVersions()

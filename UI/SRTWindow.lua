@@ -1,3 +1,4 @@
+local SwiftdawnRaidTools = SwiftdawnRaidTools
 local SharedMedia = LibStub("LibSharedMedia-3.0")
 MIN_WIDTH = 100
 MIN_HEIGHT = 100
@@ -12,12 +13,11 @@ SRTWindow = {
     main = nil,
     resizeButton = nil
 }
-
 SRTWindow.__index = SRTWindow
 
-function SRTWindow.New(obj, name, height, width)
-    local o = obj or {}
-    setmetatable(o, SRTWindow)
+function SRTWindow:New(name, height, width)
+    local o = setmetatable({}, self)
+    self.__index = self
     o.name = name
     o.height = height
     o.width = width
@@ -25,7 +25,7 @@ function SRTWindow.New(obj, name, height, width)
 end
 
 function SRTWindow:GetProfile()
-    return SRT_Profile()[self.name]
+    return SRT_Profile()[string.lower(self.name)]
 end
 
 function SRTWindow:GetAppearance()
@@ -33,7 +33,11 @@ function SRTWindow:GetAppearance()
 end
 
 function SRTWindow:GetTitleFont()
-    SharedMedia:Fetch("font", self:GetAppearance().titleFontType)
+    return SharedMedia:Fetch("font", self:GetAppearance().titleFontType)
+end
+
+function SRTWindow:GetHeaderFont()
+    return SharedMedia:Fetch("font", self:GetAppearance().headerFontType)
 end
 
 function SRTWindow:Initialize()
@@ -41,9 +45,9 @@ function SRTWindow:Initialize()
     self.popupMenu = CreateFrame("Frame", "SRT_"..self.name.."_Popup", UIParent, "BackdropTemplate")
     self.header = CreateFrame("Frame", "SRT_"..self.name.."_Header", self.container, "BackdropTemplate")
     self.headerText = self.header:CreateFontString("SRT_"..self.name.."_HeaderTitle", "OVERLAY", "GameFontNormalLarge")
-    self.menuButton = CreateFrame("SRT_"..self.name.."_MenuButton", nil, self.header)
+    self.menuButton = CreateFrame("Button", "SRT_"..self.name.."_MenuButton", self.header)
     self.main = CreateFrame("Frame", "SRT_"..self.name.."_Main", self.container)
-    self.resizeButton = CreateFrame("Button", nil, self.container)
+    self.resizeButton = CreateFrame("Button", "SRT_"..self.name.."_ResizeButton", self.container)
 
     self:SetupContainerFrame()
     self:SetupPopupMenu()
@@ -106,6 +110,10 @@ function SRTWindow:SetupPopupMenu()
     self.popupMenu:Hide() -- Start hidden
 end
 
+function SRTWindow:GetTitleFontType()
+    return SharedMedia:Fetch("font", self:GetAppearance().titleFontType)
+end
+
 function SRTWindow:SetupHeader()
     local titleFontSize = self:GetAppearance().titleFontSize
     local showPopup = function()
@@ -154,7 +162,7 @@ function SRTWindow:SetupHeader()
         self.header:SetBackdropColor(0, 0, 0, self:GetAppearance().titleBarOpacity)
         self.menuButton:SetAlpha(self:GetAppearance().titleBarOpacity)
     end)
-    self.headerText:SetFont(self:AppearanceGetOverviewTitleFontType(), titleFontSize)
+    self.headerText:SetFont(self:GetTitleFontType(), titleFontSize)
     self.headerText:SetPoint("LEFT", self.header, "LEFT", 10, 0)
     self.headerText:SetShadowOffset(1, -1)
     self.headerText:SetShadowColor(0, 0, 0, 1)
@@ -184,7 +192,7 @@ function SRTWindow:SetupResizeButton()
     self.resizeButton:SetSize(12, 12)
     self.resizeButton:SetPoint("BOTTOMRIGHT")
     local resizeTexture = self.resizeButton:CreateTexture(nil, "BACKGROUND")
-    resizeTexture:SetAllPoints(resizeButton)
+    resizeTexture:SetAllPoints(self.resizeButton)
     resizeTexture:SetTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up") -- Use a default WoW texture for resize
     self.resizeButton:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
     self.resizeButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
@@ -199,10 +207,10 @@ function SRTWindow:SetupResizeButton()
         end
     end)
     self.resizeButton:SetScript("OnEnter", function()
-        resizeButton:SetAlpha(1)
+        self.resizeButton:SetAlpha(1)
     end)
     self.resizeButton:SetScript("OnLeave", function()
-        resizeButton:SetAlpha(0)
+        self.resizeButton:SetAlpha(0)
     end)
     self.resizeButton:SetScript("OnMouseUp", function(_, button)
         if button == "LeftButton" then
@@ -227,15 +235,81 @@ function SRTWindow:UpdateAppearance()
     self.headerText:SetWidth(headerWidth - 10 - titleFontSize)
     self.main:SetPoint("TOPLEFT", 0, -headerHeight)
     self.main:SetPoint("TOPRIGHT", 0, -headerHeight)
-    self.headerButton:SetSize(titleFontSize, titleFontSize)
-    self.headerButton:SetAlpha(self:GetAppearance().titleBarOpacity)
+    self.menuButton:SetSize(titleFontSize, titleFontSize)
+    self.menuButton:SetAlpha(self:GetAppearance().titleBarOpacity)
     self.header:SetBackdropColor(0, 0, 0, self:GetAppearance().titleBarOpacity)
     local r, g, b = self.container:GetBackdropColor()
-    self.overviewFrame:SetBackdropColor(r, g, b, self:GetAppearance().backgroundOpacity)
+    self.container:SetBackdropColor(r, g, b, self:GetAppearance().backgroundOpacity)
 end
 
-function SRTWindow:UpdatePopupMenu()
-
+function SRTWindow:UpdateLocked()
+    if self:GetProfile().locked then
+        self.container:EnableMouse(false)
+        self.header:EnableMouse(false)
+        self.resizeButton:EnableMouse(false)
+        self.resizeButton:Hide()
+    else
+        self.container:EnableMouse(true)
+        self.header:EnableMouse(true)
+        self.resizeButton:EnableMouse(true)
+        self.resizeButton:Show()
+    end
 end
+
+function SRTWindow:CreatePopupMenuItem(text, onClick)
+    local item = CreateFrame("Frame", nil, self.popupMenu, "BackdropTemplate")
+    item:SetHeight(20)
+    item:EnableMouse(true)
+    item:SetScript("OnEnter", function() item.highlight:Show() end)
+    item:SetScript("OnLeave", function() item.highlight:Hide() end)
+    item:EnableMouse(true)
+    item:SetScript("OnMouseDown", function(_, button)
+        if button == "LeftButton" then
+            if item.onClick then item.onClick() end
+            self.popupMenu:Hide()
+        end
+    end)
+    item.highlight = item:CreateTexture(nil, "HIGHLIGHT")
+    item.highlight:SetPoint("TOPLEFT", 10, 0)
+    item.highlight:SetPoint("BOTTOMRIGHT", -10, 0)
+    item.highlight:SetTexture("Interface\\Buttons\\UI-Listbox-Highlight")
+    item.highlight:SetBlendMode("ADD")
+    item.highlight:SetAlpha(0.5)
+    item.highlight:Hide()
+    item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    item.text:SetFont(SwiftdawnRaidTools:AppearancePopupFontType(), 10)
+    item.text:SetTextColor(1, 1, 1)
+    item.text:SetPoint("BOTTOMLEFT", 15, 5)
+    item.text:SetText(text)
+    item.onClick = onClick
+    return item
+end
+
+function SRTWindow:ShowPopupListItem(index, text, setting, onClick, accExtraOffset, extraOffset)
+    if not self.popupListItems[index] then
+        self.popupListItems[index] = self:CreatePopupMenuItem(self.overviewPopup)
+    end
+    local item = self.popupListItems[index]
+    local yOfs = -10 - (20 * (index -1))
+    if accExtraOffset then
+        yOfs = yOfs - accExtraOffset
+    end
+    if extraOffset then
+        yOfs = yOfs - 10
+    end
+    if setting then
+        item.text:SetTextColor(1, 1, 1, 1)
+    else
+        item.text:SetTextColor(1, 0.8235, 0)
+    end
+    item:SetPoint("TOPLEFT", 0, yOfs)
+    item:SetPoint("TOPRIGHT", 0, yOfs)
+    item.text:SetText(text)
+    item.onClick = onClick
+    item:Show()
+    return yOfs
+end
+
+function SRTWindow:UpdatePopupMenu() end
 
 return SRTWindow

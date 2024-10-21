@@ -282,7 +282,7 @@ function SwiftdawnRaidTools:DebugLogUpdateAppearance()
     self.debugLogHeaderButton:SetAlpha(self.db.profile.debugLog.appearance.titleBarOpacity)
 
     self.debugLogHeader:SetBackdropColor(0, 0, 0, self.db.profile.debugLog.appearance.titleBarOpacity)
-    local r, g, b = self.overviewFrame:GetBackdropColor()
+    local r, g, b = self.debugLogFrame:GetBackdropColor()
     self.debugLogFrame:SetBackdropColor(r, g, b, self.db.profile.debugLog.appearance.backgroundOpacity)
 end
 

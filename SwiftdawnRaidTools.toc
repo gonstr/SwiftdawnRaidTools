@@ -23,8 +23,7 @@ Libs\LibSharedMedia-3.0\LibSharedMedia-3.0.lua
 Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
-Models\LogItem.lua
-UI\SRTWindow.lua
+Preload.lua
 Core.lua
 Test.lua
 Utils.lua
@@ -40,7 +39,9 @@ State\Groups.lua
 State\Units.lua
 Controllers\RaidAssignments.lua
 Controllers\Sync.lua
+UI\SRTWindow.lua
 UI\DebugLog.lua
 UI\Minimap.lua
 UI\Overview.lua
 UI\Notifications.lua
+Models\LogItem.lua

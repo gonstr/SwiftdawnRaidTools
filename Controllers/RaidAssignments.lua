@@ -173,7 +173,7 @@ function SwiftdawnRaidTools:RaidAssignmentsEndEncounter()
 
     resetState()
     self:GroupsReset()
-    self:OverviewUpdateActiveGroups()
+    self.overview:UpdateActiveGroups()
 end
 
 function SwiftdawnRaidTools:RaidAssignmentsInEncounter()

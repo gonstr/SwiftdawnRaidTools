@@ -134,7 +134,7 @@ local mainOptions = {
                         SwiftdawnRaidTools.db.profile.debugLog.appearance.backgroundOpacity = 0.4
                         SwiftdawnRaidTools.db.profile.debugLog.appearance.iconSize = 14
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                         SwiftdawnRaidTools:NotificationsUpdateAppearance()
                         SwiftdawnRaidTools:DebugLogUpdateAppearance()
                     end,
@@ -152,7 +152,7 @@ local mainOptions = {
                         SwiftdawnRaidTools.db.profile.debugLog.anchorX = -800
                         SwiftdawnRaidTools.db.profile.debugLog.anchorY = 0
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                         SwiftdawnRaidTools:NotificationsUpdateAppearance()
                         SwiftdawnRaidTools:DebugLogUpdateAppearance()
                     end,
@@ -192,7 +192,7 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.overview.show = value
-                SwiftdawnRaidTools:OverviewUpdate()
+                SwiftdawnRaidTools.overview:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.overview.show end,
             order = 11,
@@ -210,7 +210,7 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.overview.locked = value
-                SwiftdawnRaidTools:OverviewUpdate()
+                SwiftdawnRaidTools.overview:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.overview.locked end,
             order = 13,
@@ -259,7 +259,6 @@ function TopLeftToCenterX(topLeftX, frameWidth)
     local screenWidth = GetScreenWidth()
     -- Adjust for center point and correct for Y-axis inversion
     local centerX = topLeftX - (screenWidth / 2) + (frameWidth / 2)
-    print(string.format("TopLeftX: %.2d  CenterX: %.2d", topLeftX, centerX))
     return centerX
 end
 
@@ -319,13 +318,13 @@ local appearanceOptions = {
                     width = "half",
                     desc = "Overview anchor X position",
                     get = function(info)
-                        return string.format("%.1f", TopLeftToCenterX(SwiftdawnRaidTools.db.profile.overview.anchorX, SwiftdawnRaidTools.overviewFrame:GetWidth()))
+                        return string.format("%.1f", TopLeftToCenterX(SwiftdawnRaidTools.db.profile.overview.anchorX, SwiftdawnRaidTools.overview.container:GetWidth()))
                     end,
                     set = function(info, value)
                         local numValue = tonumber(value)
                         if numValue then
-                            SwiftdawnRaidTools.db.profile.overview.anchorX = CenterToTopLeftX(numValue, SwiftdawnRaidTools.overviewFrame:GetWidth())
-                            SwiftdawnRaidTools:OverviewUpdateAppearance()
+                            SwiftdawnRaidTools.db.profile.overview.anchorX = CenterToTopLeftX(numValue, SwiftdawnRaidTools.overview.container:GetWidth())
+                            SwiftdawnRaidTools.overview:UpdateAppearance()
                         else
                             print("Please enter a valid number for X position.")
                         end
@@ -350,9 +349,8 @@ local appearanceOptions = {
                     set = function(info, value)
                         local numValue = tonumber(value)
                         if numValue then
-                            print("New Y: "..numValue)
                             SwiftdawnRaidTools.db.profile.overview.anchorY = numValue
-                            SwiftdawnRaidTools:OverviewUpdateAppearance()
+                            SwiftdawnRaidTools.overview:UpdateAppearance()
                         else
                             print("Please enter a valid number for Y position.")
                         end
@@ -379,7 +377,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.scale = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewTitleFontDescription = {
@@ -400,7 +398,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.titleFontType = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewTitleFontSize = {
@@ -416,7 +414,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.titleFontSize = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewHeaderFontDescription = {
@@ -437,7 +435,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.headerFontType = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewHeaderFontSize = {
@@ -453,7 +451,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.headerFontSize = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewPlayerFontDescription = {
@@ -474,7 +472,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.playerFontType = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewPlayerFontSize = {
@@ -490,7 +488,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewIconSizeDescription = {
@@ -512,7 +510,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.iconSize = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewTitleBarOpacityDescription = {
@@ -534,7 +532,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.titleBarOpacity = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 },
                 overviewBackgroundOpacityDescription = {
@@ -556,7 +554,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.overview.appearance.backgroundOpacity = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                     end,
                 }
             }
@@ -975,7 +973,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                         SwiftdawnRaidTools:DebugLogUpdateAppearance()
                     end,
                 },
@@ -998,7 +996,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.debugLog.appearance.backgroundOpacity = value
 
-                        SwiftdawnRaidTools:OverviewUpdateAppearance()
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
                         SwiftdawnRaidTools:DebugLogUpdateAppearance()
                     end,
                 },
@@ -1134,7 +1132,7 @@ local importOptions = {
                 end
 
                 SwiftdawnRaidTools:SyncSchedule()
-                SwiftdawnRaidTools:OverviewUpdate()
+                SwiftdawnRaidTools.overview:Update()
             end,
         },
     },

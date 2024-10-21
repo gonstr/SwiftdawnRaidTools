@@ -16,7 +16,7 @@ function SwiftdawnRaidTools:MinimapInit()
                     SwiftdawnRaidTools:NotificationsToggleFrameLock()
                 else
                     SwiftdawnRaidTools.db.profile.overview.show = not SwiftdawnRaidTools.db.profile.overview.show
-                    SwiftdawnRaidTools:OverviewUpdate()
+                    SwiftdawnRaidTools.overview:Update()
                 end
             end
         end,

@@ -14,7 +14,7 @@ end
 function SwiftdawnRaidTools:InternalTestStart()
     self.TEST = true
 
-    self:OverviewUpdateSpells()
+    self.overview:UpdateSpells()
 
     self:ENCOUNTER_START(nil, 1082)
 
@@ -53,9 +53,9 @@ function SwiftdawnRaidTools:TestModeStart()
     self:GroupsReset()
     self:SpellsResetCache()
     self:UnitsResetDeadCache()
-    self:OverviewUpdate()
+    self.overview:Update()
 
-    self:OverviewSelectEncounter(42001)
+    self.overview:SelectEncounter(42001)
     self:RaidAssignmentsStartEncounter(42001, "The Boss")
 
     -- Phase 1
@@ -120,7 +120,7 @@ function SwiftdawnRaidTools:TestModeEnd()
         self:RaidAssignmentsEndEncounter()
         self:SpellsResetCache()
         self:UnitsResetDeadCache()
-        self:OverviewUpdate()
+        self.overview:Update()
     end
 end
 
