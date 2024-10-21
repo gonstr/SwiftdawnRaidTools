@@ -14,24 +14,18 @@ function SRTOverview:New(height, width)
     return o
 end
 
-function SRTOverview:Initialize()
-    SRTWindow.Initialize(self)
-    self.headerText:SetText("Overview")
-    self:UpdateAppearance()
-end
-
-local function GetBossAbilityHeight()
-    local headerFontSize = SwiftdawnRaidTools.db.profile.overview.appearance.headerFontSize
+function SRTOverview:GetBossAbilityHeight()
+    local headerFontSize = self:GetAppearance().headerFontSize
     return headerFontSize + 7
 end
 
-local function GetAssignmentGroupHeight()
-    local playerFontSize = SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize
-    local iconSize = SwiftdawnRaidTools.db.profile.overview.appearance.iconSize
+function SRTOverview:GetAssignmentGroupHeight()
+    local playerFontSize = self:GetAppearance().playerFontSize
+    local iconSize = self:GetAppearance().iconSize
     return (playerFontSize > iconSize and playerFontSize or iconSize) + 7
 end
 
-function SRTWindow:GetPlayerNameFont()
+function SRTOverview:GetPlayerNameFont()
     return SharedMedia:Fetch("font", self:GetAppearance().playerFontType)
 end
 
@@ -47,11 +41,11 @@ function SRTOverview:UpdateAppearance()
 
     for _, bossAbilityFrame in pairs(self.bossAbilities) do
         bossAbilityFrame.text:SetFont(self:GetHeaderFont(), headerFontSize)
-        bossAbilityFrame:SetHeight(GetBossAbilityHeight())
+        bossAbilityFrame:SetHeight(self:GetBossAbilityHeight())
     end
 
     for _, assignmentGroupFrame in pairs(self.assignmentGroups) do
-        assignmentGroupFrame:SetHeight(GetAssignmentGroupHeight())
+        assignmentGroupFrame:SetHeight(self:GetAssignmentGroupHeight())
         for _, assignmentFrame in pairs(assignmentGroupFrame.assignments) do
             assignmentFrame.text:SetFont(self:GetPlayerNameFont(), playerFontSize)
             assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
@@ -148,11 +142,6 @@ function SRTOverview:SelectEncounter(encounterId)
     self:Update()
 end
 
-function SRTOverview:ToggleLock()
-    self:GetProfile().locked = not self:GetProfile().locked
-    self:UpdateLocked()
-end
-
 function SRTOverview:UpdatePopupMenu()
     if InCombatLockdown() then
         return
@@ -212,16 +201,17 @@ function SRTOverview:UpdatePopupMenu()
 end
 
 function SRTOverview:CreateBossAbilityFrame(prevFrame)
+    DevTool:AddData(self, "SRTOverview")
     local bossAbilityFrame = CreateFrame("Frame", nil, self.main)
-    bossAbilityFrame:SetHeight(GetBossAbilityHeight())
+    bossAbilityFrame:SetHeight(self:GetBossAbilityHeight())
 
     -- Anchor to main frame or previous row if it exists
     if prevFrame then
-        bossAbilityFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0)
-        bossAbilityFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0)
+        bossAbilityFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
+        bossAbilityFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
     else
-        bossAbilityFrame:SetPoint("TOPLEFT", 0)
-        bossAbilityFrame:SetPoint("TOPRIGHT", 0)
+        bossAbilityFrame:SetPoint("TOPLEFT", self.main, "TOPLEFT", 0, 0)
+        bossAbilityFrame:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", 0, 0)
     end
 
     bossAbilityFrame.text = bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -233,6 +223,7 @@ function SRTOverview:CreateBossAbilityFrame(prevFrame)
 end
 
 function SRTOverview:UpdateBossAbilityFrame(bossAbilityFrame, prevFrame, name)
+    DevTool:AddData({ bossAbilityFrame = bossAbilityFrame, prevFrame = prevFrame, name = name }, "UpdateBossAbilityFrame")
     bossAbilityFrame:Show()
 
     bossAbilityFrame:ClearAllPoints()
@@ -241,16 +232,16 @@ function SRTOverview:UpdateBossAbilityFrame(bossAbilityFrame, prevFrame, name)
         bossAbilityFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, -7)
         bossAbilityFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, -7)
     else
-        bossAbilityFrame:SetPoint("TOPLEFT", 0, -4)
-        bossAbilityFrame:SetPoint("TOPRIGHT", 0, -4)
+        bossAbilityFrame:SetPoint("TOPLEFT", self.main, "TOPLEFT", 0, -4)
+        bossAbilityFrame:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", 0, -4)
     end
 
     bossAbilityFrame.text:SetText(name)
 end
 
-function SRTOverview:CreateAssignmentGroupFrame(prevFrame, i)
+function SRTOverview:CreateAssignmentGroupFrame(bossAbilityFrame, prevFrame, i)
     local assignmentGroupFrame = CreateFrame("Frame", nil, self.main, "BackdropTemplate")
-    assignmentGroupFrame:SetHeight(GetAssignmentGroupHeight())
+    assignmentGroupFrame:SetHeight(self:GetAssignmentGroupHeight())
     assignmentGroupFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
@@ -262,8 +253,8 @@ function SRTOverview:CreateAssignmentGroupFrame(prevFrame, i)
         assignmentGroupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0)
         assignmentGroupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0)
     else
-        assignmentGroupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, -4)
-        assignmentGroupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, -4)
+        assignmentGroupFrame:SetPoint("TOPLEFT", bossAbilityFrame, "BOTTOMLEFT", 0, -4)
+        assignmentGroupFrame:SetPoint("TOPRIGHT", bossAbilityFrame, "BOTTOMRIGHT", 0, -4)
     end
 
     assignmentGroupFrame.assignments = {}
@@ -296,7 +287,7 @@ function SRTOverview:CreateAssignmentFrame(parentFrame)
     return assignmentFrame
 end
 
-local function updateAssignmentFrame(assignmentFrame, assignment, index, total)
+function SRTOverview:UpdateAssignmentFrame(assignmentFrame, assignment, index, total)
     assignmentFrame:Show()
 
     assignmentFrame.player = assignment.player
@@ -356,7 +347,7 @@ function SRTOverview:UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, uu
             groupFrame.assignments[i] = self:CreateAssignmentFrame(groupFrame)
         end
 
-        updateAssignmentFrame(groupFrame.assignments[i], assignment, i, #group)
+        self:UpdateAssignmentFrame(groupFrame.assignments[i], assignment, i, #group)
     end
 end
 
@@ -402,7 +393,7 @@ function SRTOverview:UpdateMain()
                 -- Update assignment groups
                 for i, group in ipairs(part.assignments) do
                     if not self.assignmentGroups[groupIndex] then
-                        self.assignmentGroups[groupIndex] = self:CreateAssignmentGroupFrame(prevFrame, groupIndex)
+                        self.assignmentGroups[groupIndex] = self:CreateAssignmentGroupFrame(bossAbilityFrame, prevFrame, groupIndex)
                     end
 
                     local groupFrame = self.assignmentGroups[groupIndex]

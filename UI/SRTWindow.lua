@@ -53,6 +53,7 @@ function SRTWindow:Initialize()
     self:SetupPopupMenu()
     self:SetupHeader()
     self:SetupResizeButton()
+    self:SetupMain()
 
     self:UpdateAppearance()
 end
@@ -225,6 +226,11 @@ function SRTWindow:SetupResizeButton()
     end)
 end
 
+function SRTWindow:SetupMain()
+    self.main:SetPoint("BOTTOMLEFT", 0, 0)
+    self.main:SetPoint("BOTTOMRIGHT", 0, 0)
+end
+
 function SRTWindow:UpdateAppearance()
     local titleFontSize = self:GetAppearance().titleFontSize
     self.container:SetScale(self:GetAppearance().scale)
@@ -240,6 +246,11 @@ function SRTWindow:UpdateAppearance()
     self.header:SetBackdropColor(0, 0, 0, self:GetAppearance().titleBarOpacity)
     local r, g, b = self.container:GetBackdropColor()
     self.container:SetBackdropColor(r, g, b, self:GetAppearance().backgroundOpacity)
+end
+
+function SRTWindow:ToggleLock()
+    self:GetProfile().locked = not self:GetProfile().locked
+    self:UpdateLocked()
 end
 
 function SRTWindow:UpdateLocked()
