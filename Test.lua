@@ -83,7 +83,7 @@ function SwiftdawnRaidTools:TestModeStart()
     -- Phase 2
 
     insert(timers, C_Timer.NewTimer(17, function()
-        SwiftdawnRaidTools:RAID_BOSS_EMOTE(nil, "I will breathe fire on you!")
+        SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(nil, "I will breathe fire on you!")
     end))
 
     insert(timers, C_Timer.NewTimer(18.5, function()
