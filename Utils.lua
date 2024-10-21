@@ -321,3 +321,11 @@ function TableToString(tbl, indent, seen)
     result = result .. indentStr .. "}"
     return result
 end
+
+function SRT_Profile()
+    return SwiftdawnRaidTools.db.profile
+end
+
+function SRT_IsTesting()
+    return SwiftdawnRaidTools.TEST
+end

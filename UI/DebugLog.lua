@@ -231,7 +231,7 @@ function SwiftdawnRaidTools:DebugLogScrollToBottom()
 end
 
 function SwiftdawnRaidTools:DebugLogAddItem(logItem)
-    logItem:CreateFrame(self.debugLogScrollContentFrame, SwiftdawnRaidTools.db.profile)
+    logItem:CreateFrame(self.debugLogScrollContentFrame)
     -- fix connection points for new and old lines
     if #self.debugLogItems == 0 then
         -- no other lines, so connect to top

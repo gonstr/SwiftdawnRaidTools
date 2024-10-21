@@ -8,7 +8,6 @@ LogItem.__index = LogItem
 function LogItem:New(data)
     local obj = {}
     setmetatable(obj, LogItem)
-    obj.db = SwiftdawnRaidTools.db.profile
     obj.triggerType = data.triggerType
     obj.assignmentId = data.uuid
     obj.activeGroups = data.activeGroups
@@ -50,11 +49,11 @@ function LogItem:GetExtraString()
             tostring(self.triggerType), tostring(self.assignmentId), TableToString(self.activeGroups), tostring(self.countdown), tostring(self.delay), TableToString(self.context))
 end
 
-function LogItem:getLogFontType(db)
-    return SharedMedia:Fetch("font", db.debugLog.appearance.logFontType)
+function LogItem:getLogFontType()
+    return SharedMedia:Fetch("font", SRT_Profile().debugLog.appearance.logFontType)
 end
 
-function LogItem:CreateFrame(parentFrame, db)
+function LogItem:CreateFrame(parentFrame)
     self.frame = CreateFrame("Frame", "LogLine", parentFrame)
     self.frame:SetClipsChildren(true)
     self.timestamp = self.frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -84,20 +83,20 @@ function LogItem:CreateFrame(parentFrame, db)
     self.frame:SetScript("OnMouseDown", function(_, button)
         if button == "LeftButton" then
             self.showExtra = not self.showExtra
-            self:UpdateAppearance(db)
+            self:UpdateAppearance()
         end
     end)
-    self:UpdateAppearance(db)
+    self:UpdateAppearance()
 end
 
-function LogItem:UpdateAppearance(db)
-    local logFontSize = db.debugLog.appearance.logFontSize
+function LogItem:UpdateAppearance()
+    local logFontSize = SRT_Profile().debugLog.appearance.logFontSize
     self.frame:SetWidth(self.frame:GetParent():GetWidth() - 10)
-    self.timestamp:SetFont(self:getLogFontType(db), logFontSize)
+    self.timestamp:SetFont(self:getLogFontType(), logFontSize)
     self.timestamp:SetWidth(self.timestamp:GetStringWidth())
-    self.text:SetFont(self:getLogFontType(db), logFontSize)
+    self.text:SetFont(self:getLogFontType(), logFontSize)
     self.text:SetWidth(self.frame:GetWidth() - self.timestamp:GetStringWidth() - 2)
-    self.extraText:SetFont(self:getLogFontType(db), logFontSize)
+    self.extraText:SetFont(self:getLogFontType(), logFontSize)
     self.extraText:SetWidth(self.frame:GetWidth() - 5)
     self.extraText:SetHeight(self.extraText:GetStringHeight())
     if self.showExtra then
