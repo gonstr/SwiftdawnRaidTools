@@ -54,12 +54,10 @@ function SRTWindow:Initialize()
     self:SetupHeader()
     self:SetupResizeButton()
     self:SetupMain()
-
-    self:UpdateAppearance()
 end
 
 function SRTWindow:SetupContainerFrame()
-    self.container:SetSize(self.height, self.width)
+    self.container:SetSize(self.width, self.height)
     self.container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
@@ -88,6 +86,11 @@ function SRTWindow:SetupContainerFrame()
     self.container:SetClipsChildren(true)
     self.container:SetResizable(true)
     self.container:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self:GetProfile().anchorX, self:GetProfile().anchorY)
+    self.container:SetScript("OnMouseDown", function (_, button)
+        if button == "LeftButton" or button == "RightButton" then
+            self.popupMenu:Hide()
+        end
+    end)
 end
 
 function SRTWindow:SetupPopupMenu()

@@ -50,7 +50,7 @@ function LogItem:GetExtraString()
 end
 
 function LogItem:getLogFontType()
-    return SharedMedia:Fetch("font", SRT_Profile().debugLog.appearance.logFontType)
+    return SharedMedia:Fetch("font", SRT_Profile().debuglog.appearance.logFontType)
 end
 
 function LogItem:CreateFrame(parentFrame)
@@ -90,7 +90,7 @@ function LogItem:CreateFrame(parentFrame)
 end
 
 function LogItem:UpdateAppearance()
-    local logFontSize = SRT_Profile().debugLog.appearance.logFontSize
+    local logFontSize = SRT_Profile().debuglog.appearance.logFontSize
     self.frame:SetWidth(self.frame:GetParent():GetWidth() - 10)
     self.timestamp:SetFont(self:getLogFontType(), logFontSize)
     self.timestamp:SetWidth(self.timestamp:GetStringWidth())
@@ -104,7 +104,7 @@ function LogItem:UpdateAppearance()
         self.frame:SetHeight(logFontSize + 3 + self.extraText:GetHeight())
     else
         self.extraText:Hide()
-        self.frame:SetHeight(logFontSize)
+        self.frame:SetHeight(logFontSize + 3)
     end
 end
 

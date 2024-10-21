@@ -58,7 +58,7 @@ SwiftdawnRaidTools.defaults = {
                 iconSize = 14
             }
         },
-        debugLog = {
+        debuglog = {
             anchorX = 0,
             anchorY = -(GetScreenHeight()/2),
             locked = false,

@@ -3,11 +3,12 @@ function SwiftdawnRaidTools:OnInitialize()
     self:OptionsInit()
     self:MinimapInit()
 
-    self.overview = SRTOverview:New(180, 300)
+    self.overview = SRTOverview:New(300, 180)
     self.overview:Initialize()
 
     self:NotificationsInit()
-    self:DebugLogInit()
+    self.debugLog = SRTDebugLog:New(100, 400)
+    self.debugLog:Initialize()
 
     self:RegisterComm(self.PREFIX_SYNC)
     self:RegisterComm(self.PREFIX_SYNC_PROGRESS)
@@ -60,7 +61,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
     end
 
     self.overview:Update()
-    self:DebugLogUpdate()
+    self.debugLog:Update()
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
@@ -131,7 +132,7 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         if self.DEBUG then self:Print("Received message TRIGGER") end
-        self:DebugLogAddItem(LogItem:New(payload.d))
+        self.debugLog:AddItem(LogItem:New(payload.d))
         self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
         self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
         self:NotificationsUpdateSpells()

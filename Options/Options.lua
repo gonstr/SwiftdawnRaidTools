@@ -125,18 +125,18 @@ local mainOptions = {
                         SwiftdawnRaidTools.db.profile.notifications.appearance.scale = 1.2
                         SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = 0.9
                         SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = 16
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.scale = 1.0
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.headerFontType = "Friz Quadrata TT"
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.headerFontSize = 10
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType = "Friz Quadrata TT"
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontSize = 10
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity = 0.8
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.backgroundOpacity = 0.4
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.iconSize = 14
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.scale = 1.0
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.headerFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.headerFontSize = 10
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontSize = 10
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.titleBarOpacity = 0.8
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.backgroundOpacity = 0.4
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.iconSize = 14
 
                         SwiftdawnRaidTools.overview:UpdateAppearance()
                         SwiftdawnRaidTools:NotificationsUpdateAppearance()
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                     order = 5,
                 },
@@ -149,12 +149,12 @@ local mainOptions = {
                         SwiftdawnRaidTools.db.profile.overview.anchorY = 200
                         SwiftdawnRaidTools.db.profile.notifications.anchorX = 0
                         SwiftdawnRaidTools.db.profile.notifications.anchorY = 200
-                        SwiftdawnRaidTools.db.profile.debugLog.anchorX = -800
-                        SwiftdawnRaidTools.db.profile.debugLog.anchorY = 0
+                        SwiftdawnRaidTools.db.profile.debuglog.anchorX = -800
+                        SwiftdawnRaidTools.db.profile.debuglog.anchorY = 0
 
                         SwiftdawnRaidTools.overview:UpdateAppearance()
                         SwiftdawnRaidTools:NotificationsUpdateAppearance()
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                     order = 6,
                 },
@@ -227,10 +227,10 @@ local mainOptions = {
             type = "toggle",
             width = "half",
             set = function(info, value)
-                SwiftdawnRaidTools.db.profile.debugLog.show = value
-                SwiftdawnRaidTools:DebugLogUpdate()
+                SwiftdawnRaidTools.db.profile.debuglog.show = value
+                SwiftdawnRaidTools.debugLog:Update()
             end,
-            get = function(info) return SwiftdawnRaidTools.db.profile.debugLog.show end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.show end,
             order = 21,
         },
         lockDebugLogDescription = {
@@ -245,10 +245,10 @@ local mainOptions = {
             type = "toggle",
             width = "half",
             set = function(info, value)
-                SwiftdawnRaidTools.db.profile.debugLog.locked = value
-                SwiftdawnRaidTools:DebugLogUpdate()
+                SwiftdawnRaidTools.db.profile.debuglog.locked = value
+                SwiftdawnRaidTools.debugLog:Update()
             end,
-            get = function(info) return SwiftdawnRaidTools.db.profile.debugLog.locked end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.locked end,
             order = 23,
         },
     },
@@ -821,12 +821,12 @@ local appearanceOptions = {
                     name = "",
                     width = "half",
                     desc = "Debug Log anchor X position",
-                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.debugLog.anchorX) end,
+                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.debuglog.anchorX) end,
                     set = function(info, value)
                         local numValue = tonumber(value)
                         if numValue then
-                            SwiftdawnRaidTools.db.profile.debugLog.anchorX = numValue
-                            SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                            SwiftdawnRaidTools.db.profile.debuglog.anchorX = numValue
+                            SwiftdawnRaidTools.debugLog:UpdateAppearance()
                         else
                             print("Please enter a valid number for X position.")
                         end
@@ -845,12 +845,12 @@ local appearanceOptions = {
                     name = "",
                     width = "half",
                     desc = "Debug Log anchor Y position",
-                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.debugLog.anchorY) end,
+                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.debuglog.anchorY) end,
                     set = function(info, value)
                         local numValue = tonumber(value)
                         if numValue then
-                            SwiftdawnRaidTools.db.profile.debugLog.anchorY = numValue
-                            SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                            SwiftdawnRaidTools.db.profile.debuglog.anchorY = numValue
+                            SwiftdawnRaidTools.debugLog:UpdateAppearance()
                         else
                             print("Please enter a valid number for Y position.")
                         end
@@ -873,11 +873,11 @@ local appearanceOptions = {
                     desc = "Set the Debug Log UI Scale.",
                     width = "double",
                     order = 11,
-                    get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.scale end,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.scale end,
                     set = function(_, value)
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.scale = value
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.scale = value
 
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                 },
                 debugLogTitleFontDescription = {
@@ -894,11 +894,11 @@ local appearanceOptions = {
                     dialogControl = "LSM30_Font",
                     width = "normal",
                     order = 21,
-                    get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontType end,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.titleFontType end,
                     set = function(_, value)
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontType = value
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.titleFontType = value
 
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                 },
                 debugLogTitleFontSize = {
@@ -910,11 +910,11 @@ local appearanceOptions = {
                     step = 1,
                     width = "normal",
                     order = 22,
-                    get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontSize end,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.titleFontSize end,
                     set = function(_, value)
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.titleFontSize = value
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.titleFontSize = value
 
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                 },
                 debugLogLineFontDescription = {
@@ -931,11 +931,11 @@ local appearanceOptions = {
                     dialogControl = "LSM30_Font",
                     width = "normal",
                     order = 142,
-                    get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType end,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontType end,
                     set = function(_, value)
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontType = value
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontType = value
 
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                 },
                 debugLogLineFontSize = {
@@ -947,11 +947,11 @@ local appearanceOptions = {
                     step = 1,
                     width = "normal",
                     order = 143,
-                    get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontSize end,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontSize end,
                     set = function(_, value)
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.logFontSize = value
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontSize = value
 
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                 },
                 debugLogTitleBarOpacityDescription = {
@@ -969,12 +969,12 @@ local appearanceOptions = {
                     desc = "Set the Debug Log title bar background opacity.",
                     width = "double",
                     order = 154,
-                    get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity end,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.titleBarOpacity end,
                     set = function(_, value)
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.titleBarOpacity = value
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.titleBarOpacity = value
 
                         SwiftdawnRaidTools.overview:UpdateAppearance()
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                 },
                 debugLogBackgroundOpacityDescription = {
@@ -992,12 +992,12 @@ local appearanceOptions = {
                     desc = "Set the Debug Log background opacity.",
                     width = "double",
                     order = 156,
-                    get = function() return SwiftdawnRaidTools.db.profile.debugLog.appearance.backgroundOpacity end,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.backgroundOpacity end,
                     set = function(_, value)
-                        SwiftdawnRaidTools.db.profile.debugLog.appearance.backgroundOpacity = value
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.backgroundOpacity = value
 
                         SwiftdawnRaidTools.overview:UpdateAppearance()
-                        SwiftdawnRaidTools:DebugLogUpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                 },
             },

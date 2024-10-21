@@ -14,6 +14,11 @@ function SRTOverview:New(height, width)
     return o
 end
 
+function SRTOverview:Initialize()
+    SRTWindow.Initialize(self)
+    self:UpdateAppearance()
+end
+
 function SRTOverview:GetBossAbilityHeight()
     local headerFontSize = self:GetAppearance().headerFontSize
     return headerFontSize + 7
