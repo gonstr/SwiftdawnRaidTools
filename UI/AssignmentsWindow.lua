@@ -1,22 +1,34 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 local SharedMedia = LibStub("LibSharedMedia-3.0")
-local AceGUI = LibStub("AceGUI-3.0")
 
+--- Assignment Explorer window class object
+---@class SRTAssignments:SRTWindow
 SRTAssignments = setmetatable({
     encounterFrames = {}
 }, SRTWindow)
 SRTAssignments.__index = SRTAssignments
 
+---@return SRTAssignments
 function SRTAssignments:New(height, width)
-    local o = SRTWindow.New(self, "Assignments", height, width)
+    local obj = SRTWindow.New(self, "Assignments", height, width)
+    ---@cast obj SRTAssignments
     self.__index = self
-    return o
+    return obj
 end
 
 function SRTAssignments:Initialize()
     SRTWindow.Initialize(self)
     self.headerText:SetText("Assignments Explorer")
-    local encounterFrame = CreateFrame("Frame", "SRT_Encounter_"..tostring(encounterID), self.main)
+    self.leftPane = CreateFrame("Frame", "SRT_Assignments_LeftPane", self.main)
+    self.leftPane:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
+    self.leftPane:SetPoint("TOPRIGHT", self.main, "TOP", -5, -5)
+    self.leftPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
+    self.leftPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOM", -5, 5)
+    self.rightPane = CreateFrame("Frame", "SRT_Assignments_RightPane", self.main)
+    self.rightPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
+    self.rightPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
+    self.rightPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
+    self.rightPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
     self:UpdateAppearance()
 end
 
@@ -41,7 +53,7 @@ function SRTAssignments:UpdateAppearance()
     local encounterAssignments = self:GetEncounters()[selectedEncounterID]
 
     local encounterName = self.main:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    encounterName:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
+    encounterName:SetPoint("TOPLEFT", self.leftPane, "TOPLEFT", 0, -5)
     encounterName:SetText(self:GetEncounterName(selectedEncounterID))
     encounterName:SetFont(self:GetHeaderFontType(), 14)
     self:SetDefaultFontStyle(encounterName)

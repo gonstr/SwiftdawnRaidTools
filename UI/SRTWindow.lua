@@ -3,8 +3,12 @@ local SharedMedia = LibStub("LibSharedMedia-3.0")
 MIN_WIDTH = 100
 MIN_HEIGHT = 100
 
+--- Base window class object for SRT 
+---@class SRTWindow
 SRTWindow = {
     name = "",
+    height = 0,
+    width = 0,
     container = nil,
     popup = nil,
     header = nil,
@@ -15,6 +19,7 @@ SRTWindow = {
 }
 SRTWindow.__index = SRTWindow
 
+---@return SRTWindow 
 function SRTWindow:New(name, height, width)
     local o = setmetatable({}, self)
     self.__index = self
