@@ -12,8 +12,10 @@ local State = {
 SRTAssignments = setmetatable({
     state = State.ONLY_ENCOUNTER,
     selectedEncounterID = 1025,
+    selectedPlayer= {},
+    selectedPlayerName = "",
+    selectedPlayerSpellID = 0,
     encounter = {},
-    selectedPlayer = "",
     player = {},
     roster = {},
 }, SRTWindow)
@@ -58,18 +60,16 @@ end
 function SRTAssignments:UpdateAppearance()
     SRTWindow.UpdateAppearance(self)
 
+    self:UpdateEncounterPane()
+    self:UpdateSelectedPlayerPane()
+    self:UpdateRosterPane()
+end
+
+function SRTAssignments:UpdateEncounterPane()
     self.encounterPane:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
     self.encounterPane:SetPoint("TOPRIGHT", self.main, "TOP", -5, -5)
     self.encounterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
     self.encounterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOM", -5, 5)
-    self.selectedPlayerPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
-    self.selectedPlayerPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
-    self.selectedPlayerPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
-    self.selectedPlayerPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
-    self.rosterPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
-    self.rosterPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
-    self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
-    self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
 
     local encounterAssignments = self:GetEncounters()[self.selectedEncounterID]
 
@@ -120,6 +120,68 @@ function SRTAssignments:UpdateAppearance()
     end
 end
 
+function SRTAssignments:UpdateSelectedPlayerPane()
+    if self.state == State.SHOW_PLAYER then
+        self.selectedPlayerPane:Show()
+    else
+        self.selectedPlayerPane:Hide()
+    end
+
+    self.selectedPlayerPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
+    self.selectedPlayerPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
+    self.selectedPlayerPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
+    self.selectedPlayerPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+    
+    self.player.name = self.player.name or self.selectedPlayerPane:CreateFontString("SRT_AssignmentExplorer_PlayerPane_Name", "OVERLAY", "GameFontNormalLarge")
+    self.player.name:SetPoint("TOPLEFT", self.selectedPlayerPane, "TOPLEFT", 0, -5)
+    self.player.name:SetTextColor(1, 1, 1, 0.8)
+    self.player.name:SetText(self.selectedPlayer.name)
+    self.player.name:SetFont(self:GetHeaderFontType(), 14)
+    self:SetDefaultFontStyle(self.player.name)
+    
+    local iconSize = self:GetAppearance().iconSize + 2
+
+    self.player.cooldowns = self.player.cooldowns or {}
+    DevTool:AddData(self.selectedPlayer, "selectedPlayer")
+    local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(self.selectedPlayer.spellID)
+    -- DevTool:AddData({ name=name, rank=rank, icon=icon, castTime=castTime, minRange=minRange, maxRange=maxRange, spellID=spellID, originalIcon=originalIcon }, "selectedPlayerSpell_" .. self.selectedPlayer.name)
+
+    local cooldownFrame = self.player.cooldowns[1] or CreateFrame("Frame", nil, self.selectedPlayerPane, "BackdropTemplate")
+    cooldownFrame:SetPoint("TOPLEFT", self.player.name, "BOTTOMLEFT", 5, -5)
+    cooldownFrame:SetPoint("TOPRIGHT", self.player.name, "BOTTOMLEFT", 190, -5)
+    cooldownFrame.iconFrame = cooldownFrame.iconFrame or CreateFrame("Frame", nil, cooldownFrame)
+    cooldownFrame.iconFrame:SetSize(iconSize, iconSize)
+    cooldownFrame.iconFrame:SetPoint("TOPLEFT", 10, 0)
+    cooldownFrame.icon = cooldownFrame.icon or cooldownFrame.iconFrame:CreateTexture(nil, "ARTWORK")
+    cooldownFrame.icon:SetAllPoints()
+    cooldownFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+    cooldownFrame.icon:SetTexture(icon)
+    cooldownFrame.text = cooldownFrame.text or cooldownFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    cooldownFrame.text:SetFont(self:GetPlayerFontType(), self:GetAppearance().playerFontSize)
+    cooldownFrame.text:SetTextColor(1, 1, 1, 1)
+    cooldownFrame.text:SetPoint("LEFT", cooldownFrame.iconFrame, "RIGHT", 4, -1)
+    cooldownFrame.text:SetText(name)
+    self:SetDefaultFontStyle(cooldownFrame.text)
+    cooldownFrame.extraText = cooldownFrame.extraText or cooldownFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    cooldownFrame.extraText:SetFont(self:GetPlayerFontType(), self:GetAppearance().playerFontSize)
+    cooldownFrame.extraText:SetTextColor(1, 1, 1, 1)
+    cooldownFrame.extraText:SetPoint("TOPLEFT", cooldownFrame.iconFrame, "BOTTOMLEFT", 4, -3)
+    cooldownFrame.extraText:SetText(string.format("Cast time: %ds\nRange: %d to %d yards", castTime, minRange, maxRange))
+    cooldownFrame.extraText:SetHeight(cooldownFrame.extraText:GetStringHeight())
+    cooldownFrame.extraText:SetWidth(180)
+    self:SetDefaultFontStyle(cooldownFrame.extraText)
+    cooldownFrame:SetHeight(iconSize + 4 + cooldownFrame.text:GetHeight() + 4 + cooldownFrame.extraText:GetHeight() + 4)
+
+    self.player.cooldowns[1] = cooldownFrame
+end
+
+function SRTAssignments:UpdateRosterPane()
+    self.rosterPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
+    self.rosterPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
+    self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
+    self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+end
+
 function SRTAssignments:CreateGroupFrame(bossAbilityFrame, previousFrame)
     local groupFrame = CreateFrame("Frame", nil, bossAbilityFrame, "BackdropTemplate")
     groupFrame:SetHeight(self:GetAssignmentGroupHeight())
@@ -166,6 +228,17 @@ function SRTAssignments:CreateAssignmentFrame(groupFrame)
     assignmentFrame:SetBackdropColor(0, 0, 0, 0)
     assignmentFrame:SetScript("OnEnter", function() assignmentFrame:SetBackdropColor(1, 1, 1, 0.4) end)
     assignmentFrame:SetScript("OnLeave", function() assignmentFrame:SetBackdropColor(0, 0, 0, 0) end)
+    assignmentFrame:SetMouseClickEnabled(true)
+    assignmentFrame:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.SHOW_PLAYER
+            self.selectedPlayer = {
+                name = assignmentFrame.player,
+                spellID = assignmentFrame.spellId
+            }
+            self:UpdateAppearance()
+        end
+    end)
     local iconSize = self:GetAppearance().iconSize
     assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
     assignmentFrame.iconFrame:SetPoint("LEFT", 10, 0)
@@ -194,17 +267,12 @@ function SRTAssignments:UpdateAssignmentFrame(assignmentFrame, assignment, index
     assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
     assignmentFrame.cooldownFrame:Clear()
     assignmentFrame:ClearAllPoints()
-    if total > 1 then
-        if index > 1 then
-            assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOM")
-            assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
-        else
-            assignmentFrame:SetPoint("BOTTOMLEFT")
-            assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, 0)
-        end
+    if index > 1 then
+        assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOM")
+        assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
     else
         assignmentFrame:SetPoint("BOTTOMLEFT")
-        assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
+        assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, 0)
     end
 end
 
