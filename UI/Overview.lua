@@ -84,38 +84,27 @@ function SRTOverview:Resize()
 end
 
 function SRTOverview:Update()
+    SRTWindow.Update(self)
+
     local encounters = SwiftdawnRaidTools:GetEncounters()
-
-    local show = self:GetProfile().show
-    
-    if not show then
-        self.container:Hide()
-        return
-    end
-
     local selectedEncounterIdFound = false
-
     for encounterId, _ in pairs(encounters) do
         if self:GetProfile().selectedEncounterId == encounterId then
             selectedEncounterIdFound = true
         end
     end
-
     if not selectedEncounterIdFound then
         local encounterIndexes = {}
         for encounterId in pairs(SwiftdawnRaidTools:GetEncounters()) do
             table.insert(encounterIndexes, encounterId)
         end
         table.sort(encounterIndexes)
-
         self:GetProfile().selectedEncounterId = encounterIndexes[1]
     end
 
     self:UpdateHeaderText()
     self:UpdateMain()
     self:UpdateSpells()
-    self:UpdateLocked()
-    self.container:Show()
 end
 
 function SRTOverview:UpdateHeaderText()

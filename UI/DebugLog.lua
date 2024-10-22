@@ -80,18 +80,6 @@ function SRTDebugLog:UpdateAppearance()
     SRTWindow.UpdateAppearance(self)
 end
 
-function SRTDebugLog:Update()
-    local show = self:GetProfile().show
-
-    if not show then
-        self.container:Hide()
-        return
-    end
-
-    self:UpdateLocked()
-    self.container:Show()
-end
-
 function SRTDebugLog:UpdateAutoScroll()
     if self:GetProfile().scrollToBottom then
         self:ScrollToBottom()

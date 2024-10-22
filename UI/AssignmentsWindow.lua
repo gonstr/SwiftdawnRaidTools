@@ -1,5 +1,6 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 local SharedMedia = LibStub("LibSharedMedia-3.0")
+local AceGUI = LibStub("AceGUI-3.0")
 
 SRTAssignments = setmetatable({
     encounterFrames = {}
@@ -27,88 +28,161 @@ function SRTAssignments:GetPlayerFontType()
     return SharedMedia:Fetch("font", self:GetAppearance().playerFontType)
 end
 
+function SRTAssignments:GetAssignmentGroupHeight()
+    local playerFontSize = self:GetAppearance().playerFontSize
+    local iconSize = self:GetAppearance().iconSize
+    return (playerFontSize > iconSize and playerFontSize or iconSize) + 7
+end
+
 function SRTAssignments:UpdateAppearance()
     SRTWindow.UpdateAppearance(self)
-    local previousEncounterFrame
-    for encounterID, bossAbilities in pairs(self:GetEncounters()) do
-        local encounterFrame = self:CreateEncounterFrame(encounterID, bossAbilities, previousEncounterFrame)
-        self.encounterFrames[encounterID] = encounterFrame
-        previousEncounterFrame = encounterFrame
+
+    local selectedEncounterID = 1025
+    local encounterAssignments = self:GetEncounters()[selectedEncounterID]
+
+    local encounterName = self.main:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    encounterName:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
+    encounterName:SetText(self:GetEncounterName(selectedEncounterID))
+    encounterName:SetFont(self:GetHeaderFontType(), 14)
+    self:SetDefaultFontStyle(encounterName)
+
+    local previousAbility
+
+    for _, bossAbility in ipairs(encounterAssignments) do
+        local bossAbilityFrame = CreateFrame("Frame", nil, self.main)
+        if previousAbility then
+            bossAbilityFrame:SetPoint("TOPLEFT", previousAbility, "BOTTOMLEFT", 0, 0)
+            bossAbilityFrame:SetPoint("TOPRIGHT", previousAbility, "BOTTOMRIGHT", 0, 0)
+        else
+            bossAbilityFrame:SetPoint("TOPLEFT", encounterName, "BOTTOMLEFT", 10, -7)
+            bossAbilityFrame:SetPoint("TOPRIGHT", encounterName, "BOTTOMLEFT", 190, -7)
+        end
+        local bossAbilityFrameHeight = 7
+
+        local bossAbilityName = bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        bossAbilityName:SetPoint("TOPLEFT", bossAbilityFrame, "TOPLEFT", 0, 0)
+        bossAbilityName:SetText(bossAbility.metadata.name)
+        bossAbilityName:SetFont(self:GetHeaderFontType(), 12)
+        bossAbilityName:SetTextColor(1, 1, 1, 0.8)
+        self:SetDefaultFontStyle(bossAbilityName)
+        bossAbilityFrameHeight = bossAbilityFrameHeight + 12
+
+        local previousGroup = nil
+        for groupIndex, group in ipairs(bossAbility.assignments) do
+            local groupFrame = self:CreateGroupFrame(bossAbilityFrame, previousGroup)
+            self:UpdateGroupFrame(groupFrame, previousGroup, group, bossAbility.uuid, groupIndex)
+            groupFrame:SetHeight(self:GetAssignmentGroupHeight() + 3)
+            bossAbilityFrameHeight = bossAbilityFrameHeight + groupFrame:GetHeight()
+            previousGroup = groupFrame
+        end
+
+        bossAbilityFrameHeight = bossAbilityFrameHeight + 7
+        bossAbilityFrame:SetHeight(bossAbilityFrameHeight)
+        previousAbility = bossAbilityFrame
     end
-    DevTool:AddData(self, "assignmentsWindow")
+end
+
+function SRTAssignments:CreateGroupFrame(bossAbilityFrame, previousFrame)
+    local groupFrame = CreateFrame("Frame", nil, bossAbilityFrame, "BackdropTemplate")
+    groupFrame:SetHeight(self:GetAssignmentGroupHeight())
+    groupFrame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 32,
+    })
+    groupFrame.assignments = {}
+    return groupFrame
+end
+
+function SRTAssignments:UpdateGroupFrame(groupFrame, prevFrame, group, uuid, index)
+    groupFrame:Show()
+    groupFrame.uuid = uuid
+    groupFrame.index = index
+    groupFrame:SetBackdropColor(0, 0, 0, 0)
+    groupFrame:ClearAllPoints()
+    if prevFrame then
+        groupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
+        groupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
+    else
+        groupFrame:SetPoint("TOPLEFT", 0, -16)
+        groupFrame:SetPoint("TOPRIGHT", 0, -16)
+    end
+    for _, cd in pairs(groupFrame.assignments) do
+        cd:Hide()
+    end
+    for i, assignment in ipairs(group) do
+        if not groupFrame.assignments[i] then
+            groupFrame.assignments[i] = self:CreateAssignmentFrame(groupFrame)
+        end
+        self:UpdateAssignmentFrame(groupFrame.assignments[i], assignment, i, #group)
+    end
+end
+
+function SRTAssignments:CreateAssignmentFrame(groupFrame)
+    local assignmentFrame = CreateFrame("Frame", nil, groupFrame, "BackdropTemplate")
+    assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
+    assignmentFrame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 32,
+    })
+    assignmentFrame:SetBackdropColor(0, 0, 0, 0)
+    assignmentFrame:SetScript("OnEnter", function() assignmentFrame:SetBackdropColor(1, 1, 1, 0.4) end)
+    assignmentFrame:SetScript("OnLeave", function() assignmentFrame:SetBackdropColor(0, 0, 0, 0) end)
+    local iconSize = self:GetAppearance().iconSize
+    assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
+    assignmentFrame.iconFrame:SetPoint("LEFT", 10, 0)
+    assignmentFrame.cooldownFrame = CreateFrame("Cooldown", nil, assignmentFrame.iconFrame, "CooldownFrameTemplate")
+    assignmentFrame.cooldownFrame:SetAllPoints()
+    assignmentFrame.iconFrame.cooldown = assignmentFrame.cooldownFrame
+    assignmentFrame.icon = assignmentFrame.iconFrame:CreateTexture(nil, "ARTWORK")
+    assignmentFrame.icon:SetAllPoints()
+    assignmentFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+    assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    assignmentFrame.text:SetFont(self:GetTitleFontType(), self:GetAppearance().titleFontSize)
+    assignmentFrame.text:SetTextColor(1, 1, 1, 1)
+    assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "CENTER", iconSize/2+4, -1)
+    self:SetDefaultFontStyle(assignmentFrame.text)
+    return assignmentFrame
+end
+
+function SRTAssignments:UpdateAssignmentFrame(assignmentFrame, assignment, index, total)
+    assignmentFrame:Show()
+    assignmentFrame.player = assignment.player
+    assignmentFrame.spellId = assignment.spell_id
+    local _, _, icon = GetSpellInfo(assignment.spell_id)
+    assignmentFrame.icon:SetTexture(icon)
+    assignmentFrame.text:SetText(assignment.player)
+    local color = SwiftdawnRaidTools:GetSpellColor(assignment.spell_id)
+    assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
+    assignmentFrame.cooldownFrame:Clear()
+    assignmentFrame:ClearAllPoints()
+    if total > 1 then
+        if index > 1 then
+            assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOM")
+            assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
+        else
+            assignmentFrame:SetPoint("BOTTOMLEFT")
+            assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, 0)
+        end
+    else
+        assignmentFrame:SetPoint("BOTTOMLEFT")
+        assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
+    end
 end
 
 function SRTAssignments:GetEncounters()
     return SRT_Profile().data.encounters
 end
 
-function SRTAssignments:CreateEncounterFrame(encounterID, bossAbilities, previousEncounterFrame)
-    DevTool:AddData(encounterID, "encounterID")
-    DevTool:AddData(bossAbilities, "bossAbilities")
-    local encounterFrame = CreateFrame("Frame", "SRT_Encounter_"..tostring(encounterID), self.main)
-    if previousEncounterFrame == nil then
-        encounterFrame:SetPoint("TOPLEFT", self.main, "TOPLEFT", 5, 0)
-        encounterFrame:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -5, 0)
-    else
-        encounterFrame:SetPoint("TOPLEFT", previousEncounterFrame, "BOTTOMLEFT", 0, -3)
-        encounterFrame:SetPoint("TOPRIGHT", previousEncounterFrame, "BOTTOMRIGHT", 0, -3)
-    end
-    encounterFrame.title = encounterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    encounterFrame.title:SetPoint("TOPLEFT", encounterFrame, "TOPLEFT", 0, -3)
-    encounterFrame.title:SetText("EncounterID: "..tostring(encounterID))
-    encounterFrame.title:SetFont(self:GetHeaderFontType(), 12)
-    encounterFrame.title:SetHeight(encounterFrame.title:GetStringHeight())
-    local bossAbilitiesHeight = 0
-    encounterFrame.bossAbilities = {}
-    for bossAbilityIndex, bossAbility in ipairs(bossAbilities) do
-        local bossAbilityHeight = 0
-        local bossAbilityFrame = CreateFrame("Frame", string.format("SRT_BossAbility_%d_%d", encounterID, bossAbilityIndex), encounterFrame)
-        bossAbilityFrame:SetWidth(self.width)
-        if #encounterFrame.bossAbilities == 0 then
-            bossAbilityFrame:SetPoint("TOPLEFT", encounterFrame.title, "BOTTOMLEFT", 0, -3)
-        else
-            bossAbilityFrame:SetPoint("TOPLEFT", encounterFrame.bossAbilities[bossAbilityIndex-1], "BOTTOMLEFT", 0, -3)
-        end
-        DevTool:AddData(bossAbility, "bossAbility")
-        bossAbilityFrame.title = encounterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        bossAbilityFrame.title:SetPoint("TOPLEFT", bossAbilityFrame, "TOPLEFT", 0, -3)
-        bossAbilityFrame.title:SetText("- "..bossAbility.metadata.name)
-        bossAbilityFrame.title:SetFont(self:GetHeaderFontType(), 12)
-        bossAbilityHeight = bossAbilityHeight + bossAbilityFrame.title:GetStringHeight()
-        bossAbilityFrame.assignments = encounterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        bossAbilityFrame.assignments:SetPoint("TOPLEFT", bossAbilityFrame.title, "BOTTOMLEFT")
-        bossAbilityFrame.assignments:SetJustifyH("LEFT")
-        bossAbilityFrame.assignments:SetWordWrap(true)
-        local assignmentsTextString = "  - Assignments:\n"
-        for assignmentGroupIndex, assignmentGroup in ipairs(bossAbility.assignments) do
-            DevTool:AddData(assignmentGroup, "assignmentGroup")
-            assignmentsTextString = assignmentsTextString .. "    Group "..tostring(assignmentGroupIndex).."\n"
-            for _, assignment in ipairs(assignmentGroup) do
-                DevTool:AddData(assignment, "assignment")
-                assignmentsTextString = assignmentsTextString .. string.format("      %s %s %d", assignment.player, assignment.type, assignment.spell_id).."\n"
-            end
-        end
-        bossAbilityFrame.assignments:SetText(assignmentsTextString)
-        bossAbilityFrame.assignments:SetFont(self:GetPlayerFontType(), 10)
-        bossAbilityFrame.assignments:SetHeight(bossAbilityFrame.assignments:GetStringHeight())
-        bossAbilityHeight = bossAbilityHeight + bossAbilityFrame.assignments:GetHeight()
-        bossAbilityFrame.triggers = encounterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        bossAbilityFrame.triggers:SetPoint("TOPLEFT", bossAbilityFrame.assignments, "BOTTOMLEFT", 0, -3)
-        bossAbilityFrame.triggers:SetJustifyH("LEFT")
-        bossAbilityFrame.triggers:SetWordWrap(true)
-        local triggerTextString = "  - Triggers:\n"
-        for _, trigger in ipairs(bossAbility.triggers) do
-            DevTool:AddData(trigger, "trigger")
-            triggerTextString = triggerTextString .. string.format("    %s\n", trigger.type)
-        end
-        bossAbilityFrame.triggers:SetText(triggerTextString)
-        bossAbilityFrame.triggers:SetFont(self:GetPlayerFontType(), 10)
-        bossAbilityFrame.triggers:SetHeight(bossAbilityFrame.triggers:GetStringHeight())
-        bossAbilityHeight = bossAbilityHeight + bossAbilityFrame.triggers:GetHeight()
-        bossAbilityFrame:SetHeight(bossAbilityHeight)
-        bossAbilitiesHeight = bossAbilitiesHeight + bossAbilityHeight
-        table.insert(encounterFrame.bossAbilities, bossAbilityIndex, bossAbilityFrame)
-    end
-    encounterFrame:SetHeight(encounterFrame.title:GetStringHeight() + bossAbilitiesHeight)
-    return encounterFrame
+function SRTAssignments:GetEncounterName(encounterID)
+    SwiftdawnRaidTools:BossEncountersInit()
+   return SwiftdawnRaidTools:BossEncountersGetAll()[encounterID]
+end
+
+function SRTAssignments:SetDefaultFontStyle(fontString)
+    fontString:SetShadowOffset(1, -1)
+    fontString:SetShadowColor(0, 0, 0, 1)
+    fontString:SetJustifyH("LEFT")
+    fontString:SetHeight(fontString:GetStringHeight())
 end

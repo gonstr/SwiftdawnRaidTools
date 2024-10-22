@@ -246,10 +246,46 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.debuglog.locked = value
-                SwiftdawnRaidTools.debugLog:Update()
+                SwiftdawnRaidTools.assignmentsWindow:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.locked end,
             order = 23,
+        },
+        showAssignmentsExplorerDescription = {
+            type = "description",
+            name = "Show Assignments Explorer",
+            width = "normal",
+            order = 30,
+        },
+        showAssignmentsExplorer = {
+            name = " ",
+            desc = "Enables / Disables Assignments Explorer window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.assignments.show = value
+                SwiftdawnRaidTools.assignmentsWindow:Update()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.assignments.show end,
+            order = 31,
+        },
+        lockAssignmentsExplorerDescription = {
+            type = "description",
+            name = "Lock Assignments Explorer",
+            width = "normal",
+            order = 32,
+        },
+        lockAssignmentsExplorer = {
+            name = " ",
+            desc = "Lock / Unlocks Assignments Explorer window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.assignments.locked = value
+                SwiftdawnRaidTools.assignmentsWindow:Update()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.assignments.locked end,
+            order = 33,
         },
     },
 }

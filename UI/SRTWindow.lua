@@ -321,6 +321,15 @@ function SRTWindow:ShowPopupListItem(index, text, setting, onClick, accExtraOffs
     return yOfs
 end
 
+function SRTWindow:Update()
+    if not self:GetProfile().show then
+        self.container:Hide()
+        return
+    end
+    self:UpdateLocked()
+    self.container:Show()
+end
+
 function SRTWindow:UpdatePopupMenu() end
 
 return SRTWindow
