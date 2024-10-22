@@ -1,10 +1,21 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 local SharedMedia = LibStub("LibSharedMedia-3.0")
 
+local State = {
+    ONLY_ENCOUNTER = 1,
+    SHOW_PLAYER = 2,
+    SHOW_ROSTER = 3
+}
+
 --- Assignment Explorer window class object
 ---@class SRTAssignments:SRTWindow
 SRTAssignments = setmetatable({
-    encounterFrames = {}
+    state = State.ONLY_ENCOUNTER,
+    selectedEncounterID = 1025,
+    encounter = {},
+    selectedPlayer = "",
+    player = {},
+    roster = {},
 }, SRTWindow)
 SRTAssignments.__index = SRTAssignments
 
@@ -19,16 +30,14 @@ end
 function SRTAssignments:Initialize()
     SRTWindow.Initialize(self)
     self.headerText:SetText("Assignments Explorer")
-    self.leftPane = CreateFrame("Frame", "SRT_Assignments_LeftPane", self.main)
-    self.leftPane:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
-    self.leftPane:SetPoint("TOPRIGHT", self.main, "TOP", -5, -5)
-    self.leftPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
-    self.leftPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOM", -5, 5)
-    self.rightPane = CreateFrame("Frame", "SRT_Assignments_RightPane", self.main)
-    self.rightPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
-    self.rightPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
-    self.rightPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
-    self.rightPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+    self.encounterPane = CreateFrame("Frame", "SRT_Assignments_EncounterPane", self.main)
+    self.encounterPane:SetClipsChildren(true)
+    self.selectedPlayerPane = CreateFrame("Frame", "SRT_Assignments_SelectedPlayerPane", self.main)
+    self.selectedPlayerPane:SetClipsChildren(true)
+    self.selectedPlayerPane:Hide()
+    self.rosterPane = CreateFrame("Frame", "SRT_Assignments_RosterPane", self.main)
+    self.rosterPane:SetClipsChildren(true)
+    self.rosterPane:Hide()
     self:UpdateAppearance()
 end
 
@@ -49,47 +58,64 @@ end
 function SRTAssignments:UpdateAppearance()
     SRTWindow.UpdateAppearance(self)
 
-    local selectedEncounterID = 1025
-    local encounterAssignments = self:GetEncounters()[selectedEncounterID]
+    self.encounterPane:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
+    self.encounterPane:SetPoint("TOPRIGHT", self.main, "TOP", -5, -5)
+    self.encounterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
+    self.encounterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOM", -5, 5)
+    self.selectedPlayerPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
+    self.selectedPlayerPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
+    self.selectedPlayerPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
+    self.selectedPlayerPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+    self.rosterPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
+    self.rosterPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
+    self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
+    self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
 
-    local encounterName = self.main:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    encounterName:SetPoint("TOPLEFT", self.leftPane, "TOPLEFT", 0, -5)
-    encounterName:SetText(self:GetEncounterName(selectedEncounterID))
-    encounterName:SetFont(self:GetHeaderFontType(), 14)
-    self:SetDefaultFontStyle(encounterName)
+    local encounterAssignments = self:GetEncounters()[self.selectedEncounterID]
 
+    self.encounter.name = self.encounter.name or self.main:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    self.encounter.name:SetPoint("TOPLEFT", self.encounterPane, "TOPLEFT", 0, -5)
+    self.encounter.name:SetTextColor(1, 1, 1, 0.8)
+    self.encounter.name:SetText(self:GetEncounterName(self.selectedEncounterID))
+    self.encounter.name:SetFont(self:GetHeaderFontType(), 14)
+    self:SetDefaultFontStyle(self.encounter.name)
+
+    self.encounter.bossAbilities = self.encounter.bossAbilities or {}
     local previousAbility
-
-    for _, bossAbility in ipairs(encounterAssignments) do
-        local bossAbilityFrame = CreateFrame("Frame", nil, self.main)
+    for bossAbilityIndex, bossAbility in ipairs(encounterAssignments) do
+        local bossAbilityFrame = self.encounter.bossAbilities[bossAbilityIndex] or CreateFrame("Frame", nil, self.encounterPane)
         if previousAbility then
             bossAbilityFrame:SetPoint("TOPLEFT", previousAbility, "BOTTOMLEFT", 0, 0)
             bossAbilityFrame:SetPoint("TOPRIGHT", previousAbility, "BOTTOMRIGHT", 0, 0)
         else
-            bossAbilityFrame:SetPoint("TOPLEFT", encounterName, "BOTTOMLEFT", 10, -7)
-            bossAbilityFrame:SetPoint("TOPRIGHT", encounterName, "BOTTOMLEFT", 190, -7)
+            bossAbilityFrame:SetPoint("TOPLEFT", self.encounter.name, "BOTTOMLEFT", 10, -7)
+            bossAbilityFrame:SetPoint("TOPRIGHT", self.encounter.name, "BOTTOMLEFT", 190, -7)
         end
         local bossAbilityFrameHeight = 7
 
-        local bossAbilityName = bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        bossAbilityName:SetPoint("TOPLEFT", bossAbilityFrame, "TOPLEFT", 0, 0)
-        bossAbilityName:SetText(bossAbility.metadata.name)
-        bossAbilityName:SetFont(self:GetHeaderFontType(), 12)
-        bossAbilityName:SetTextColor(1, 1, 1, 0.8)
-        self:SetDefaultFontStyle(bossAbilityName)
+        bossAbilityFrame.name = bossAbilityFrame.name or bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        bossAbilityFrame.name:SetPoint("TOPLEFT", bossAbilityFrame, "TOPLEFT", 0, 0)
+        bossAbilityFrame.name:SetText(bossAbility.metadata.name)
+        bossAbilityFrame.name:SetFont(self:GetHeaderFontType(), 12)
+        bossAbilityFrame.name:SetTextColor(1, 1, 1, 0.8)
+        self:SetDefaultFontStyle(bossAbilityFrame.name)
         bossAbilityFrameHeight = bossAbilityFrameHeight + 12
 
+        bossAbilityFrame.groups = bossAbilityFrame.groups or {}
         local previousGroup = nil
         for groupIndex, group in ipairs(bossAbility.assignments) do
-            local groupFrame = self:CreateGroupFrame(bossAbilityFrame, previousGroup)
+            local groupFrame = bossAbilityFrame.groups[groupIndex] or self:CreateGroupFrame(bossAbilityFrame, previousGroup)
             self:UpdateGroupFrame(groupFrame, previousGroup, group, bossAbility.uuid, groupIndex)
             groupFrame:SetHeight(self:GetAssignmentGroupHeight() + 3)
             bossAbilityFrameHeight = bossAbilityFrameHeight + groupFrame:GetHeight()
+            bossAbilityFrame.groups[groupIndex] = groupFrame
             previousGroup = groupFrame
         end
 
         bossAbilityFrameHeight = bossAbilityFrameHeight + 7
         bossAbilityFrame:SetHeight(bossAbilityFrameHeight)
+
+        self.encounter.bossAbilities[bossAbilityIndex] = bossAbilityFrame
         previousAbility = bossAbilityFrame
     end
 end
@@ -123,10 +149,9 @@ function SRTAssignments:UpdateGroupFrame(groupFrame, prevFrame, group, uuid, ind
         cd:Hide()
     end
     for i, assignment in ipairs(group) do
-        if not groupFrame.assignments[i] then
-            groupFrame.assignments[i] = self:CreateAssignmentFrame(groupFrame)
-        end
-        self:UpdateAssignmentFrame(groupFrame.assignments[i], assignment, i, #group)
+        local assignmentFrame = groupFrame.assignments[i] or self:CreateAssignmentFrame(groupFrame)
+        self:UpdateAssignmentFrame(assignmentFrame, assignment, i, #group)
+        groupFrame.assignments[i] = assignmentFrame
     end
 end
 
