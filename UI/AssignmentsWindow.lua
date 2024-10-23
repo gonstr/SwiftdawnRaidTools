@@ -31,15 +31,119 @@ end
 
 function SRTAssignments:Initialize()
     SRTWindow.Initialize(self)
+    -- Setup header
     self.headerText:SetText("Assignments Explorer")
+    -- Setup encounter pane
     self.encounterPane = CreateFrame("Frame", "SRT_Assignments_EncounterPane", self.main)
     self.encounterPane:SetClipsChildren(true)
+    self.encounterPane:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
+    self.encounterPane:SetPoint("TOPRIGHT", self.main, "TOP", -5, -5)
+    self.encounterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
+    self.encounterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOM", -5, 5)
+    self.encounter.name = self.encounter.name or self.encounterPane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    self.encounter.name:SetFont(self:GetHeaderFontType(), 14)
+    self.encounter.name:SetPoint("TOPLEFT", self.encounterPane, "TOPLEFT", 0, -5)
+    self.encounter.name:SetTextColor(1, 1, 1, 0.8)
+    self.encounter.bossAbilities = self.encounter.bossAbilities or {}
+    -- Setup player pane
     self.selectedPlayerPane = CreateFrame("Frame", "SRT_Assignments_SelectedPlayerPane", self.main)
     self.selectedPlayerPane:SetClipsChildren(true)
+    self.selectedPlayerPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
+    self.selectedPlayerPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
+    self.selectedPlayerPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
+    self.selectedPlayerPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+    self.player.name = self.player.name or self.selectedPlayerPane:CreateFontString("SRT_AssignmentExplorer_PlayerPane_Name", "OVERLAY", "GameFontNormalLarge")
+    self.player.name:SetPoint("TOPLEFT", self.selectedPlayerPane, "TOPLEFT", 0, -5)
+    self.player.name:SetTextColor(1, 1, 1, 0.8)
+    self.player.cooldowns = self.player.cooldowns or {}
+    self.replaceButton = self.replaceButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.selectedPlayerPane, "BackdropTemplate")
+    self.replaceButton:SetWidth(75)
+    self.replaceButton:SetHeight(25)
+    self.replaceButton:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        tile = true,
+        tileSize = 32,
+    })
+    self.replaceButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
+    self.replaceButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 5)
+    self.replaceButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.SHOW_ROSTER
+            self:UpdateAppearance()
+        end
+    end)
+    self.replaceButtonText = self.replaceButtonText or self.replaceButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.replaceButtonText:SetAllPoints()
+    self.replaceButtonText:SetText("Replace")
+    self.applyBuffChangesButton = self.applyBuffChangesButton or CreateFrame("Button", "SRT_AssignmentExplorer_ReplaceButton", self.selectedPlayerPane, "BackdropTemplate")
+    self.applyBuffChangesButton:SetWidth(75)
+    self.applyBuffChangesButton:SetHeight(25)
+    self.applyBuffChangesButton:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        tile = true,
+        tileSize = 32,
+    })
+    self.applyBuffChangesButton:SetBackdropColor(1, 0.5, 0.5, 1)
+    self.applyBuffChangesButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 5)
+    self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.ONLY_ENCOUNTER
+            self:UpdateAppearance()
+        end
+    end)
+    self.applyBuffChangesButtonText = self.applyBuffChangesButtonText or self.applyBuffChangesButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.applyBuffChangesButtonText:SetAllPoints()
+    self.applyBuffChangesButtonText:SetText("Apply")
     self.selectedPlayerPane:Hide()
+    -- Setup roster pane
     self.rosterPane = CreateFrame("Frame", "SRT_Assignments_RosterPane", self.main)
     self.rosterPane:SetClipsChildren(true)
+    self.rosterPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
+    self.rosterPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
+    self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
+    self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+    self.rosterPane.roster = self.rosterPane.roster or self.rosterPane:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.rosterPane.roster:SetPoint("TOPLEFT", self.rosterPane, "TOPLEFT", 0, -5)
+    self.backButton = self.backButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
+    self.backButton:SetWidth(75)
+    self.backButton:SetHeight(25)
+    self.backButton:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        tile = true,
+        tileSize = 32,
+    })
+    self.backButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
+    self.backButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
+    self.backButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.SHOW_PLAYER
+            self:UpdateAppearance()
+        end
+    end)
+    self.backButtonText = self.backButtonText or self.backButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.backButtonText:SetAllPoints()
+    self.backButtonText:SetText("Back")
+    self.applyReplacePlayerButton = self.applyReplacePlayerButton or CreateFrame("Button", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
+    self.applyReplacePlayerButton:SetWidth(75)
+    self.applyReplacePlayerButton:SetHeight(25)
+    self.applyReplacePlayerButton:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        tile = true,
+        tileSize = 32,
+    })
+    self.applyReplacePlayerButton:SetBackdropColor(1, 0.5, 0.5, 1)
+    self.applyReplacePlayerButton:SetPoint("BOTTOMRIGHT", self.rosterPane, "BOTTOMRIGHT", 0, 5)
+    self.applyReplacePlayerButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.SHOW_PLAYER
+            self:UpdateAppearance()
+        end
+    end)
+    self.applyReplacePlayerButtonText = self.applyReplacePlayerButtonText or self.applyReplacePlayerButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.applyReplacePlayerButtonText:SetAllPoints()
+    self.applyReplacePlayerButtonText:SetText("Apply")
     self.rosterPane:Hide()
+    -- Update appearance
     self:UpdateAppearance()
 end
 
@@ -60,27 +164,24 @@ end
 function SRTAssignments:UpdateAppearance()
     SRTWindow.UpdateAppearance(self)
 
+    self:SetDefaultFontStyle(self.encounter.name)
+
     self:UpdateEncounterPane()
     self:UpdateSelectedPlayerPane()
     self:UpdateRosterPane()
 end
 
-function SRTAssignments:UpdateEncounterPane()
-    self.encounterPane:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
-    self.encounterPane:SetPoint("TOPRIGHT", self.main, "TOP", -5, -5)
-    self.encounterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
-    self.encounterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOM", -5, 5)
-
-    local encounterAssignments = self:GetEncounters()[self.selectedEncounterID]
-
-    self.encounter.name = self.encounter.name or self.main:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    self.encounter.name:SetPoint("TOPLEFT", self.encounterPane, "TOPLEFT", 0, -5)
-    self.encounter.name:SetTextColor(1, 1, 1, 0.8)
+function SRTAssignments:Update()
+    SRTWindow.Update(self)
     self.encounter.name:SetText(self:GetEncounterName(self.selectedEncounterID))
-    self.encounter.name:SetFont(self:GetHeaderFontType(), 14)
-    self:SetDefaultFontStyle(self.encounter.name)
+end
 
-    self.encounter.bossAbilities = self.encounter.bossAbilities or {}
+function SRTAssignments:UpdateEncounterPane()
+    local encounterAssignments = self:GetEncounters()[self.selectedEncounterID]
+    if not encounterAssignments then
+        return
+    end
+
     local previousAbility
     for bossAbilityIndex, bossAbility in ipairs(encounterAssignments) do
         local bossAbilityFrame = self.encounter.bossAbilities[bossAbilityIndex] or CreateFrame("Frame", nil, self.encounterPane)
@@ -101,10 +202,36 @@ function SRTAssignments:UpdateEncounterPane()
         self:SetDefaultFontStyle(bossAbilityFrame.name)
         bossAbilityFrameHeight = bossAbilityFrameHeight + 12
 
+        bossAbilityFrame.triggers = bossAbilityFrame.triggers or {}
+        local previousTrigger = nil
+        for triggerIndex, trigger in ipairs(bossAbility.triggers) do
+            local triggerFrame = bossAbilityFrame.triggers[triggerIndex] or self:CreateTriggerFrame(bossAbilityFrame)
+            if trigger.type == "SPELL_CAST" then
+                local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(trigger.spell_id)
+                triggerFrame.text:SetText("When Boss casts " .. name)
+            elseif trigger.type == "RAID_BOSS_EMOTE" then
+                triggerFrame.text:SetText("When Boss emote includes '" .. trigger.text .. "'")
+            elseif trigger.type == "UNIT_HEALTH" then
+                triggerFrame.text:SetText("When Boss health drops below " .. tostring(trigger.pct_lt))
+            else
+                triggerFrame.text:SetText("When type: " .. trigger.type)
+            end
+            if not previousTrigger then
+                triggerFrame:SetPoint("TOPLEFT", 10, -16)
+                triggerFrame:SetPoint("TOPRIGHT", 10, -16)
+            else
+                triggerFrame:SetPoint("TOPLEFT", previousTrigger, "BOTTOMLEFT", 0, 0)
+                triggerFrame:SetPoint("TOPRIGHT", previousTrigger, "BOTTOMRIGHT", 0, 0)
+            end
+            bossAbilityFrameHeight = bossAbilityFrameHeight + triggerFrame:GetHeight()
+            bossAbilityFrame.triggers[triggerIndex] = triggerFrame
+            previousTrigger = triggerFrame
+        end
+
         bossAbilityFrame.groups = bossAbilityFrame.groups or {}
-        local previousGroup = nil
+        local previousGroup = previousTrigger
         for groupIndex, group in ipairs(bossAbility.assignments) do
-            local groupFrame = bossAbilityFrame.groups[groupIndex] or self:CreateGroupFrame(bossAbilityFrame, previousGroup)
+            local groupFrame = bossAbilityFrame.groups[groupIndex] or self:CreateGroupFrame(bossAbilityFrame)
             self:UpdateGroupFrame(groupFrame, previousGroup, group, bossAbility.uuid, groupIndex)
             groupFrame:SetHeight(self:GetAssignmentGroupHeight() + 3)
             bossAbilityFrameHeight = bossAbilityFrameHeight + groupFrame:GetHeight()
@@ -127,22 +254,13 @@ function SRTAssignments:UpdateSelectedPlayerPane()
         self.selectedPlayerPane:Hide()
     end
 
-    self.selectedPlayerPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
-    self.selectedPlayerPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
-    self.selectedPlayerPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
-    self.selectedPlayerPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
-    
-    self.player.name = self.player.name or self.selectedPlayerPane:CreateFontString("SRT_AssignmentExplorer_PlayerPane_Name", "OVERLAY", "GameFontNormalLarge")
-    self.player.name:SetPoint("TOPLEFT", self.selectedPlayerPane, "TOPLEFT", 0, -5)
-    self.player.name:SetTextColor(1, 1, 1, 0.8)
     self.player.name:SetText(self.selectedPlayer.name)
     self.player.name:SetFont(self:GetHeaderFontType(), 14)
     self:SetDefaultFontStyle(self.player.name)
+    self.replaceButtonText:SetFont(self:GetHeaderFontType(), 14)
+    self.applyBuffChangesButtonText:SetFont(self:GetHeaderFontType(), 14)
     
     local iconSize = self:GetAppearance().iconSize + 2
-
-    self.player.cooldowns = self.player.cooldowns or {}
-    DevTool:AddData(self.selectedPlayer, "selectedPlayer")
     local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(self.selectedPlayer.spellID)
     -- DevTool:AddData({ name=name, rank=rank, icon=icon, castTime=castTime, minRange=minRange, maxRange=maxRange, spellID=spellID, originalIcon=originalIcon }, "selectedPlayerSpell_" .. self.selectedPlayer.name)
 
@@ -171,50 +289,7 @@ function SRTAssignments:UpdateSelectedPlayerPane()
     cooldownFrame.extraText:SetWidth(180)
     self:SetDefaultFontStyle(cooldownFrame.extraText)
     cooldownFrame:SetHeight(iconSize + 4 + cooldownFrame.text:GetHeight() + 4 + cooldownFrame.extraText:GetHeight() + 4)
-
     self.player.cooldowns[1] = cooldownFrame
-
-    self.replaceButton = self.replaceButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.selectedPlayerPane, "BackdropTemplate")
-    self.replaceButton:SetWidth(75)
-    self.replaceButton:SetHeight(25)
-    self.replaceButton:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        tile = true,
-        tileSize = 32,
-    })
-    self.replaceButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
-    self.replaceButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 5)
-    self.replaceButton:SetScript("OnMouseUp", function (_, button)
-        if button == "LeftButton" then
-            self.state = State.SHOW_ROSTER
-            self:UpdateAppearance()
-        end
-    end)
-    self.replaceButtonText = self.replaceButtonText or self.replaceButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.replaceButtonText:SetAllPoints()
-    self.replaceButtonText:SetFont(self:GetHeaderFontType(), 14)
-    self.replaceButtonText:SetText("Replace")
-
-    self.applyBuffChangesButton = self.applyBuffChangesButton or CreateFrame("Button", "SRT_AssignmentExplorer_ReplaceButton", self.selectedPlayerPane, "BackdropTemplate")
-    self.applyBuffChangesButton:SetWidth(75)
-    self.applyBuffChangesButton:SetHeight(25)
-    self.applyBuffChangesButton:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        tile = true,
-        tileSize = 32,
-    })
-    self.applyBuffChangesButton:SetBackdropColor(1, 0.5, 0.5, 1)
-    self.applyBuffChangesButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 5)
-    self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, button)
-        if button == "LeftButton" then
-            self.state = State.ONLY_ENCOUNTER
-            self:UpdateAppearance()
-        end
-    end)
-    self.applyBuffChangesButtonText = self.applyBuffChangesButtonText or self.applyBuffChangesButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.applyBuffChangesButtonText:SetAllPoints()
-    self.applyBuffChangesButtonText:SetFont(self:GetHeaderFontType(), 14)
-    self.applyBuffChangesButtonText:SetText("Apply")
 end
 
 function SRTAssignments:UpdateRosterPane()
@@ -224,57 +299,19 @@ function SRTAssignments:UpdateRosterPane()
         self.rosterPane:Hide()
     end
 
-    self.rosterPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
-    self.rosterPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
-    self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
-    self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+    DevTool:AddData(self:GetOnlineGuildMembers(), "guildMemberInfo")
 
-    DevTool:AddData(self:GetGuildMemberInfo(), "guildMemberInfo")
-
-    self.backButton = self.backButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
-    self.backButton:SetWidth(75)
-    self.backButton:SetHeight(25)
-    self.backButton:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        tile = true,
-        tileSize = 32,
-    })
-    self.backButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
-    self.backButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
-    self.backButton:SetScript("OnMouseUp", function (_, button)
-        if button == "LeftButton" then
-            self.state = State.SHOW_PLAYER
-            self:UpdateAppearance()
-        end
-    end)
-    self.backButtonText = self.backButtonText or self.backButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.backButtonText:SetAllPoints()
+    local rosterText = ""
+    for _, player in ipairs(self:GetOnlineGuildMembers()) do
+        rosterText = rosterText .. string.format("%s - %s\n", player.name, player.class)
+    end
+    self.rosterPane.roster:SetText(rosterText)
+    self.rosterPane.roster:SetFont(self:GetHeaderFontType(), 12)
     self.backButtonText:SetFont(self:GetHeaderFontType(), 14)
-    self.backButtonText:SetText("Back")
-
-    self.applyReplacePlayerButton = self.applyReplacePlayerButton or CreateFrame("Button", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
-    self.applyReplacePlayerButton:SetWidth(75)
-    self.applyReplacePlayerButton:SetHeight(25)
-    self.applyReplacePlayerButton:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        tile = true,
-        tileSize = 32,
-    })
-    self.applyReplacePlayerButton:SetBackdropColor(1, 0.5, 0.5, 1)
-    self.applyReplacePlayerButton:SetPoint("BOTTOMRIGHT", self.rosterPane, "BOTTOMRIGHT", 0, 5)
-    self.applyReplacePlayerButton:SetScript("OnMouseUp", function (_, button)
-        if button == "LeftButton" then
-            self.state = State.SHOW_PLAYER
-            self:UpdateAppearance()
-        end
-    end)
-    self.applyReplacePlayerButtonText = self.applyReplacePlayerButtonText or self.applyReplacePlayerButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.applyReplacePlayerButtonText:SetAllPoints()
     self.applyReplacePlayerButtonText:SetFont(self:GetHeaderFontType(), 14)
-    self.applyReplacePlayerButtonText:SetText("Apply")
 end
 
-function SRTAssignments:GetGuildMemberInfo()
+function SRTAssignments:GetOnlineGuildMembers()
     local guildMembers = {}
     local numTotalGuildMembers, numOnlineGuildMembers, numOnlineAndMobileMembers = GetNumGuildMembers()
     for index = 1, numTotalGuildMembers, 1 do
@@ -286,7 +323,23 @@ function SRTAssignments:GetGuildMemberInfo()
     return guildMembers
 end
 
-function SRTAssignments:CreateGroupFrame(bossAbilityFrame, previousFrame)
+function SRTAssignments:CreateTriggerFrame(bossAbilityFrame)
+    local triggerFrame = CreateFrame("Frame", nil, bossAbilityFrame, "BackdropTemplate")
+    triggerFrame:SetHeight(self:GetAssignmentGroupHeight())
+    triggerFrame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 32,
+    })
+    triggerFrame:SetBackdropColor(0, 0, 0, 0)
+    triggerFrame.text = triggerFrame.text or triggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    triggerFrame.text:SetAllPoints()
+    triggerFrame.text:SetFont(self:GetTitleFontType(), self:GetAppearance().titleFontSize)
+    self:SetDefaultFontStyle(triggerFrame.text)
+    return triggerFrame
+end
+
+function SRTAssignments:CreateGroupFrame(bossAbilityFrame)
     local groupFrame = CreateFrame("Frame", nil, bossAbilityFrame, "BackdropTemplate")
     groupFrame:SetHeight(self:GetAssignmentGroupHeight())
     groupFrame:SetBackdrop({
@@ -294,6 +347,7 @@ function SRTAssignments:CreateGroupFrame(bossAbilityFrame, previousFrame)
         tile = true,
         tileSize = 32,
     })
+    groupFrame:SetBackdropColor(0, 0, 0, 0)
     groupFrame.assignments = {}
     return groupFrame
 end
@@ -302,7 +356,6 @@ function SRTAssignments:UpdateGroupFrame(groupFrame, prevFrame, group, uuid, ind
     groupFrame:Show()
     groupFrame.uuid = uuid
     groupFrame.index = index
-    groupFrame:SetBackdropColor(0, 0, 0, 0)
     groupFrame:ClearAllPoints()
     if prevFrame then
         groupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
@@ -345,7 +398,7 @@ function SRTAssignments:CreateAssignmentFrame(groupFrame)
     end)
     local iconSize = self:GetAppearance().iconSize
     assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
-    assignmentFrame.iconFrame:SetPoint("LEFT", 10, 0)
+    assignmentFrame.iconFrame:SetPoint("LEFT", 0, 0)
     assignmentFrame.cooldownFrame = CreateFrame("Cooldown", nil, assignmentFrame.iconFrame, "CooldownFrameTemplate")
     assignmentFrame.cooldownFrame:SetAllPoints()
     assignmentFrame.iconFrame.cooldown = assignmentFrame.cooldownFrame
