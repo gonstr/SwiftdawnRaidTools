@@ -173,6 +173,36 @@ function SRTAssignments:UpdateSelectedPlayerPane()
     cooldownFrame:SetHeight(iconSize + 4 + cooldownFrame.text:GetHeight() + 4 + cooldownFrame.extraText:GetHeight() + 4)
 
     self.player.cooldowns[1] = cooldownFrame
+
+    self.replaceButton = self.replaceButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.selectedPlayerPane, "BackdropTemplate")
+    self.replaceButton:SetWidth(75)
+    self.replaceButton:SetHeight(25)
+    self.replaceButton:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        tile = true,
+        tileSize = 32,
+    })
+    self.replaceButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
+    self.replaceButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 0)
+    self.replaceButtonText = self.replaceButtonText or self.replaceButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.replaceButtonText:SetAllPoints()
+    self.replaceButtonText:SetFont(self:GetHeaderFontType(), 14)
+    self.replaceButtonText:SetText("Replace")
+
+    self.applyBuffChangesButton = self.applyBuffChangesButton or CreateFrame("Button", "SRT_AssignmentExplorer_ReplaceButton", self.selectedPlayerPane, "BackdropTemplate")
+    self.applyBuffChangesButton:SetWidth(75)
+    self.applyBuffChangesButton:SetHeight(25)
+    self.applyBuffChangesButton:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        tile = true,
+        tileSize = 32,
+    })
+    self.applyBuffChangesButton:SetBackdropColor(1, 0.5, 0.5, 1)
+    self.applyBuffChangesButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 0)
+    self.applyBuffChangesButtonText = self.applyBuffChangesButtonText or self.applyBuffChangesButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.applyBuffChangesButtonText:SetAllPoints()
+    self.applyBuffChangesButtonText:SetFont(self:GetHeaderFontType(), 14)
+    self.applyBuffChangesButtonText:SetText("Replace")
 end
 
 function SRTAssignments:UpdateRosterPane()
