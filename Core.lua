@@ -66,6 +66,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
 
     self.overview:Update()
     self.debugLog:Update()
+    self.assignmentsWindow:Update()
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
