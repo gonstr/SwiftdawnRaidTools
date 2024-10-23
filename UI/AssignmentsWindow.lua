@@ -183,7 +183,13 @@ function SRTAssignments:UpdateSelectedPlayerPane()
         tileSize = 32,
     })
     self.replaceButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
-    self.replaceButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 0)
+    self.replaceButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 5)
+    self.replaceButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.SHOW_ROSTER
+            self:UpdateAppearance()
+        end
+    end)
     self.replaceButtonText = self.replaceButtonText or self.replaceButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     self.replaceButtonText:SetAllPoints()
     self.replaceButtonText:SetFont(self:GetHeaderFontType(), 14)
@@ -198,18 +204,86 @@ function SRTAssignments:UpdateSelectedPlayerPane()
         tileSize = 32,
     })
     self.applyBuffChangesButton:SetBackdropColor(1, 0.5, 0.5, 1)
-    self.applyBuffChangesButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 0)
+    self.applyBuffChangesButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 5)
+    self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.ONLY_ENCOUNTER
+            self:UpdateAppearance()
+        end
+    end)
     self.applyBuffChangesButtonText = self.applyBuffChangesButtonText or self.applyBuffChangesButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     self.applyBuffChangesButtonText:SetAllPoints()
     self.applyBuffChangesButtonText:SetFont(self:GetHeaderFontType(), 14)
-    self.applyBuffChangesButtonText:SetText("Replace")
+    self.applyBuffChangesButtonText:SetText("Apply")
 end
 
 function SRTAssignments:UpdateRosterPane()
+    if self.state == State.SHOW_ROSTER then
+        self.rosterPane:Show()
+    else
+        self.rosterPane:Hide()
+    end
+
     self.rosterPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
     self.rosterPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
     self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
     self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+
+    DevTool:AddData(self:GetGuildMemberInfo(), "guildMemberInfo")
+
+    self.backButton = self.backButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
+    self.backButton:SetWidth(75)
+    self.backButton:SetHeight(25)
+    self.backButton:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        tile = true,
+        tileSize = 32,
+    })
+    self.backButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
+    self.backButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
+    self.backButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.SHOW_PLAYER
+            self:UpdateAppearance()
+        end
+    end)
+    self.backButtonText = self.backButtonText or self.backButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.backButtonText:SetAllPoints()
+    self.backButtonText:SetFont(self:GetHeaderFontType(), 14)
+    self.backButtonText:SetText("Back")
+
+    self.applyReplacePlayerButton = self.applyReplacePlayerButton or CreateFrame("Button", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
+    self.applyReplacePlayerButton:SetWidth(75)
+    self.applyReplacePlayerButton:SetHeight(25)
+    self.applyReplacePlayerButton:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        tile = true,
+        tileSize = 32,
+    })
+    self.applyReplacePlayerButton:SetBackdropColor(1, 0.5, 0.5, 1)
+    self.applyReplacePlayerButton:SetPoint("BOTTOMRIGHT", self.rosterPane, "BOTTOMRIGHT", 0, 5)
+    self.applyReplacePlayerButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.state = State.SHOW_PLAYER
+            self:UpdateAppearance()
+        end
+    end)
+    self.applyReplacePlayerButtonText = self.applyReplacePlayerButtonText or self.applyReplacePlayerButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.applyReplacePlayerButtonText:SetAllPoints()
+    self.applyReplacePlayerButtonText:SetFont(self:GetHeaderFontType(), 14)
+    self.applyReplacePlayerButtonText:SetText("Apply")
+end
+
+function SRTAssignments:GetGuildMemberInfo()
+    local guildMembers = {}
+    local numTotalGuildMembers, numOnlineGuildMembers, numOnlineAndMobileMembers = GetNumGuildMembers()
+    for index = 1, numTotalGuildMembers, 1 do
+        local name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index)
+        if online and level == 85 then
+            table.insert(guildMembers, { name = name, class = class, classFileName = classFileName })
+        end
+    end
+    return guildMembers
 end
 
 function SRTAssignments:CreateGroupFrame(bossAbilityFrame, previousFrame)
