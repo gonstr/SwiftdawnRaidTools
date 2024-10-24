@@ -102,8 +102,7 @@ function SRTAssignments:Initialize()
     self.rosterPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
     self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
     self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
-    self.rosterPane.roster = self.rosterPane.roster or self.rosterPane:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.rosterPane.roster:SetPoint("TOPLEFT", self.rosterPane, "TOPLEFT", 0, -5)
+    self.rosterPane.roster = {}
     self.backButton = self.backButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
     self.backButton:SetWidth(75)
     self.backButton:SetHeight(25)
@@ -252,6 +251,7 @@ function SRTAssignments:UpdateSelectedPlayerPane()
         self.selectedPlayerPane:Show()
     else
         self.selectedPlayerPane:Hide()
+        return
     end
 
     self.player.name:SetText(self.selectedPlayer.name)
@@ -297,16 +297,59 @@ function SRTAssignments:UpdateRosterPane()
         self.rosterPane:Show()
     else
         self.rosterPane:Hide()
+        return
     end
 
     DevTool:AddData(self:GetOnlineGuildMembers(), "guildMemberInfo")
 
-    local rosterText = ""
+    self.rosterPane.title = self.rosterPane.title or self.rosterPane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    self.rosterPane.title:SetText("Available Players")
+    self.rosterPane.title:SetPoint("TOPLEFT", self.rosterPane, "TOPLEFT", 10, -5)
+    self.rosterPane.title:SetFont(self:GetHeaderFontType(), 14)
+    self.rosterPane.title:SetHeight(self.rosterPane.title:GetStringHeight())
+    self.rosterPane.guildTitle = self.rosterPane.guildTitle or self.rosterPane:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.rosterPane.guildTitle:SetText("Swiftdawn")
+    self.rosterPane.guildTitle:SetPoint("TOPLEFT", self.rosterPane.title, "BOTTOMLEFT", 10, -3)
+    self.rosterPane.guildTitle:SetFont(self:GetHeaderFontType(), 13)
+    self.rosterPane.guildTitle:SetHeight(self.rosterPane.guildTitle:GetStringHeight())
+
+    local iconSize = self:GetAppearance().iconSize + 2
+    self.rosterPane.roster = self.rosterPane.roster or {}
+    local lastPlayerFrame = nil
     for _, player in ipairs(self:GetOnlineGuildMembers()) do
-        rosterText = rosterText .. string.format("%s - %s\n", player.name, player.class)
+        local playerFrame = self.rosterPane.roster[player.name] or CreateFrame("Frame", nil, self.rosterPane, "BackdropTemplate")
+        playerFrame:SetSize(190, 20)
+        if not lastPlayerFrame then
+            playerFrame:SetPoint("TOPLEFT", self.rosterPane.guildTitle, "BOTTOMLEFT", 10, -3)
+        else
+            playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -3)
+        end
+
+        playerFrame.name = playerFrame.name or playerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        playerFrame.name:SetPoint("LEFT", playerFrame, "LEFT")
+        playerFrame.name:SetFont(self:GetPlayerFontType(), 12)
+        playerFrame.name:SetText(strsplit("-", player.name))
+
+        playerFrame.spells = playerFrame.spells or {}
+        for i, spellID in ipairs(SwiftdawnRaidTools:SpellsGetClassSpells(player.classFileName)) do
+            local _, _, icon, _, _, _, _, _ = GetSpellInfo(spellID)
+            local iconFrame = playerFrame.spells[i] or CreateFrame("Frame", nil, playerFrame)
+            iconFrame:SetSize(iconSize, iconSize)
+            if i == 1 then
+                iconFrame:SetPoint("LEFT", playerFrame.name, "RIGHT", 3, 0)
+            else
+                iconFrame:SetPoint("LEFT", playerFrame.spells[i-1], "RIGHT", 3, 0)
+            end
+            iconFrame.icon = iconFrame.icon or iconFrame:CreateTexture(nil, "ARTWORK")
+            iconFrame.icon:SetAllPoints()
+            iconFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+            iconFrame.icon:SetTexture(icon)
+            playerFrame.spells[i] = iconFrame
+        end
+        self.rosterPane.roster[player.name] = playerFrame
+        lastPlayerFrame = playerFrame
     end
-    self.rosterPane.roster:SetText(rosterText)
-    self.rosterPane.roster:SetFont(self:GetHeaderFontType(), 12)
+
     self.backButtonText:SetFont(self:GetHeaderFontType(), 14)
     self.applyReplacePlayerButtonText:SetFont(self:GetHeaderFontType(), 14)
 end
