@@ -170,3 +170,13 @@ function SwiftdawnRaidTools:SpellsCacheCast(unit, spellId, updateFunc)
         C_Timer.After(spell.cooldown, updateFunc)
     end
 end
+
+function SwiftdawnRaidTools:SpellsGetClassSpells(class)
+    local spellIDs = {}
+    for spellID, spellInfo in pairs(spells) do
+        if spellInfo.class == class then
+            table.insert(spellIDs, spellID)
+        end
+    end
+    return spellIDs
+end
