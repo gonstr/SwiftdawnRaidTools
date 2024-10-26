@@ -109,7 +109,7 @@ function SwiftdawnRaidTools:OnInitialize()
     self.debugLog = SRTDebugLog:New(100, 400)
     self.debugLog:Initialize()
 
-    self.assignmentsWindow = SRTAssignments:New(600, 800)
+    self.assignmentsWindow = SRTAssignments:New(600)
     self.assignmentsWindow:Initialize()
 
     self:RegisterComm(self.PREFIX_SYNC)
