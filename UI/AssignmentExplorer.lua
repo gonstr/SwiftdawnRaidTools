@@ -10,8 +10,8 @@ local State = {
 }
 
 --- Assignment Explorer window class object
----@class SRTAssignments:SRTWindow
-SRTAssignments = setmetatable({
+---@class AssignmentExplorer:SRTWindow
+AssignmentExplorer = setmetatable({
     state = State.ONLY_ENCOUNTER,
     lastState = State.ONLY_ENCOUNTER,
     selectedEncounterID = 1025,
@@ -22,17 +22,17 @@ SRTAssignments = setmetatable({
     player = {},
     roster = {},
 }, SRTWindow)
-SRTAssignments.__index = SRTAssignments
+AssignmentExplorer.__index = AssignmentExplorer
 
----@return SRTAssignments
-function SRTAssignments:New(height)
+---@return AssignmentExplorer
+function AssignmentExplorer:New(height)
     local obj = SRTWindow.New(self, "Assignments", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
-    ---@cast obj SRTAssignments
+    ---@cast obj AssignmentExplorer
     self.__index = self
     return obj
 end
 
-function SRTAssignments:Initialize()
+function AssignmentExplorer:Initialize()
     SRTWindow.Initialize(self)
     SwiftdawnRaidTools:BossEncountersInit()
     -- Setup header
@@ -117,23 +117,23 @@ function SRTAssignments:Initialize()
     self:UpdateAppearance()
 end
 
-function SRTAssignments:GetHeaderFontType()
+function AssignmentExplorer:GetHeaderFontType()
     return SharedMedia:Fetch("font", self:GetAppearance().headerFontType)
 end
 
 ---@return FontFile
-function SRTAssignments:GetPlayerFontType()
+function AssignmentExplorer:GetPlayerFontType()
     ---@class FontFile
     return SharedMedia:Fetch("font", self:GetAppearance().playerFontType)
 end
 
-function SRTAssignments:GetAssignmentGroupHeight()
+function AssignmentExplorer:GetAssignmentGroupHeight()
     local playerFontSize = self:GetAppearance().playerFontSize
     local iconSize = self:GetAppearance().iconSize
     return (playerFontSize > iconSize and playerFontSize or iconSize) + 7
 end
 
-function SRTAssignments:UpdateAppearance()
+function AssignmentExplorer:UpdateAppearance()
     SRTWindow.UpdateAppearance(self)
 
     self:UpdateEncounterPane()
@@ -141,13 +141,13 @@ function SRTAssignments:UpdateAppearance()
     self:UpdateRosterPane()
 end
 
-function SRTAssignments:Update()
+function AssignmentExplorer:Update()
     SRTWindow.Update(self)
     self.encounter.selector.selectedName = self:GetEncounterName(self.selectedEncounterID)
     FrameBuilder.UpdateSelector(self.encounter.selector)
 end
 
-function SRTAssignments:UpdateEncounterPane()
+function AssignmentExplorer:UpdateEncounterPane()
     local encounterItems = {}
     local encounters = SwiftdawnRaidTools:BossEncountersGetAll()
     for encounterID, _ in pairs(self:GetEncounters()) do
@@ -257,7 +257,7 @@ function SRTAssignments:UpdateEncounterPane()
     end
 end
 
-function SRTAssignments:UpdateSelectedPlayerPane()
+function AssignmentExplorer:UpdateSelectedPlayerPane()
     if self.lastState == State.SHOW_ROSTER then
         self.replaceButton.text:SetText("Back")
     else
@@ -333,7 +333,7 @@ function SRTAssignments:UpdateSelectedPlayerPane()
     
 end
 
-function SRTAssignments:UpdateRosterPane()
+function AssignmentExplorer:UpdateRosterPane()
     if self.state == State.SHOW_ROSTER then
         self.rosterPane:Show()
     else
@@ -391,7 +391,7 @@ end
 
 local lastUpdatedOnlineGuildMembers = 0
 local guildMembers = {}
-function SRTAssignments:GetOnlineGuildMembers()
+function AssignmentExplorer:GetOnlineGuildMembers()
     if GetTime() - lastUpdatedOnlineGuildMembers < 5 then
         return
     end
@@ -406,7 +406,7 @@ function SRTAssignments:GetOnlineGuildMembers()
     return guildMembers
 end
 
-function SRTAssignments:CreateTriggerFrame(bossAbilityFrame)
+function AssignmentExplorer:CreateTriggerFrame(bossAbilityFrame)
     local triggerFrame = CreateFrame("Frame", nil, bossAbilityFrame, "BackdropTemplate")
     triggerFrame:SetHeight(self:GetAssignmentGroupHeight())
     triggerFrame:SetBackdrop({
@@ -422,16 +422,16 @@ function SRTAssignments:CreateTriggerFrame(bossAbilityFrame)
     return triggerFrame
 end
 
-function SRTAssignments:GetEncounters()
+function AssignmentExplorer:GetEncounters()
     return SRT_Profile().data.encounters
 end
 
-function SRTAssignments:GetEncounterName(encounterID)
+function AssignmentExplorer:GetEncounterName(encounterID)
     SwiftdawnRaidTools:BossEncountersInit()
    return SwiftdawnRaidTools:BossEncountersGetAll()[encounterID]
 end
 
-function SRTAssignments:SetDefaultFontStyle(fontString)
+function AssignmentExplorer:SetDefaultFontStyle(fontString)
     fontString:SetShadowOffset(1, -1)
     fontString:SetShadowColor(0, 0, 0, 1)
     fontString:SetJustifyH("LEFT")
