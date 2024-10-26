@@ -1,6 +1,8 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 local SharedMedia = LibStub("LibSharedMedia-3.0")
 
+local WINDOW_WIDTH = 600
+
 local State = {
     ONLY_ENCOUNTER = 1,
     SHOW_PLAYER = 2,
@@ -11,10 +13,11 @@ local State = {
 ---@class SRTAssignments:SRTWindow
 SRTAssignments = setmetatable({
     state = State.ONLY_ENCOUNTER,
+    lastState = State.ONLY_ENCOUNTER,
     selectedEncounterID = 1025,
     selectedPlayer= {},
-    selectedPlayerName = "",
-    selectedPlayerSpellID = 0,
+    viewRosterPlayer = false,
+    selectedRosterPlayer= {},
     encounter = {},
     player = {},
     roster = {},
@@ -22,8 +25,8 @@ SRTAssignments = setmetatable({
 SRTAssignments.__index = SRTAssignments
 
 ---@return SRTAssignments
-function SRTAssignments:New(height, width)
-    local obj = SRTWindow.New(self, "Assignments", height, width)
+function SRTAssignments:New(height)
+    local obj = SRTWindow.New(self, "Assignments", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
     ---@cast obj SRTAssignments
     self.__index = self
     return obj
@@ -31,6 +34,7 @@ end
 
 function SRTAssignments:Initialize()
     SRTWindow.Initialize(self)
+    SwiftdawnRaidTools:BossEncountersInit()
     -- Setup header
     self.headerText:SetText("Assignments Explorer")
     -- Setup encounter pane
@@ -40,10 +44,10 @@ function SRTAssignments:Initialize()
     self.encounterPane:SetPoint("TOPRIGHT", self.main, "TOP", -5, -5)
     self.encounterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
     self.encounterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOM", -5, 5)
-    self.encounter.name = self.encounter.name or self.encounterPane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    self.encounter.name:SetFont(self:GetHeaderFontType(), 14)
-    self.encounter.name:SetPoint("TOPLEFT", self.encounterPane, "TOPLEFT", 0, -5)
-    self.encounter.name:SetTextColor(1, 1, 1, 0.8)
+
+    self.encounter.selector = self.encounter.selector or FrameBuilder.CreateSelector(self.encounterPane, {}, 285, self:GetHeaderFontType(), 14, "Maloriak")
+    self.encounter.selector:SetPoint("TOPLEFT", self.encounterPane, "TOPLEFT", 0, -5)
+    self.encounter.selector.selectedName = "Maloriak"
     self.encounter.bossAbilities = self.encounter.bossAbilities or {}
     -- Setup player pane
     self.selectedPlayerPane = CreateFrame("Frame", "SRT_Assignments_SelectedPlayerPane", self.main)
@@ -56,44 +60,40 @@ function SRTAssignments:Initialize()
     self.player.name:SetPoint("TOPLEFT", self.selectedPlayerPane, "TOPLEFT", 0, -5)
     self.player.name:SetTextColor(1, 1, 1, 0.8)
     self.player.cooldowns = self.player.cooldowns or {}
-    self.replaceButton = self.replaceButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.selectedPlayerPane, "BackdropTemplate")
-    self.replaceButton:SetWidth(75)
-    self.replaceButton:SetHeight(25)
-    self.replaceButton:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        tile = true,
-        tileSize = 32,
-    })
-    self.replaceButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
+
+    local colorRed = { r=0.8, g=0.3, b=0.3, a=0.8 }
+    local colorRedHighlight = { r=1, g=0.3, b=0.3, a=1 }
+    local colorGreen = { r=0.3, g=0.8, b=0.3, a=0.8 }
+    local colorGreenHighlight = { r=0.3, g=1, b=0.3, a=1 }
+    local colorGray = { r=0.3, g=0.3, b=0.3, a=0.8 }
+    local colorGrayHighlight = { r=0.8, g=0.8, b=0.8, a=1 }
+
+    self.replaceButton = FrameBuilder.CreateButton(self.selectedPlayerPane, 75, 25, "Replace", SRTColor.Red, SRTColor.RedHighlight)
     self.replaceButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 5)
     self.replaceButton:SetScript("OnMouseUp", function (_, button)
         if button == "LeftButton" then
+            self.lastState = State.SHOW_PLAYER
             self.state = State.SHOW_ROSTER
+            self.viewRosterPlayer = false
+            self.selectedRosterPlayer.selectedID = nil
+            self.applyBuffChangesButton.color = SRTColor.Gray
+            self.applyBuffChangesButton.colorHightlight = SRTColor.Gray
+            self.applyBuffChangesButton:SetScript("OnMouseUp", nil)
+            FrameBuilder.UpdateButton(self.applyBuffChangesButton)
             self:UpdateAppearance()
         end
     end)
-    self.replaceButtonText = self.replaceButtonText or self.replaceButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.replaceButtonText:SetAllPoints()
-    self.replaceButtonText:SetText("Replace")
-    self.applyBuffChangesButton = self.applyBuffChangesButton or CreateFrame("Button", "SRT_AssignmentExplorer_ReplaceButton", self.selectedPlayerPane, "BackdropTemplate")
-    self.applyBuffChangesButton:SetWidth(75)
-    self.applyBuffChangesButton:SetHeight(25)
-    self.applyBuffChangesButton:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        tile = true,
-        tileSize = 32,
-    })
-    self.applyBuffChangesButton:SetBackdropColor(1, 0.5, 0.5, 1)
+    self.applyBuffChangesButton = FrameBuilder.CreateButton(self.selectedPlayerPane, 75, 25, "Apply", SRTColor.Gray, SRTColor.Gray)
     self.applyBuffChangesButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 5)
-    self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, button)
+    self.cancelBuffChangesButton = FrameBuilder.CreateButton(self.selectedPlayerPane, 75, 25, "Cancel", SRTColor.Red, SRTColor.RedHighlight)
+    self.cancelBuffChangesButton:SetPoint("RIGHT", self.applyBuffChangesButton, "LEFT", -5, 0)
+    self.cancelBuffChangesButton:SetScript("OnMouseUp", function (_, button)
         if button == "LeftButton" then
+            self.lastState = State.SHOW_PLAYER
             self.state = State.ONLY_ENCOUNTER
             self:UpdateAppearance()
         end
     end)
-    self.applyBuffChangesButtonText = self.applyBuffChangesButtonText or self.applyBuffChangesButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.applyBuffChangesButtonText:SetAllPoints()
-    self.applyBuffChangesButtonText:SetText("Apply")
     self.selectedPlayerPane:Hide()
     -- Setup roster pane
     self.rosterPane = CreateFrame("Frame", "SRT_Assignments_RosterPane", self.main)
@@ -103,44 +103,15 @@ function SRTAssignments:Initialize()
     self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
     self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
     self.rosterPane.roster = {}
-    self.backButton = self.backButton or CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
-    self.backButton:SetWidth(75)
-    self.backButton:SetHeight(25)
-    self.backButton:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        tile = true,
-        tileSize = 32,
-    })
-    self.backButton:SetBackdropColor(0.8, 0.3, 0.3, 1)
-    self.backButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
-    self.backButton:SetScript("OnMouseUp", function (_, button)
+    self.rosterBackButton = FrameBuilder.CreateButton(self.rosterPane, 75, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
+    self.rosterBackButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
+    self.rosterBackButton:SetScript("OnMouseUp", function (_, button)
         if button == "LeftButton" then
+            self.lastState = State.SHOW_PLAYER
             self.state = State.SHOW_PLAYER
             self:UpdateAppearance()
         end
     end)
-    self.backButtonText = self.backButtonText or self.backButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.backButtonText:SetAllPoints()
-    self.backButtonText:SetText("Back")
-    self.applyReplacePlayerButton = self.applyReplacePlayerButton or CreateFrame("Button", "SRT_AssignmentExplorer_ReplaceButton", self.rosterPane, "BackdropTemplate")
-    self.applyReplacePlayerButton:SetWidth(75)
-    self.applyReplacePlayerButton:SetHeight(25)
-    self.applyReplacePlayerButton:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        tile = true,
-        tileSize = 32,
-    })
-    self.applyReplacePlayerButton:SetBackdropColor(1, 0.5, 0.5, 1)
-    self.applyReplacePlayerButton:SetPoint("BOTTOMRIGHT", self.rosterPane, "BOTTOMRIGHT", 0, 5)
-    self.applyReplacePlayerButton:SetScript("OnMouseUp", function (_, button)
-        if button == "LeftButton" then
-            self.state = State.SHOW_PLAYER
-            self:UpdateAppearance()
-        end
-    end)
-    self.applyReplacePlayerButtonText = self.applyReplacePlayerButtonText or self.applyReplacePlayerButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    self.applyReplacePlayerButtonText:SetAllPoints()
-    self.applyReplacePlayerButtonText:SetText("Apply")
     self.rosterPane:Hide()
     -- Update appearance
     self:UpdateAppearance()
@@ -150,7 +121,9 @@ function SRTAssignments:GetHeaderFontType()
     return SharedMedia:Fetch("font", self:GetAppearance().headerFontType)
 end
 
+---@return FontFile
 function SRTAssignments:GetPlayerFontType()
+    ---@class FontFile
     return SharedMedia:Fetch("font", self:GetAppearance().playerFontType)
 end
 
@@ -163,8 +136,6 @@ end
 function SRTAssignments:UpdateAppearance()
     SRTWindow.UpdateAppearance(self)
 
-    self:SetDefaultFontStyle(self.encounter.name)
-
     self:UpdateEncounterPane()
     self:UpdateSelectedPlayerPane()
     self:UpdateRosterPane()
@@ -172,10 +143,27 @@ end
 
 function SRTAssignments:Update()
     SRTWindow.Update(self)
-    self.encounter.name:SetText(self:GetEncounterName(self.selectedEncounterID))
+    self.encounter.selector.selectedName = self:GetEncounterName(self.selectedEncounterID)
+    FrameBuilder.UpdateSelector(self.encounter.selector)
 end
 
 function SRTAssignments:UpdateEncounterPane()
+    local encounterItems = {}
+    local encounters = SwiftdawnRaidTools:BossEncountersGetAll()
+    for encounterID, _ in pairs(self:GetEncounters()) do
+        local item = {
+            name = encounters[encounterID],
+            encounterID = encounterID,
+            onClick = function (row)
+                self.selectedEncounterID = row.item.encounterID
+                self:UpdateAppearance()
+            end
+        }
+        table.insert(encounterItems, item)
+    end
+    self.encounter.selector.items = encounterItems
+    FrameBuilder.UpdateSelector(self.encounter.selector)
+
     local encounterAssignments = self:GetEncounters()[self.selectedEncounterID]
     if not encounterAssignments then
         return
@@ -188,8 +176,8 @@ function SRTAssignments:UpdateEncounterPane()
             bossAbilityFrame:SetPoint("TOPLEFT", previousAbility, "BOTTOMLEFT", 0, 0)
             bossAbilityFrame:SetPoint("TOPRIGHT", previousAbility, "BOTTOMRIGHT", 0, 0)
         else
-            bossAbilityFrame:SetPoint("TOPLEFT", self.encounter.name, "BOTTOMLEFT", 10, -7)
-            bossAbilityFrame:SetPoint("TOPRIGHT", self.encounter.name, "BOTTOMLEFT", 190, -7)
+            bossAbilityFrame:SetPoint("TOPLEFT", self.encounter.selector, "BOTTOMLEFT", 10, -7)
+            bossAbilityFrame:SetPoint("TOPRIGHT", self.encounter.selector, "BOTTOMLEFT", 190, -7)
         end
         local bossAbilityFrameHeight = 7
 
@@ -201,40 +189,63 @@ function SRTAssignments:UpdateEncounterPane()
         self:SetDefaultFontStyle(bossAbilityFrame.name)
         bossAbilityFrameHeight = bossAbilityFrameHeight + 12
 
-        bossAbilityFrame.triggers = bossAbilityFrame.triggers or {}
-        local previousTrigger = nil
-        for triggerIndex, trigger in ipairs(bossAbility.triggers) do
-            local triggerFrame = bossAbilityFrame.triggers[triggerIndex] or self:CreateTriggerFrame(bossAbilityFrame)
-            if trigger.type == "SPELL_CAST" then
-                local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(trigger.spell_id)
-                triggerFrame.text:SetText("When Boss casts " .. name)
-            elseif trigger.type == "RAID_BOSS_EMOTE" then
-                triggerFrame.text:SetText("When Boss emote includes '" .. trigger.text .. "'")
-            elseif trigger.type == "UNIT_HEALTH" then
-                triggerFrame.text:SetText("When Boss health drops below " .. tostring(trigger.pct_lt))
-            else
-                triggerFrame.text:SetText("When type: " .. trigger.type)
-            end
-            if not previousTrigger then
-                triggerFrame:SetPoint("TOPLEFT", 10, -16)
-                triggerFrame:SetPoint("TOPRIGHT", 10, -16)
-            else
-                triggerFrame:SetPoint("TOPLEFT", previousTrigger, "BOTTOMLEFT", 0, 0)
-                triggerFrame:SetPoint("TOPRIGHT", previousTrigger, "BOTTOMRIGHT", 0, 0)
-            end
-            bossAbilityFrameHeight = bossAbilityFrameHeight + triggerFrame:GetHeight()
-            bossAbilityFrame.triggers[triggerIndex] = triggerFrame
-            previousTrigger = triggerFrame
-        end
+        bossAbilityFrame.bossSelectionFrame = bossAbilityFrame.bossSelectionFrame or {}
+
+        -- bossAbilityFrame.triggers = bossAbilityFrame.triggers or {}
+        -- local previousTrigger = nil
+        -- for triggerIndex, trigger in ipairs(bossAbility.triggers) do
+        --     local triggerFrame = bossAbilityFrame.triggers[triggerIndex] or self:CreateTriggerFrame(bossAbilityFrame)
+        --     if trigger.type == "SPELL_CAST" then
+        --         local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(trigger.spell_id)
+        --         triggerFrame.text:SetText("When Boss casts " .. name)
+        --     elseif trigger.type == "RAID_BOSS_EMOTE" then
+        --         triggerFrame.text:SetText("When Boss emote includes '" .. trigger.text .. "'")
+        --     elseif trigger.type == "UNIT_HEALTH" then
+        --         triggerFrame.text:SetText("When Boss health drops below " .. tostring(trigger.pct_lt))
+        --     else
+        --         triggerFrame.text:SetText("When type: " .. trigger.type)
+        --     end
+        --     if not previousTrigger then
+        --         triggerFrame:SetPoint("TOPLEFT", 10, -16)
+        --         triggerFrame:SetPoint("TOPRIGHT", 10, -16)
+        --     else
+        --         triggerFrame:SetPoint("TOPLEFT", previousTrigger, "BOTTOMLEFT", 0, 0)
+        --         triggerFrame:SetPoint("TOPRIGHT", previousTrigger, "BOTTOMRIGHT", 0, 0)
+        --     end
+        --     bossAbilityFrameHeight = bossAbilityFrameHeight + triggerFrame:GetHeight()
+        --     bossAbilityFrame.triggers[triggerIndex] = triggerFrame
+        --     previousTrigger = triggerFrame
+        -- end
 
         bossAbilityFrame.groups = bossAbilityFrame.groups or {}
-        local previousGroup = previousTrigger
+        for groupIndex, groupFrame in ipairs(bossAbilityFrame.groups) do
+            groupFrame:Hide()
+        end
+        local previousGroup = nil
         for groupIndex, group in ipairs(bossAbility.assignments) do
-            local groupFrame = bossAbilityFrame.groups[groupIndex] or self:CreateGroupFrame(bossAbilityFrame)
-            self:UpdateGroupFrame(groupFrame, previousGroup, group, bossAbility.uuid, groupIndex)
-            groupFrame:SetHeight(self:GetAssignmentGroupHeight() + 3)
+            local groupFrame = bossAbilityFrame.groups[groupIndex] or FrameBuilder.CreateAssignmentGroupFrame(bossAbilityFrame, self:GetAssignmentGroupHeight() + 3)
+            FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, previousGroup, group, bossAbility.uuid, groupIndex, self:GetPlayerFontType(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
+
+            -- Set OnClick for each assignment
+            for _, assignmentFrame in pairs(groupFrame.assignments) do
+                assignmentFrame:SetScript("OnMouseUp", function (frame, button)
+                    if button == "LeftButton" then
+                        self.lastState = State.ONLY_ENCOUNTER
+                        self.state = State.SHOW_PLAYER
+                        self.viewRosterPlayer = false
+                        self.selectedPlayer = {
+                            name = frame.assignment.player,
+                            class = SwiftdawnRaidTools:SpellsGetClass(frame.assignment.spell_id),
+                            selectedID = frame.assignment.spell_id
+                        }
+                        self:UpdateAppearance()
+                    end
+                end)
+            end
+
             bossAbilityFrameHeight = bossAbilityFrameHeight + groupFrame:GetHeight()
             bossAbilityFrame.groups[groupIndex] = groupFrame
+
             previousGroup = groupFrame
         end
 
@@ -247,6 +258,12 @@ function SRTAssignments:UpdateEncounterPane()
 end
 
 function SRTAssignments:UpdateSelectedPlayerPane()
+    if self.lastState == State.SHOW_ROSTER then
+        self.replaceButton.text:SetText("Back")
+    else
+        self.replaceButton.text:SetText("Replace")
+    end
+
     if self.state == State.SHOW_PLAYER then
         self.selectedPlayerPane:Show()
     else
@@ -254,42 +271,66 @@ function SRTAssignments:UpdateSelectedPlayerPane()
         return
     end
 
-    self.player.name:SetText(self.selectedPlayer.name)
+    if self.viewRosterPlayer then
+        self.player.name:SetText(self.selectedRosterPlayer.name)
+    else
+        self.player.name:SetText(self.selectedPlayer.name)
+    end
     self.player.name:SetFont(self:GetHeaderFontType(), 14)
-    self:SetDefaultFontStyle(self.player.name)
-    self.replaceButtonText:SetFont(self:GetHeaderFontType(), 14)
-    self.applyBuffChangesButtonText:SetFont(self:GetHeaderFontType(), 14)
     
-    local iconSize = self:GetAppearance().iconSize + 2
-    local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(self.selectedPlayer.spellID)
-    -- DevTool:AddData({ name=name, rank=rank, icon=icon, castTime=castTime, minRange=minRange, maxRange=maxRange, spellID=spellID, originalIcon=originalIcon }, "selectedPlayerSpell_" .. self.selectedPlayer.name)
+    local iconSize = self:GetAppearance().iconSize * 3
 
-    local cooldownFrame = self.player.cooldowns[1] or CreateFrame("Frame", nil, self.selectedPlayerPane, "BackdropTemplate")
-    cooldownFrame:SetPoint("TOPLEFT", self.player.name, "BOTTOMLEFT", 5, -5)
-    cooldownFrame:SetPoint("TOPRIGHT", self.player.name, "BOTTOMLEFT", 190, -5)
-    cooldownFrame.iconFrame = cooldownFrame.iconFrame or CreateFrame("Frame", nil, cooldownFrame)
-    cooldownFrame.iconFrame:SetSize(iconSize, iconSize)
-    cooldownFrame.iconFrame:SetPoint("TOPLEFT", 10, 0)
-    cooldownFrame.icon = cooldownFrame.icon or cooldownFrame.iconFrame:CreateTexture(nil, "ARTWORK")
-    cooldownFrame.icon:SetAllPoints()
-    cooldownFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-    cooldownFrame.icon:SetTexture(icon)
-    cooldownFrame.text = cooldownFrame.text or cooldownFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    cooldownFrame.text:SetFont(self:GetPlayerFontType(), self:GetAppearance().playerFontSize)
-    cooldownFrame.text:SetTextColor(1, 1, 1, 1)
-    cooldownFrame.text:SetPoint("LEFT", cooldownFrame.iconFrame, "RIGHT", 4, -1)
-    cooldownFrame.text:SetText(name)
-    self:SetDefaultFontStyle(cooldownFrame.text)
-    cooldownFrame.extraText = cooldownFrame.extraText or cooldownFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    cooldownFrame.extraText:SetFont(self:GetPlayerFontType(), self:GetAppearance().playerFontSize)
-    cooldownFrame.extraText:SetTextColor(1, 1, 1, 1)
-    cooldownFrame.extraText:SetPoint("TOPLEFT", cooldownFrame.iconFrame, "BOTTOMLEFT", 4, -3)
-    cooldownFrame.extraText:SetText(string.format("Cast time: %ds\nRange: %d to %d yards", castTime, minRange, maxRange))
-    cooldownFrame.extraText:SetHeight(cooldownFrame.extraText:GetStringHeight())
-    cooldownFrame.extraText:SetWidth(180)
-    self:SetDefaultFontStyle(cooldownFrame.extraText)
-    cooldownFrame:SetHeight(iconSize + 4 + cooldownFrame.text:GetHeight() + 4 + cooldownFrame.extraText:GetHeight() + 4)
-    self.player.cooldowns[1] = cooldownFrame
+    for _, spellFrame in pairs(self.player.cooldowns) do
+        spellFrame:Hide()
+    end
+    local lastSpellFrame
+
+    local classSpells
+    local selectedID
+    if self.viewRosterPlayer then
+        classSpells = SwiftdawnRaidTools:SpellsGetClassSpells(self.selectedRosterPlayer.class)
+        selectedID = self.selectedRosterPlayer.selectedID
+    else
+        classSpells = SwiftdawnRaidTools:SpellsGetClassSpells(self.selectedPlayer.class)
+        selectedID = self.selectedPlayer.selectedID
+    end
+    for _, spellID in pairs(classSpells) do
+        local spellFrame = self.player.cooldowns[spellID] or FrameBuilder.CreateLargeSpellFrame(self.selectedPlayerPane)
+        FrameBuilder.UpdateLargeSpellFrame(spellFrame, spellID, self:GetPlayerFontType(), self:GetAppearance().playerFontSize, iconSize)
+        spellFrame:SetScript("OnEnter", function () spellFrame:SetBackdropColor(1, 1, 1, 0.4) end)
+        spellFrame:SetScript("OnLeave", function (frame) if frame.spellID ~= selectedID then spellFrame:SetBackdropColor(0, 0, 0, 0) end end)
+        spellFrame:SetScript("OnMouseDown", function (sf, button)
+            if button == "LeftButton" then
+                if self.viewRosterPlayer then 
+                    self.selectedRosterPlayer.selectedID = sf.spellID
+                    self.applyBuffChangesButton.color = SRTColor.Green
+                    self.applyBuffChangesButton.colorHightlight = SRTColor.GreenHighlight
+                    self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, button)
+                        if button == "LeftButton" then
+                            self.lastState = State.SHOW_ROSTER
+                            self.state = State.SHOW_PLAYER
+                            self:UpdateAppearance()
+                        end
+                    end)
+                    FrameBuilder.UpdateButton(self.applyBuffChangesButton)
+                    self:UpdateAppearance()
+                end
+            end
+        end)
+        if lastSpellFrame then
+            spellFrame:SetPoint("TOPLEFT", lastSpellFrame, "BOTTOMLEFT", 0, -7)
+            spellFrame:SetPoint("TOPRIGHT", lastSpellFrame, "BOTTOMRIGHT", 0, -7)
+        else
+            spellFrame:SetPoint("TOPLEFT", self.player.name, "BOTTOMLEFT", 5, -7)
+            spellFrame:SetPoint("TOPRIGHT", self.player.name, "BOTTOMLEFT", 280, -7)
+        end
+        if spellID == selectedID then
+            spellFrame:SetBackdropColor(1, 1, 1, 0.4)
+        end
+        self.player.cooldowns[spellID] = spellFrame
+        lastSpellFrame = spellFrame
+    end
+    
 end
 
 function SRTAssignments:UpdateRosterPane()
@@ -300,62 +341,61 @@ function SRTAssignments:UpdateRosterPane()
         return
     end
 
-    DevTool:AddData(self:GetOnlineGuildMembers(), "guildMemberInfo")
-
     self.rosterPane.title = self.rosterPane.title or self.rosterPane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     self.rosterPane.title:SetText("Available Players")
-    self.rosterPane.title:SetPoint("TOPLEFT", self.rosterPane, "TOPLEFT", 10, -5)
+    self.rosterPane.title:SetPoint("TOPLEFT", self.rosterPane, "TOPLEFT", 0, -5)
     self.rosterPane.title:SetFont(self:GetHeaderFontType(), 14)
     self.rosterPane.title:SetHeight(self.rosterPane.title:GetStringHeight())
+    self.rosterPane.title:SetTextColor(1, 1, 1, 0.8)
     self.rosterPane.guildTitle = self.rosterPane.guildTitle or self.rosterPane:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     self.rosterPane.guildTitle:SetText("Swiftdawn")
-    self.rosterPane.guildTitle:SetPoint("TOPLEFT", self.rosterPane.title, "BOTTOMLEFT", 10, -3)
+    self.rosterPane.guildTitle:SetPoint("TOPLEFT", self.rosterPane.title, "BOTTOMLEFT", 10, -7)
     self.rosterPane.guildTitle:SetFont(self:GetHeaderFontType(), 13)
     self.rosterPane.guildTitle:SetHeight(self.rosterPane.guildTitle:GetStringHeight())
+    self.rosterPane.guildTitle:SetTextColor(1, 1, 1, 0.8)
 
-    local iconSize = self:GetAppearance().iconSize + 2
     self.rosterPane.roster = self.rosterPane.roster or {}
+    
     local lastPlayerFrame = nil
     for _, player in ipairs(self:GetOnlineGuildMembers()) do
-        local playerFrame = self.rosterPane.roster[player.name] or CreateFrame("Frame", nil, self.rosterPane, "BackdropTemplate")
-        playerFrame:SetSize(190, 20)
+        local playerFrame = self.rosterPane.roster[player.name] or FrameBuilder.CreatePlayerFrame(self.rosterPane, player.name, player.classFileName,
+            self.rosterPane:GetWidth(), self:GetAssignmentGroupHeight(), self:GetPlayerFontType(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize + 2)
+
         if not lastPlayerFrame then
-            playerFrame:SetPoint("TOPLEFT", self.rosterPane.guildTitle, "BOTTOMLEFT", 10, -3)
+            playerFrame:SetPoint("TOPLEFT", self.rosterPane.guildTitle, "BOTTOMLEFT", 0, -7)
         else
-            playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -3)
+            playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -5)
         end
 
-        playerFrame.name = playerFrame.name or playerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        playerFrame.name:SetPoint("LEFT", playerFrame, "LEFT")
-        playerFrame.name:SetFont(self:GetPlayerFontType(), 12)
-        playerFrame.name:SetText(strsplit("-", player.name))
+        playerFrame:SetScript("OnEnter", function () playerFrame:SetBackdropColor(1, 1, 1, 0.4) end)
+        playerFrame:SetScript("OnLeave", function () playerFrame:SetBackdropColor(0, 0, 0, 0) end)
 
-        playerFrame.spells = playerFrame.spells or {}
-        for i, spellID in ipairs(SwiftdawnRaidTools:SpellsGetClassSpells(player.classFileName)) do
-            local _, _, icon, _, _, _, _, _ = GetSpellInfo(spellID)
-            local iconFrame = playerFrame.spells[i] or CreateFrame("Frame", nil, playerFrame)
-            iconFrame:SetSize(iconSize, iconSize)
-            if i == 1 then
-                iconFrame:SetPoint("LEFT", playerFrame.name, "RIGHT", 3, 0)
-            else
-                iconFrame:SetPoint("LEFT", playerFrame.spells[i-1], "RIGHT", 3, 0)
+        playerFrame:SetScript("OnMouseUp", function (_, button)
+            if button == "LeftButton" then
+                self.lastState = State.SHOW_ROSTER
+                self.state = State.SHOW_PLAYER
+                self.viewRosterPlayer = true
+                self.selectedRosterPlayer = {
+                    name = strsplit("-", player.name),
+                    class = player.classFileName,
+                    selectedID = nil
+                }
+                self:UpdateAppearance()
             end
-            iconFrame.icon = iconFrame.icon or iconFrame:CreateTexture(nil, "ARTWORK")
-            iconFrame.icon:SetAllPoints()
-            iconFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-            iconFrame.icon:SetTexture(icon)
-            playerFrame.spells[i] = iconFrame
-        end
+        end)
+
         self.rosterPane.roster[player.name] = playerFrame
         lastPlayerFrame = playerFrame
     end
-
-    self.backButtonText:SetFont(self:GetHeaderFontType(), 14)
-    self.applyReplacePlayerButtonText:SetFont(self:GetHeaderFontType(), 14)
 end
 
+local lastUpdatedOnlineGuildMembers = 0
+local guildMembers = {}
 function SRTAssignments:GetOnlineGuildMembers()
-    local guildMembers = {}
+    if GetTime() - lastUpdatedOnlineGuildMembers < 5 then
+        return
+    end
+    guildMembers = {}
     local numTotalGuildMembers, numOnlineGuildMembers, numOnlineAndMobileMembers = GetNumGuildMembers()
     for index = 1, numTotalGuildMembers, 1 do
         local name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index)
@@ -372,7 +412,7 @@ function SRTAssignments:CreateTriggerFrame(bossAbilityFrame)
     triggerFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
-        tileSize = 32,
+        tileSize = 16,
     })
     triggerFrame:SetBackdropColor(0, 0, 0, 0)
     triggerFrame.text = triggerFrame.text or triggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -380,100 +420,6 @@ function SRTAssignments:CreateTriggerFrame(bossAbilityFrame)
     triggerFrame.text:SetFont(self:GetTitleFontType(), self:GetAppearance().titleFontSize)
     self:SetDefaultFontStyle(triggerFrame.text)
     return triggerFrame
-end
-
-function SRTAssignments:CreateGroupFrame(bossAbilityFrame)
-    local groupFrame = CreateFrame("Frame", nil, bossAbilityFrame, "BackdropTemplate")
-    groupFrame:SetHeight(self:GetAssignmentGroupHeight())
-    groupFrame:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 32,
-    })
-    groupFrame:SetBackdropColor(0, 0, 0, 0)
-    groupFrame.assignments = {}
-    return groupFrame
-end
-
-function SRTAssignments:UpdateGroupFrame(groupFrame, prevFrame, group, uuid, index)
-    groupFrame:Show()
-    groupFrame.uuid = uuid
-    groupFrame.index = index
-    groupFrame:ClearAllPoints()
-    if prevFrame then
-        groupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
-        groupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
-    else
-        groupFrame:SetPoint("TOPLEFT", 0, -16)
-        groupFrame:SetPoint("TOPRIGHT", 0, -16)
-    end
-    for _, cd in pairs(groupFrame.assignments) do
-        cd:Hide()
-    end
-    for i, assignment in ipairs(group) do
-        local assignmentFrame = groupFrame.assignments[i] or self:CreateAssignmentFrame(groupFrame)
-        self:UpdateAssignmentFrame(assignmentFrame, assignment, i, #group)
-        groupFrame.assignments[i] = assignmentFrame
-    end
-end
-
-function SRTAssignments:CreateAssignmentFrame(groupFrame)
-    local assignmentFrame = CreateFrame("Frame", nil, groupFrame, "BackdropTemplate")
-    assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
-    assignmentFrame:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 32,
-    })
-    assignmentFrame:SetBackdropColor(0, 0, 0, 0)
-    assignmentFrame:SetScript("OnEnter", function() assignmentFrame:SetBackdropColor(1, 1, 1, 0.4) end)
-    assignmentFrame:SetScript("OnLeave", function() assignmentFrame:SetBackdropColor(0, 0, 0, 0) end)
-    assignmentFrame:SetMouseClickEnabled(true)
-    assignmentFrame:SetScript("OnMouseUp", function (_, button)
-        if button == "LeftButton" then
-            self.state = State.SHOW_PLAYER
-            self.selectedPlayer = {
-                name = assignmentFrame.player,
-                spellID = assignmentFrame.spellId
-            }
-            self:UpdateAppearance()
-        end
-    end)
-    local iconSize = self:GetAppearance().iconSize
-    assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
-    assignmentFrame.iconFrame:SetPoint("LEFT", 0, 0)
-    assignmentFrame.cooldownFrame = CreateFrame("Cooldown", nil, assignmentFrame.iconFrame, "CooldownFrameTemplate")
-    assignmentFrame.cooldownFrame:SetAllPoints()
-    assignmentFrame.iconFrame.cooldown = assignmentFrame.cooldownFrame
-    assignmentFrame.icon = assignmentFrame.iconFrame:CreateTexture(nil, "ARTWORK")
-    assignmentFrame.icon:SetAllPoints()
-    assignmentFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-    assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    assignmentFrame.text:SetFont(self:GetTitleFontType(), self:GetAppearance().titleFontSize)
-    assignmentFrame.text:SetTextColor(1, 1, 1, 1)
-    assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "CENTER", iconSize/2+4, -1)
-    self:SetDefaultFontStyle(assignmentFrame.text)
-    return assignmentFrame
-end
-
-function SRTAssignments:UpdateAssignmentFrame(assignmentFrame, assignment, index, total)
-    assignmentFrame:Show()
-    assignmentFrame.player = assignment.player
-    assignmentFrame.spellId = assignment.spell_id
-    local _, _, icon = GetSpellInfo(assignment.spell_id)
-    assignmentFrame.icon:SetTexture(icon)
-    assignmentFrame.text:SetText(assignment.player)
-    local color = SwiftdawnRaidTools:GetSpellColor(assignment.spell_id)
-    assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
-    assignmentFrame.cooldownFrame:Clear()
-    assignmentFrame:ClearAllPoints()
-    if index > 1 then
-        assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOM")
-        assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
-    else
-        assignmentFrame:SetPoint("BOTTOMLEFT")
-        assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, 0)
-    end
 end
 
 function SRTAssignments:GetEncounters()
