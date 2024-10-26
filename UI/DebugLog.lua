@@ -25,8 +25,6 @@ function SRTDebugLog:Initialize()
     self.scrollFrame:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 0, 5)
     self.scrollFrame:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", 0, 5)
 
-    DevTool:AddData(self.scrollFrame, "ScrollFrame")
-
     self.scrollBar = _G[self.scrollFrame:GetName() .. "ScrollBar"]
     self.scrollBar.scrollStep = logFontSize  -- Change this value to adjust the scroll amount per tick
     -- Create a content frame to hold the text
