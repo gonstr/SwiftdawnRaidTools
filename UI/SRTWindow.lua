@@ -5,28 +5,29 @@ MIN_HEIGHT = 100
 
 --- Base window class object for SRT 
 ---@class SRTWindow
-SRTWindow = {
-    name = "",
-    height = 0,
-    width = 0,
-    container = nil,
-    popup = nil,
-    header = nil,
-    headerText = nil,
-    headerButton = nil,
-    main = nil,
-    resizeButton = nil
-}
+SRTWindow = {}
 SRTWindow.__index = SRTWindow
 
 ---@return SRTWindow 
-function SRTWindow:New(name, height, width)
-    local o = setmetatable({}, self)
+function SRTWindow:New(name, height, width, minHeight, maxHeight, minWidth, maxWidth)
+    ---@class SRTWindow
+    local obj = setmetatable({}, self)
     self.__index = self
-    o.name = name
-    o.height = height
-    o.width = width
-    return o
+    obj.name = name
+    obj.height = height
+    obj.width = width
+    obj.minHeight = minHeight
+    obj.maxHeight = maxHeight
+    obj.minWidth = minWidth
+    obj.maxWidth = maxWidth
+    obj.container = CreateFrame("Frame", "SRT_"..name, UIParent, "BackdropTemplate")
+    obj.popupMenu = CreateFrame("Frame", "SRT_"..name.."_Popup", UIParent, "BackdropTemplate")
+    obj.header = CreateFrame("Frame", "SRT_"..name.."_Header", obj.container, "BackdropTemplate")
+    obj.headerText = obj.header:CreateFontString("SRT_"..name.."_HeaderTitle", "OVERLAY", "GameFontNormalLarge")
+    obj.menuButton = CreateFrame("Button", "SRT_"..name.."_MenuButton", obj.header)
+    obj.main = CreateFrame("Frame", "SRT_"..name.."_Main", obj.container)
+    obj.resizeButton = CreateFrame("Button", "SRT_"..name.."_ResizeButton", obj.container)
+    return obj
 end
 
 function SRTWindow:GetProfile()
@@ -46,14 +47,6 @@ function SRTWindow:GetHeaderFont()
 end
 
 function SRTWindow:Initialize()
-    self.container = CreateFrame("Frame", "SRT_"..self.name, UIParent, "BackdropTemplate")
-    self.popupMenu = CreateFrame("Frame", "SRT_"..self.name.."_Popup", UIParent, "BackdropTemplate")
-    self.header = CreateFrame("Frame", "SRT_"..self.name.."_Header", self.container, "BackdropTemplate")
-    self.headerText = self.header:CreateFontString("SRT_"..self.name.."_HeaderTitle", "OVERLAY", "GameFontNormalLarge")
-    self.menuButton = CreateFrame("Button", "SRT_"..self.name.."_MenuButton", self.header)
-    self.main = CreateFrame("Frame", "SRT_"..self.name.."_Main", self.container)
-    self.resizeButton = CreateFrame("Button", "SRT_"..self.name.."_ResizeButton", self.container)
-
     self:SetupContainerFrame()
     self:SetupPopupMenu()
     self:SetupHeader()
@@ -227,6 +220,10 @@ function SRTWindow:SetupResizeButton()
     self.container:SetScript("OnSizeChanged", function(_, width, height)
         if width < MIN_WIDTH then width = MIN_WIDTH end
         if height < MIN_HEIGHT then height = MIN_HEIGHT end
+        if self.minWidth and width < self.minWidth then width = self.minWidth end
+        if self.minHeight and height < self.minHeight then height = self.minHeight end
+        if self.maxWidth and width > self.maxWidth then width = self.maxWidth end
+        if self.maxHeight and height > self.maxHeight then height = self.maxHeight end
         self.container:SetSize(width, height)
     end)
 end
