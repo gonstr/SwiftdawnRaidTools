@@ -9,9 +9,10 @@ SRTOverview = setmetatable({
 SRTOverview.__index = SRTOverview
 
 function SRTOverview:New(height, width)
-    local o = SRTWindow.New(self, "Overview", height, width)
+    local obj = SRTWindow.New(self, "Overview", height, width)
+    ---@casts obj SRTOverview
     self.__index = self
-    return o
+    return obj
 end
 
 function SRTOverview:Initialize()
@@ -125,7 +126,7 @@ function SRTOverview:UpdateHeaderText()
         if SRT_Profile().data.encountersProgress then
             self.headerText:SetText("Loading Assignments... |cFFFFFFFF" .. string.format("%.1f", SRT_Profile().data.encountersProgress) .. "%|r")
         else
-            self.headerText:SetText("SRT |cFFFFFFFF" .. self.VERSION .. "|r")
+            self.headerText:SetText("SRT |cFFFFFFFF" .. tostring(self.VERSION) .. "|r")
             self.headerText:SetAlpha(0.8)
         end
     end
@@ -195,7 +196,6 @@ function SRTOverview:UpdatePopupMenu()
 end
 
 function SRTOverview:CreateBossAbilityFrame(prevFrame)
-    DevTool:AddData(self, "SRTOverview")
     local bossAbilityFrame = CreateFrame("Frame", nil, self.main)
     bossAbilityFrame:SetHeight(self:GetBossAbilityHeight())
 
@@ -217,7 +217,6 @@ function SRTOverview:CreateBossAbilityFrame(prevFrame)
 end
 
 function SRTOverview:UpdateBossAbilityFrame(bossAbilityFrame, prevFrame, name)
-    DevTool:AddData({ bossAbilityFrame = bossAbilityFrame, prevFrame = prevFrame, name = name }, "UpdateBossAbilityFrame")
     bossAbilityFrame:Show()
 
     bossAbilityFrame:ClearAllPoints()
@@ -275,7 +274,7 @@ function SRTOverview:CreateAssignmentFrame(parentFrame)
 
     assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     assignmentFrame.text:SetFont(self:GetTitleFontType(), self:GetAppearance().titleFontSize)
-    assignmentFrame.text:SetTextColor(1, 1, 1, 1)
+    assignmentFrame.text:SetTextColor(1, 1, 1, 0.8)
     assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "CENTER", iconSize/2+4, -1)
 
     return assignmentFrame
