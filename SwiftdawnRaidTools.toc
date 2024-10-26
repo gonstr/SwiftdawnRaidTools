@@ -44,5 +44,10 @@ UI\Minimap.lua
 UI\Overview.lua
 UI\Notifications.lua
 UI\AssignmentsWindow.lua
+Utils\FrameBuilder.lua
 Models\LogItem.lua
-Models\PlayerFrame.lua
+Models\Class.lua
+Models\Spec.lua
+Models\Player.lua
+Models\SRTData.lua
+Models\SRTColor.lua
