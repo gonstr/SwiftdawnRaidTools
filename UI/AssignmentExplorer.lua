@@ -26,7 +26,7 @@ AssignmentExplorer.__index = AssignmentExplorer
 
 ---@return AssignmentExplorer
 function AssignmentExplorer:New(height)
-    local obj = SRTWindow.New(self, "Assignments", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
+    local obj = SRTWindow.New(self, "AssignmentsExplorer", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
     ---@cast obj AssignmentExplorer
     self.__index = self
     return obj
@@ -117,7 +117,9 @@ function AssignmentExplorer:Initialize()
     self:UpdateAppearance()
 end
 
+---@return FontFile
 function AssignmentExplorer:GetHeaderFontType()
+    ---@class FontFile
     return SharedMedia:Fetch("font", self:GetAppearance().headerFontType)
 end
 
