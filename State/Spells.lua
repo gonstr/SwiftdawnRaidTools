@@ -180,3 +180,11 @@ function SwiftdawnRaidTools:SpellsGetClassSpells(class)
     end
     return spellIDs
 end
+
+function SwiftdawnRaidTools:SpellsGetClass(spellID)
+    if spells[spellID] then
+        return spells[spellID].class
+    else
+        return nil
+    end
+end
