@@ -6,7 +6,8 @@ local WINDOW_WIDTH = 600
 local State = {
     ONLY_ENCOUNTER = 1,
     SHOW_PLAYER = 2,
-    SHOW_ROSTER = 3
+    SHOW_ROSTER = 3,
+    APPLY_BUFF_CHANGE = 4
 }
 
 --- Assignment Explorer window class object
@@ -113,6 +114,25 @@ function AssignmentExplorer:Initialize()
         end
     end)
     self.rosterPane:Hide()
+    -- Setup apply buff change pane
+    self.applyChangePane = CreateFrame("Frame", "SRT_AssignmentExplorer_ApplyChangePane", self.main)
+    self.applyChangePane:SetClipsChildren(true)
+    self.applyChangePane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
+    self.applyChangePane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
+    self.applyChangePane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
+    self.applyChangePane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+    self.applyChangeBackButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
+    self.applyChangeBackButton:SetPoint("BOTTOMLEFT", self.applyChangePane, "BOTTOMLEFT", 0, 5)
+    self.applyChangeBackButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.lastState = State.SHOW_ROSTER
+            self.state = State.SHOW_PLAYER
+            self:UpdateAppearance()
+        end
+    end)
+    self.applyChangeAcceptButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Accept", SRTColor.Green, SRTColor.GreenHighlight)
+    self.applyChangeAcceptButton:SetPoint("BOTTOMRIGHT", self.applyChangePane, "BOTTOMRIGHT", 0, 5)
+    self.applyChangePane:Hide()
     -- Update appearance
     self:UpdateAppearance()
 end
@@ -141,6 +161,7 @@ function AssignmentExplorer:UpdateAppearance()
     self:UpdateEncounterPane()
     self:UpdateSelectedPlayerPane()
     self:UpdateRosterPane()
+    self:UpdateApplyChangePane()
 end
 
 function AssignmentExplorer:Update()
@@ -238,7 +259,10 @@ function AssignmentExplorer:UpdateEncounterPane()
                         self.selectedPlayer = {
                             name = frame.assignment.player,
                             class = SwiftdawnRaidTools:SpellsGetClass(frame.assignment.spell_id),
-                            selectedID = frame.assignment.spell_id
+                            selectedID = frame.assignment.spell_id,
+                            encounterID = self.selectedEncounterID,
+                            bossAbility = bossAbilityIndex,
+                            assignmentGroup = frame.groupIndex
                         }
                         self:UpdateAppearance()
                     end
@@ -310,7 +334,7 @@ function AssignmentExplorer:UpdateSelectedPlayerPane()
                     self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, button)
                         if button == "LeftButton" then
                             self.lastState = State.SHOW_ROSTER
-                            self.state = State.SHOW_PLAYER
+                            self.state = State.APPLY_BUFF_CHANGE
                             self:UpdateAppearance()
                         end
                     end)
@@ -389,6 +413,63 @@ function AssignmentExplorer:UpdateRosterPane()
         self.rosterPane.roster[player.name] = playerFrame
         lastPlayerFrame = playerFrame
     end
+end
+
+local function ApplyBuffChange(original, replacement)
+    if SwiftdawnRaidTools.DEBUG then print(string.format("Changing %s's Spell:%d for %s's Spell:%d on encounter %d and ability %d", original.name, original.selectedID, replacement.name, replacement.selectedID, original.encounterID, original.bossAbility)) end
+    for _, assignment in ipairs(SRT_Profile().data.encounters[original.encounterID][original.bossAbility]["assignments"][original.assignmentGroup]) do
+        if assignment.player == original.name and assignment.spell_id == original.selectedID then
+            assignment.player = replacement.name
+            assignment.spell_id = replacement.selectedID
+        end
+    end
+end
+
+function AssignmentExplorer:UpdateApplyChangePane()
+    if self.state == State.APPLY_BUFF_CHANGE then
+        self.applyChangePane:Show()
+    else
+        self.applyChangePane:Hide()
+        return
+    end
+
+    local originalSpellName, _, _, _, _, _, originalSpellID, _ = GetSpellInfo(self.selectedPlayer.selectedID)
+
+    self.applyChangePane.questionPartOne = self.applyChangePane.questionPartOne or self.applyChangePane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    self.applyChangePane.questionPartOne:SetText(string.format("Change %s's %s", self.selectedPlayer.name, originalSpellName))
+    self.applyChangePane.questionPartOne:SetPoint("TOPLEFT", self.applyChangePane, "TOPLEFT", 0, -5)
+    self.applyChangePane.questionPartOne:SetFont(self:GetHeaderFontType(), 14)
+    self.applyChangePane.questionPartOne:SetHeight(self.applyChangePane.questionPartOne:GetStringHeight())
+    self.applyChangePane.questionPartOne:SetTextColor(1, 1, 1, 0.8)
+    
+    local iconSize = self:GetAppearance().iconSize * 3
+    self.applyChangePane.originalSpellFrame = self.applyChangePane.originalSpellFrame or FrameBuilder.CreateLargeSpellFrame(self.applyChangePane)
+    FrameBuilder.UpdateLargeSpellFrame(self.applyChangePane.originalSpellFrame, originalSpellID, self:GetPlayerFontType(), self:GetAppearance().playerFontSize, iconSize)
+    self.applyChangePane.originalSpellFrame:SetPoint("TOPLEFT", self.applyChangePane.questionPartOne, "BOTTOMLEFT", 5, -7)
+    self.applyChangePane.originalSpellFrame:SetPoint("TOPRIGHT", self.applyChangePane.questionPartOne, "BOTTOMLEFT", 285, -7)
+
+    local replacementSpellName, _, _, _, _, _, replacementSpellID, _ = GetSpellInfo(self.selectedRosterPlayer.selectedID)
+
+    self.applyChangePane.questionPartTwo = self.applyChangePane.questionPartTwo or self.applyChangePane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    self.applyChangePane.questionPartTwo:SetText(string.format("To %s's %s?", self.selectedRosterPlayer.name, replacementSpellName))
+    self.applyChangePane.questionPartTwo:SetPoint("TOPLEFT", self.applyChangePane.originalSpellFrame, "BOTTOMLEFT", -5, -7)
+    self.applyChangePane.questionPartTwo:SetFont(self:GetHeaderFontType(), 14)
+    self.applyChangePane.questionPartTwo:SetHeight(self.applyChangePane.questionPartTwo:GetStringHeight())
+    self.applyChangePane.questionPartTwo:SetTextColor(1, 1, 1, 0.8)
+    
+    self.applyChangePane.replacementSpellFrame = self.applyChangePane.replacementSpellFrame or FrameBuilder.CreateLargeSpellFrame(self.applyChangePane)
+    FrameBuilder.UpdateLargeSpellFrame(self.applyChangePane.replacementSpellFrame, replacementSpellID, self:GetPlayerFontType(), self:GetAppearance().playerFontSize, iconSize)
+    self.applyChangePane.replacementSpellFrame:SetPoint("TOPLEFT", self.applyChangePane.questionPartTwo, "BOTTOMLEFT", 5, -7)
+    self.applyChangePane.replacementSpellFrame:SetPoint("TOPRIGHT", self.applyChangePane.questionPartTwo, "BOTTOMLEFT", 285, -7)
+
+    self.applyChangeAcceptButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.lastState = State.APPLY_BUFF_CHANGE
+            self.state = State.ONLY_ENCOUNTER
+            ApplyBuffChange(self.selectedPlayer, self.selectedRosterPlayer)
+            self:UpdateAppearance()
+        end
+    end)
 end
 
 local lastUpdatedOnlineGuildMembers = 0
