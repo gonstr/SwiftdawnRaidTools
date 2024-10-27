@@ -96,6 +96,7 @@ function FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, u
     for assignmentIndex, assignment in ipairs(group) do
         local assignmentFrame = groupFrame.assignments[assignmentIndex] or FrameBuilder.CreateAssignmentFrame(groupFrame, font, fontSize, iconSize)
         FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment, assignmentIndex)
+        assignmentFrame.groupIndex = index
         groupFrame.assignments[assignmentIndex] = assignmentFrame
     end
 end
