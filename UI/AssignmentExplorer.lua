@@ -21,6 +21,7 @@ AssignmentExplorer = setmetatable({
     encounter = {},
     player = {},
     roster = {},
+    popupListItems = {},
 }, SRTWindow)
 AssignmentExplorer.__index = AssignmentExplorer
 
@@ -437,4 +438,38 @@ function AssignmentExplorer:SetDefaultFontStyle(fontString)
     fontString:SetShadowColor(0, 0, 0, 1)
     fontString:SetJustifyH("LEFT")
     fontString:SetHeight(fontString:GetStringHeight())
+end
+
+function AssignmentExplorer:UpdatePopupMenu()
+    local index = 1
+
+    local lockFunc = function()
+        self:ToggleLock()
+        LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools")
+    end
+    local lockedText = "Lock Assignment Explorer"
+    if self:GetProfile().locked then lockedText = "Unlock Assignment Explorer" end
+    self:ShowPopupListItem(index, lockedText, true, lockFunc, 0, false)
+
+    index = index + 1
+
+    local configurationFunc = function() InterfaceOptionsFrame_OpenToCategory("Swiftdawn Raid Tools") end
+    self:ShowPopupListItem(index, "Configuration", true, configurationFunc, 0, false)
+
+    index = index + 1
+
+    local closeFunc = function ()
+        self.container:Hide()
+        self:GetProfile().show = false
+    end
+    self:ShowPopupListItem(index, "Close Explorer", true, closeFunc, 0, false)
+
+    index = index + 1
+
+    local yOfs = self:ShowPopupListItem(index, "Close", true, nil, 0, true)
+
+    local popupHeight = math.abs(yOfs) + 30
+
+    -- Update popup size
+    self.popupMenu:SetHeight(popupHeight)
 end
