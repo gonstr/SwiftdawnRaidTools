@@ -126,21 +126,41 @@ function RosterExplorer:Initialize()
         self.state = State.ROSTER
         self:UpdateAppearance()
     end)
-
+    -- Create available players pane
     self.availablePlayersPane = CreateFrame("Frame", nil, self.main)
     self.availablePlayersPane:SetClipsChildren(true)
     self.availablePlayersPane:SetPoint("TOPLEFT", self.main, "TOPLEFT", 10, -5)
     self.availablePlayersPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
     self.availablePlayersPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
     self.availablePlayersPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
-
+    -- Create available players left pane
     self.availablePlayersPaneLeft = CreateFrame("Frame", nil, self.availablePlayersPane)
     self.availablePlayersPaneLeft:SetClipsChildren(true)
     self.availablePlayersPaneLeft:SetPoint("TOPLEFT", self.availablePlayersPane, "TOPLEFT", 0, -0)
     self.availablePlayersPaneLeft:SetPoint("TOPRIGHT", self.availablePlayersPane, "TOP", -5, 0)
     self.availablePlayersPaneLeft:SetPoint("BOTTOMLEFT", self.availablePlayersPane, "BOTTOMLEFT", 0, 0)
     self.availablePlayersPaneLeft:SetPoint("BOTTOMRIGHT", self.availablePlayersPane, "BOTTOM", -5, 0)
+    -- Create header for left pane
+    self.availablePlayersTitle = self.availablePlayersPaneLeft:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.availablePlayersTitle:SetPoint("TOPLEFT", self.availablePlayersPaneLeft, "TOPLEFT", 5 , -5)
+    self.availablePlayersTitle:SetText("Available Players")
+    self.availablePlayersTitle:SetFont(self:GetHeaderFont(), 16)
+    self.availablePlayersTitle:SetTextColor(1, 1, 1, 0.8)
+    -- Create scrolling roster content
+    self.availablePlayersScrollFrame = CreateFrame("ScrollFrame", "availablePlayersScrollFrame", self.availablePlayersPaneLeft, "UIPanelScrollFrameTemplate")
+    self.availablePlayersScrollFrame:SetPoint("TOPLEFT", self.availablePlayersPaneLeft, "TOPLEFT", 0, -21)
+    self.availablePlayersScrollFrame:SetPoint("TOPRIGHT", self.availablePlayersPaneLeft, "TOPRIGHT", 0, -21)
+    self.availablePlayersScrollFrame:SetPoint("BOTTOMLEFT", self.availablePlayersPaneLeft, "BOTTOMLEFT", 0, 5)
+    self.availablePlayersScrollFrame:SetPoint("BOTTOMRIGHT", self.availablePlayersPaneLeft, "BOTTOMRIGHT", 0, 5)
+    self.availablePlayersScrollFrame.ScrollBar:SetValueStep(20)  -- Set scrolling speed per scroll step
+    self.availablePlayersScrollFrame.ScrollBar:SetMinMaxValues(0, 400)  -- Set based on content height - frame height
 
+    self.availablePlayersScrollContentFrame = CreateFrame("Frame", nil, self.availablePlayersScrollFrame)
+    -- self.availablePlayersScrollContentFrame:SetSize(self.availablePlayersPaneLeft:GetWidth(), 8000)  -- Set the size of the content frame (height is larger for scrolling)
+    self.availablePlayersScrollContentFrame:SetPoint("TOPLEFT")
+    self.availablePlayersScrollContentFrame:SetPoint("TOPRIGHT")
+    self.availablePlayersScrollFrame:SetScrollChild(self.availablePlayersScrollContentFrame)
+    -- Create available players right pane
     self.availablePlayersPaneRight = CreateFrame("Frame", nil, self.availablePlayersPane)
     self.availablePlayersPaneRight:SetClipsChildren(true)
     self.availablePlayersPaneRight:SetPoint("TOPLEFT", self.availablePlayersPane, "TOP", 5, 0)
@@ -191,10 +211,69 @@ function RosterExplorer:UpdateAvailablePlayersPane()
         self.availablePlayersPane:Hide()
         return
     end
+
+    self.availablePlayers = self.availablePlayers or {}
+    self.availablePlayers.guild = self.availablePlayers.guild or {}
+    self.availablePlayers.guild.name = "Swiftdawn"
+    self.availablePlayers.guild.players = self.availablePlayers.guild.players or {}
+    local lastPlayerFrame
+    for _, guildMember in pairs(self:GetGuildMembers()) do
+        local playerFrame = self.availablePlayers.guild.players[guildMember.name] or FrameBuilder.CreatePlayerFrame(self.availablePlayersScrollContentFrame, guildMember.name, guildMember.class, 280, 20, self:GetPlayerFontType(), self:GetAppearance().playerFontSize, 14)
+        playerFrame.info = guildMember
+        if lastPlayerFrame then
+            playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -3)
+        else
+            playerFrame:SetPoint("TOPLEFT", self.availablePlayersTitle, "BOTTOMLEFT", 0, -7)
+        end
+        self.availablePlayers.guild.players[guildMember.name] = playerFrame
+
+        playerFrame:SetScript("OnMouseDown", function (pf)
+            self.availablePlayersPane.selectedName = pf.info.name
+            self.availablePlayersPane.selectedClass = pf.info.class
+            self:UpdateAvailablePlayersPane()
+        end)
+
+        lastPlayerFrame = playerFrame
+    end
+    -- Set the size of the content frame (height is larger for scrolling)
+    self.availablePlayersScrollContentFrame:SetHeight(7 + (20 + 3) * #self.availablePlayers.guild.players)
+
+    if self.availablePlayersPane.selectedName then
+        self.availablePlayersPaneRight.nameTitle = self.availablePlayersPaneRight.nameTitle or self.availablePlayersPaneRight:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        self.availablePlayersPaneRight.nameTitle:SetPoint("TOPLEFT", self.availablePlayersPaneRight, "TOPLEFT", 5 , -5)
+        self.availablePlayersPaneRight.nameTitle:SetText(strsplit("-", self.availablePlayersPane.selectedName))
+        self.availablePlayersPaneRight.nameTitle:SetFont(self:GetHeaderFont(), 16)
+        local color = SwiftdawnRaidTools:GetClassColor(self.availablePlayersPane.selectedClass)
+        self.availablePlayersPaneRight.nameTitle:SetTextColor(color.r, color.g, color.b, 0.8)
+    end
 end
 
 function RosterExplorer:Update()
     SRTWindow.Update(self)
+end
+
+local lastUpdatedGuildMembers = 0
+local guildMembers = {}
+function RosterExplorer:GetGuildMembers()
+    if GetTime() - lastUpdatedGuildMembers < 5 then
+        return guildMembers
+    end
+    guildMembers = {}
+    local numTotalGuildMembers, _, _ = GetNumGuildMembers()
+    for index = 1, numTotalGuildMembers, 1 do
+        local name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index)
+        if level == 85 then
+            table.insert(guildMembers, { name = name, class = classFileName, rank = rankIndex })
+        end
+    end
+    table.sort(guildMembers, function (a, b)
+        if a.rank ~= b.rank then
+            return a.rank < b.rank
+        else
+            return a.name < b.name
+        end
+    end)
+    return guildMembers
 end
 
 ---@return FontFile
