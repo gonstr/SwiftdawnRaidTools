@@ -75,11 +75,29 @@ SwiftdawnRaidTools.defaults = {
                 iconSize = 14
             }
         },
-        assignments = {
+        assignmentexplorer = {
             anchorX = GetScreenWidth()/2,
             anchorY = -(GetScreenHeight()/2),
             locked = false,
             show = false,
+            appearance = {
+                scale = 1.0,
+                titleFontType = "Friz Quadrata TT",
+                titleFontSize = 10,
+                headerFontType = "Friz Quadrata TT",
+                headerFontSize = 10,
+                playerFontType = "Friz Quadrata TT",
+                playerFontSize = 10,
+                titleBarOpacity = 0.8,
+                backgroundOpacity = 0.4,
+                iconSize = 14
+            }
+        },
+        rosterexplorer = {
+            anchorX = GetScreenWidth()/2,
+            anchorY = -(GetScreenHeight()/2),
+            locked = false,
+            show = true,
             appearance = {
                 scale = 1.0,
                 titleFontType = "Friz Quadrata TT",
@@ -97,6 +115,7 @@ SwiftdawnRaidTools.defaults = {
 }
 
 function SwiftdawnRaidTools:OnInitialize()
+    SwiftdawnRaidTools:BossEncountersInit()
     self:DBInit() 
     self:OptionsInit()
     self:MinimapInit()
@@ -111,6 +130,9 @@ function SwiftdawnRaidTools:OnInitialize()
 
     self.assignmentsWindow = AssignmentExplorer:New(600)
     self.assignmentsWindow:Initialize()
+
+    self.rosterWindow = RosterExplorer:New(600)
+    self.rosterWindow:Initialize()
 
     self:RegisterComm(self.PREFIX_SYNC)
     self:RegisterComm(self.PREFIX_SYNC_PROGRESS)
