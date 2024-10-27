@@ -115,7 +115,6 @@ SwiftdawnRaidTools.defaults = {
 }
 
 function SwiftdawnRaidTools:OnInitialize()
-    SwiftdawnRaidTools:BossEncountersInit()
     self:DBInit() 
     self:OptionsInit()
     self:MinimapInit()
@@ -128,8 +127,8 @@ function SwiftdawnRaidTools:OnInitialize()
     self.debugLog = SRTDebugLog:New(100, 400)
     self.debugLog:Initialize()
 
-    self.assignmentsWindow = AssignmentExplorer:New(600)
-    self.assignmentsWindow:Initialize()
+    self.assignmentExplorer = AssignmentExplorer:New(600)
+    self.assignmentExplorer:Initialize()
 
     self.rosterWindow = RosterExplorer:New(600)
     self.rosterWindow:Initialize()
@@ -186,7 +185,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
 
     self.overview:Update()
     self.debugLog:Update()
-    self.assignmentsWindow:Update()
+    self.assignmentExplorer:Update()
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)

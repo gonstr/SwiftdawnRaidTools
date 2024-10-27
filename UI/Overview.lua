@@ -232,118 +232,6 @@ function SRTOverview:UpdateBossAbilityFrame(bossAbilityFrame, prevFrame, name)
     bossAbilityFrame.text:SetText(name)
 end
 
-function SRTOverview:CreateAssignmentGroupFrame(bossAbilityFrame, prevFrame, i)
-    local assignmentGroupFrame = CreateFrame("Frame", nil, self.main, "BackdropTemplate")
-    assignmentGroupFrame:SetHeight(self:GetAssignmentGroupHeight())
-    assignmentGroupFrame:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 32,
-    })
-
-    -- Anchor to main frame or previous row if it exists
-    if i > 1 then
-        assignmentGroupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0)
-        assignmentGroupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0)
-    else
-        assignmentGroupFrame:SetPoint("TOPLEFT", bossAbilityFrame, "BOTTOMLEFT", 0, -4)
-        assignmentGroupFrame:SetPoint("TOPRIGHT", bossAbilityFrame, "BOTTOMRIGHT", 0, -4)
-    end
-
-    assignmentGroupFrame.assignments = {}
-
-    return assignmentGroupFrame
-end
-
-function SRTOverview:CreateAssignmentFrame(parentFrame)
-    local assignmentFrame = CreateFrame("Frame", nil, parentFrame)
-
-    assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
-    local iconSize = self:GetAppearance().iconSize
-    assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
-    assignmentFrame.iconFrame:SetPoint("LEFT", 10, 0)
-
-    assignmentFrame.cooldownFrame = CreateFrame("Cooldown", nil, assignmentFrame.iconFrame, "CooldownFrameTemplate")
-    assignmentFrame.cooldownFrame:SetAllPoints()
-
-    assignmentFrame.iconFrame.cooldown = assignmentFrame.cooldownFrame
-
-    assignmentFrame.icon = assignmentFrame.iconFrame:CreateTexture(nil, "ARTWORK")
-    assignmentFrame.icon:SetAllPoints()
-    assignmentFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-
-    assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    assignmentFrame.text:SetFont(self:GetTitleFontType(), self:GetAppearance().titleFontSize)
-    assignmentFrame.text:SetTextColor(1, 1, 1, 0.8)
-    assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "CENTER", iconSize/2+4, -1)
-
-    return assignmentFrame
-end
-
-function SRTOverview:UpdateAssignmentFrame(assignmentFrame, assignment, index, total)
-    assignmentFrame:Show()
-
-    assignmentFrame.player = assignment.player
-    assignmentFrame.spellId = assignment.spell_id
-
-    local _, _, icon = GetSpellInfo(assignment.spell_id)
-
-    assignmentFrame.icon:SetTexture(icon)
-    assignmentFrame.text:SetText(assignment.player)
-
-    local color = SwiftdawnRaidTools:GetSpellColor(assignment.spell_id)
-
-    assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
-
-    assignmentFrame.cooldownFrame:Clear()
-
-    assignmentFrame:ClearAllPoints()
-
-    if total > 1 then
-        if index > 1 then
-            assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOM")
-            assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
-        else
-            assignmentFrame:SetPoint("BOTTOMLEFT")
-            assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, 0)
-        end
-    else
-        assignmentFrame:SetPoint("BOTTOMLEFT")
-        assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
-    end
-end
-
-function SRTOverview:UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, uuid, index)
-    groupFrame:Show()
-
-    groupFrame.uuid = uuid
-    groupFrame.index = index
-
-    groupFrame:SetBackdropColor(0, 0, 0, 0)
-
-    groupFrame:ClearAllPoints()
-
-    if prevFrame then
-        groupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
-        groupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
-    else
-        groupFrame:SetPoint("TOPLEFT", 0, -4)
-        groupFrame:SetPoint("TOPRIGHT", 0, -4)
-    end
-
-    for _, cd in pairs(groupFrame.assignments) do
-        cd:Hide()
-    end
-
-    for i, assignment in ipairs(group) do
-        if not groupFrame.assignments[i] then
-            groupFrame.assignments[i] = self:CreateAssignmentFrame(groupFrame)
-        end
-
-        self:UpdateAssignmentFrame(groupFrame.assignments[i], assignment, i, #group)
-    end
-end
-
 function SRTOverview:UpdateMain()
     for _, bossAbilityFrame in pairs(self.bossAbilities) do
         bossAbilityFrame:Hide()
@@ -386,12 +274,14 @@ function SRTOverview:UpdateMain()
                 -- Update assignment groups
                 for i, group in ipairs(part.assignments) do
                     if not self.assignmentGroups[groupIndex] then
-                        self.assignmentGroups[groupIndex] = self:CreateAssignmentGroupFrame(bossAbilityFrame, prevFrame, groupIndex)
+                        -- self.assignmentGroups[groupIndex] = self:CreateAssignmentGroupFrame(bossAbilityFrame, prevFrame, groupIndex)
+                        self.assignmentGroups[groupIndex] = FrameBuilder.CreateAssignmentGroupFrame(bossAbilityFrame, self:GetAssignmentGroupHeight())
                     end
 
                     local groupFrame = self.assignmentGroups[groupIndex]
 
-                    self:UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, part.uuid, i)
+                    -- self:UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, part.uuid, i)
+                    FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, part.uuid, i, self:GetPlayerNameFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
 
                     prevFrame = groupFrame
                     groupIndex = groupIndex + 1

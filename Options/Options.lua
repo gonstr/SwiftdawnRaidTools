@@ -246,7 +246,7 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.debuglog.locked = value
-                SwiftdawnRaidTools.assignmentsWindow:Update()
+                SwiftdawnRaidTools.assignmentExplorer:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.locked end,
             order = 23,
@@ -264,7 +264,7 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.assignmentexplorer.show = value
-                SwiftdawnRaidTools.assignmentsWindow:Update()
+                SwiftdawnRaidTools.assignmentExplorer:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.assignmentexplorer.show end,
             order = 31,
@@ -1205,6 +1205,7 @@ local importOptions = {
 
                 SwiftdawnRaidTools:SyncSchedule()
                 SwiftdawnRaidTools.overview:Update()
+                SwiftdawnRaidTools.assignmentExplorer:Update()
             end,
         },
     },
