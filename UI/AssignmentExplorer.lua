@@ -394,7 +394,7 @@ local lastUpdatedOnlineGuildMembers = 0
 local guildMembers = {}
 function AssignmentExplorer:GetOnlineGuildMembers()
     if GetTime() - lastUpdatedOnlineGuildMembers < 5 then
-        return
+        return guildMembers
     end
     guildMembers = {}
     local numTotalGuildMembers, numOnlineGuildMembers, numOnlineAndMobileMembers = GetNumGuildMembers()
