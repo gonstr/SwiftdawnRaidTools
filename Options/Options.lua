@@ -263,10 +263,10 @@ local mainOptions = {
             type = "toggle",
             width = "half",
             set = function(info, value)
-                SwiftdawnRaidTools.db.profile.assignments.show = value
+                SwiftdawnRaidTools.db.profile.assignmentexplorer.show = value
                 SwiftdawnRaidTools.assignmentsWindow:Update()
             end,
-            get = function(info) return SwiftdawnRaidTools.db.profile.assignments.show end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.assignmentexplorer.show end,
             order = 31,
         },
         lockAssignmentsExplorerDescription = {
@@ -281,11 +281,47 @@ local mainOptions = {
             type = "toggle",
             width = "half",
             set = function(info, value)
-                SwiftdawnRaidTools.db.profile.assignments.locked = value
-                SwiftdawnRaidTools.assignmentsWindow:Update()
+                SwiftdawnRaidTools.db.profile.rosterexplorer.locked = value
+                SwiftdawnRaidTools.rosterWindow:Update()
             end,
-            get = function(info) return SwiftdawnRaidTools.db.profile.assignments.locked end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.locked end,
             order = 33,
+        },
+        showRosterExplorerDescription = {
+            type = "description",
+            name = "Show Roster Explorer",
+            width = "normal",
+            order = 40,
+        },
+        showRosterExplorer = {
+            name = " ",
+            desc = "Enables / Disables Roster Explorer window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.rosterexplorer.show = value
+                SwiftdawnRaidTools.rosterWindow:Update()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.show end,
+            order = 41,
+        },
+        lockRosterExplorerDescription = {
+            type = "description",
+            name = "Lock Roster Explorer",
+            width = "normal",
+            order = 42,
+        },
+        lockRosterExplorer = {
+            name = " ",
+            desc = "Lock / Unlocks Roster Explorer window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.rosterexplorer.locked = value
+                SwiftdawnRaidTools.rosterWindow:Update()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.locked end,
+            order = 43,
         },
     },
 }
