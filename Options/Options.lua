@@ -282,7 +282,7 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.rosterexplorer.locked = value
-                SwiftdawnRaidTools.rosterWindow:Update()
+                SwiftdawnRaidTools.rosterExplorer:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.locked end,
             order = 33,
@@ -300,7 +300,7 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.rosterexplorer.show = value
-                SwiftdawnRaidTools.rosterWindow:Update()
+                SwiftdawnRaidTools.rosterExplorer:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.show end,
             order = 41,
@@ -318,7 +318,7 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.rosterexplorer.locked = value
-                SwiftdawnRaidTools.rosterWindow:Update()
+                SwiftdawnRaidTools.rosterExplorer:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.locked end,
             order = 43,

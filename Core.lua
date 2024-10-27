@@ -130,8 +130,8 @@ function SwiftdawnRaidTools:OnInitialize()
     self.assignmentExplorer = AssignmentExplorer:New(600)
     self.assignmentExplorer:Initialize()
 
-    self.rosterWindow = RosterExplorer:New(600)
-    self.rosterWindow:Initialize()
+    self.rosterExplorer = RosterExplorer:New(600)
+    self.rosterExplorer:Initialize()
 
     self:RegisterComm(self.PREFIX_SYNC)
     self:RegisterComm(self.PREFIX_SYNC_PROGRESS)
