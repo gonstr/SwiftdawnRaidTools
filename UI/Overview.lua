@@ -1,6 +1,7 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 local SharedMedia = LibStub("LibSharedMedia-3.0")
 
+---@class SRTOverview:SRTWindow
 SRTOverview = setmetatable({
     popupListItems = {},
     bossAbilities = {},
@@ -8,9 +9,10 @@ SRTOverview = setmetatable({
 }, SRTWindow)
 SRTOverview.__index = SRTOverview
 
+---@return SRTOverview
 function SRTOverview:New(height, width)
     local obj = SRTWindow.New(self, "Overview", height, width)
-    ---@casts obj SRTOverview
+    ---@cast obj SRTOverview
     self.__index = self
     return obj
 end
@@ -126,7 +128,7 @@ function SRTOverview:UpdateHeaderText()
         if SRT_Profile().data.encountersProgress then
             self.headerText:SetText("Loading Assignments... |cFFFFFFFF" .. string.format("%.1f", SRT_Profile().data.encountersProgress) .. "%|r")
         else
-            self.headerText:SetText("SRT |cFFFFFFFF" .. tostring(self.VERSION) .. "|r")
+            self.headerText:SetText("SRT |cFFFFFFFF" .. tostring(SwiftdawnRaidTools.VERSION) .. "|r")
             self.headerText:SetAlpha(0.8)
         end
     end
