@@ -26,7 +26,7 @@ AssignmentExplorer.__index = AssignmentExplorer
 
 ---@return AssignmentExplorer
 function AssignmentExplorer:New(height)
-    local obj = SRTWindow.New(self, "AssignmentsExplorer", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
+    local obj = SRTWindow.New(self, "AssignmentExplorer", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
     ---@cast obj AssignmentExplorer
     self.__index = self
     return obj
@@ -34,7 +34,6 @@ end
 
 function AssignmentExplorer:Initialize()
     SRTWindow.Initialize(self)
-    SwiftdawnRaidTools:BossEncountersInit()
     -- Setup header
     self.headerText:SetText("Assignments Explorer")
     -- Setup encounter pane
