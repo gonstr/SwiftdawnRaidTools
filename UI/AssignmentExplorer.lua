@@ -62,13 +62,6 @@ function AssignmentExplorer:Initialize()
     self.player.name:SetTextColor(1, 1, 1, 0.8)
     self.player.cooldowns = self.player.cooldowns or {}
 
-    local colorRed = { r=0.8, g=0.3, b=0.3, a=0.8 }
-    local colorRedHighlight = { r=1, g=0.3, b=0.3, a=1 }
-    local colorGreen = { r=0.3, g=0.8, b=0.3, a=0.8 }
-    local colorGreenHighlight = { r=0.3, g=1, b=0.3, a=1 }
-    local colorGray = { r=0.3, g=0.3, b=0.3, a=0.8 }
-    local colorGrayHighlight = { r=0.8, g=0.8, b=0.8, a=1 }
-
     self.replaceButton = FrameBuilder.CreateButton(self.selectedPlayerPane, 75, 25, "Replace", SRTColor.Red, SRTColor.RedHighlight)
     self.replaceButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 5)
     self.replaceButton:SetScript("OnMouseUp", function (_, button)
@@ -97,7 +90,7 @@ function AssignmentExplorer:Initialize()
     end)
     self.selectedPlayerPane:Hide()
     -- Setup roster pane
-    self.rosterPane = CreateFrame("Frame", "SRT_Assignments_RosterPane", self.main)
+    self.rosterPane = CreateFrame("Frame", "SRT_Assignments_Roster", self.main)
     self.rosterPane:SetClipsChildren(true)
     self.rosterPane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
     self.rosterPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
@@ -115,7 +108,7 @@ function AssignmentExplorer:Initialize()
     end)
     self.rosterPane:Hide()
     -- Setup apply buff change pane
-    self.applyChangePane = CreateFrame("Frame", "SRT_AssignmentExplorer_ApplyChangePane", self.main)
+    self.applyChangePane = CreateFrame("Frame", "SRT_AssignmentExplorer_ApplyChange", self.main)
     self.applyChangePane:SetClipsChildren(true)
     self.applyChangePane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
     self.applyChangePane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
@@ -213,32 +206,6 @@ function AssignmentExplorer:UpdateEncounterPane()
         bossAbilityFrameHeight = bossAbilityFrameHeight + 12
 
         bossAbilityFrame.bossSelectionFrame = bossAbilityFrame.bossSelectionFrame or {}
-
-        -- bossAbilityFrame.triggers = bossAbilityFrame.triggers or {}
-        -- local previousTrigger = nil
-        -- for triggerIndex, trigger in ipairs(bossAbility.triggers) do
-        --     local triggerFrame = bossAbilityFrame.triggers[triggerIndex] or self:CreateTriggerFrame(bossAbilityFrame)
-        --     if trigger.type == "SPELL_CAST" then
-        --         local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(trigger.spell_id)
-        --         triggerFrame.text:SetText("When Boss casts " .. name)
-        --     elseif trigger.type == "RAID_BOSS_EMOTE" then
-        --         triggerFrame.text:SetText("When Boss emote includes '" .. trigger.text .. "'")
-        --     elseif trigger.type == "UNIT_HEALTH" then
-        --         triggerFrame.text:SetText("When Boss health drops below " .. tostring(trigger.pct_lt))
-        --     else
-        --         triggerFrame.text:SetText("When type: " .. trigger.type)
-        --     end
-        --     if not previousTrigger then
-        --         triggerFrame:SetPoint("TOPLEFT", 10, -16)
-        --         triggerFrame:SetPoint("TOPRIGHT", 10, -16)
-        --     else
-        --         triggerFrame:SetPoint("TOPLEFT", previousTrigger, "BOTTOMLEFT", 0, 0)
-        --         triggerFrame:SetPoint("TOPRIGHT", previousTrigger, "BOTTOMRIGHT", 0, 0)
-        --     end
-        --     bossAbilityFrameHeight = bossAbilityFrameHeight + triggerFrame:GetHeight()
-        --     bossAbilityFrame.triggers[triggerIndex] = triggerFrame
-        --     previousTrigger = triggerFrame
-        -- end
 
         bossAbilityFrame.groups = bossAbilityFrame.groups or {}
         for groupIndex, groupFrame in ipairs(bossAbilityFrame.groups) do
