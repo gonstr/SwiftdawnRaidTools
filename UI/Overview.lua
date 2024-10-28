@@ -48,8 +48,8 @@ function SRTOverview:UpdateAppearance()
     end
 
     for _, bossAbilityFrame in pairs(self.bossAbilities) do
-        bossAbilityFrame.text:SetFont(self:GetHeaderFont(), headerFontSize)
-        bossAbilityFrame:SetHeight(self:GetBossAbilityHeight())
+        bossAbilityFrame.name:SetFont(self:GetHeaderFont(), headerFontSize)
+        -- bossAbilityFrame:SetHeight(self:GetBossAbilityHeight())
     end
 
     for _, assignmentGroupFrame in pairs(self.assignmentGroups) do
@@ -61,6 +61,7 @@ function SRTOverview:UpdateAppearance()
         end
     end
 
+    self:UpdateMain()
 end
 
 function SRTOverview:Resize()
@@ -197,43 +198,6 @@ function SRTOverview:UpdatePopupMenu()
     self.popupMenu:SetHeight(popupHeight)
 end
 
-function SRTOverview:CreateBossAbilityFrame(prevFrame)
-    local bossAbilityFrame = CreateFrame("Frame", nil, self.main)
-    bossAbilityFrame:SetHeight(self:GetBossAbilityHeight())
-
-    -- Anchor to main frame or previous row if it exists
-    if prevFrame then
-        bossAbilityFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
-        bossAbilityFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
-    else
-        bossAbilityFrame:SetPoint("TOPLEFT", self.main, "TOPLEFT", 0, 0)
-        bossAbilityFrame:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", 0, 0)
-    end
-
-    bossAbilityFrame.text = bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    bossAbilityFrame.text:SetFont(self:GetHeaderFont(), self:GetAppearance().headerFontSize)
-    bossAbilityFrame.text:SetTextColor(1, 1, 1, 0.8)
-    bossAbilityFrame.text:SetPoint("LEFT", 10, 0)
-
-    return bossAbilityFrame
-end
-
-function SRTOverview:UpdateBossAbilityFrame(bossAbilityFrame, prevFrame, name)
-    bossAbilityFrame:Show()
-
-    bossAbilityFrame:ClearAllPoints()
-
-    if prevFrame then
-        bossAbilityFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, -7)
-        bossAbilityFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, -7)
-    else
-        bossAbilityFrame:SetPoint("TOPLEFT", self.main, "TOPLEFT", 0, -4)
-        bossAbilityFrame:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", 0, -4)
-    end
-
-    bossAbilityFrame.text:SetText(name)
-end
-
 function SRTOverview:UpdateMain()
     for _, bossAbilityFrame in pairs(self.bossAbilities) do
         bossAbilityFrame:Hide()
@@ -247,48 +211,48 @@ function SRTOverview:UpdateMain()
     local encounter = SwiftdawnRaidTools:GetEncounters()[selectedEncounterId]
 
     if encounter then
-        local headerIndex = 1
-        local groupIndex = 1
-        local prevFrame = nil
-        for _, part in pairs(encounter) do
-            if part.type == "RAID_ASSIGNMENTS" then
-                -- Update header
-                if not self.bossAbilities[headerIndex] then
-                    self.bossAbilities[headerIndex] = self:CreateBossAbilityFrame()
-                end
-    
-                local bossAbilityFrame = self.bossAbilities[headerIndex]
 
-                local headerText
-
-                if part.metadata.spell_id then
-                    local name = GetSpellInfo(part.metadata.spell_id)
-                    headerText = name
-                else
-                    headerText = part.metadata.name
-                end
-
-                self:UpdateBossAbilityFrame(bossAbilityFrame, prevFrame, headerText)
-                
-                prevFrame = bossAbilityFrame
-                headerIndex = headerIndex + 1
-
-                -- Update assignment groups
-                for i, group in ipairs(part.assignments) do
-                    if not self.assignmentGroups[groupIndex] then
-                        -- self.assignmentGroups[groupIndex] = self:CreateAssignmentGroupFrame(bossAbilityFrame, prevFrame, groupIndex)
-                        self.assignmentGroups[groupIndex] = FrameBuilder.CreateAssignmentGroupFrame(bossAbilityFrame, self:GetAssignmentGroupHeight())
-                    end
-
-                    local groupFrame = self.assignmentGroups[groupIndex]
-
-                    -- self:UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, part.uuid, i)
-                    FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, part.uuid, i, self:GetPlayerNameFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
-
-                    prevFrame = groupFrame
-                    groupIndex = groupIndex + 1
-                end
+        local previousAbility
+        for bossAbilityIndex, bossAbility in ipairs(encounter) do
+            local bossAbilityFrame = self.bossAbilities[bossAbilityIndex] or CreateFrame("Frame", nil, self.main)
+            if previousAbility then
+                bossAbilityFrame:SetPoint("TOPLEFT", previousAbility, "BOTTOMLEFT", 0, 0)
+                bossAbilityFrame:SetPoint("TOPRIGHT", previousAbility, "BOTTOMRIGHT", 0, 0)
+            else
+                bossAbilityFrame:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 10, -7)
+                bossAbilityFrame:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", -10, -7)
             end
+            local bossAbilityFrameHeight = 7
+    
+            bossAbilityFrame.name = bossAbilityFrame.name or bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            bossAbilityFrame.name:SetPoint("TOPLEFT", bossAbilityFrame, "TOPLEFT", 0, 0)
+            bossAbilityFrame.name:SetText(bossAbility.metadata.name)
+            bossAbilityFrame.name:SetFont(self:GetHeaderFont(), self:GetAppearance().headerFontSize)
+            bossAbilityFrame.name:SetTextColor(1, 1, 1, 0.8)
+            bossAbilityFrameHeight = bossAbilityFrameHeight + self:GetAppearance().headerFontSize
+
+            bossAbilityFrame.groups = bossAbilityFrame.groups or {}
+            for _, groupFrame in ipairs(bossAbilityFrame.groups) do
+                groupFrame:Hide()
+            end
+            local previousGroup = nil
+            for groupIndex, group in ipairs(bossAbility.assignments) do
+                local groupFrame = bossAbilityFrame.groups[groupIndex] or FrameBuilder.CreateAssignmentGroupFrame(bossAbilityFrame, self:GetAssignmentGroupHeight() + 3)
+                FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, previousGroup, group, bossAbility.uuid, groupIndex, self:GetPlayerNameFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
+    
+                bossAbilityFrameHeight = bossAbilityFrameHeight + groupFrame:GetHeight()
+                bossAbilityFrame.groups[groupIndex] = groupFrame
+    
+                previousGroup = groupFrame
+            end
+    
+            bossAbilityFrameHeight = bossAbilityFrameHeight + 7
+            bossAbilityFrame:SetHeight(bossAbilityFrameHeight)
+
+            bossAbilityFrame:Show()
+    
+            self.bossAbilities[bossAbilityIndex] = bossAbilityFrame
+            previousAbility = bossAbilityFrame
         end
     end
 
