@@ -13,7 +13,7 @@ FrameBuilder.__index = FrameBuilder
 ---@param fontSize integer
 ---@param iconSize integer
 function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, width, height, font, fontSize, iconSize)
-    local playerFrame = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
+    local playerFrame = CreateFrame("Frame", parentFrame:GetName() .. "_" .. playerName, parentFrame, "BackdropTemplate")
     playerFrame:SetSize(width, height)
     playerFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -87,8 +87,8 @@ function FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, u
         groupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
         groupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
     else
-        groupFrame:SetPoint("TOPLEFT", 0, -16)
-        groupFrame:SetPoint("TOPRIGHT", 0, -16)
+        groupFrame:SetPoint("TOPLEFT", groupFrame:GetParent(), "TOPLEFT", 0, -16)
+        groupFrame:SetPoint("TOPRIGHT", groupFrame:GetParent(), "TOPRIGHT", 0, -16)
     end
     for _, cd in pairs(groupFrame.assignments) do
         cd:Hide()
@@ -335,10 +335,10 @@ function FrameBuilder.UpdateSelector(selector)
 end
 
 ---@return table|Frame|BackdropTemplate
-function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, depth)
+function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, updateFunction, depth)
     if not depth then depth = 1 end
-    DevTool:AddData({ parentFrame=parentFrame, structure=structure, font=font }, "CreateFilterMenu")
     local popup = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
+    popup:SetFrameStrata("DIALOG")
     popup:SetWidth(120)
     popup:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -350,9 +350,8 @@ function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, depth)
     local lastItem
     local count = 0
     popup.items = {}
-    for name, structure in pairs(structure) do
-        DevTool:AddData({ name=name, structure=structure }, "pairs(structure)")
-        popup.items[name] = FrameBuilder.CreateFilterMenuItem(popup, lastItem, name, structure, font, depth)
+    for name, structure in OrderedPairs(structure) do
+        popup.items[name] = FrameBuilder.CreateFilterMenuItem(popup, lastItem, name, structure, font, updateFunction, depth)
         lastItem = popup.items[name]
         count = count + 1
     end
@@ -385,8 +384,7 @@ function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, depth)
 end
 
 ---@return table|Frame|BackdropTemplate
-function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, structure, font, depth)
-    DevTool:AddData({ popupFrame=popupFrame, previousItem=previousItem, name=name, structure=structure, font=font }, "CreateFilterMenuItem")
+function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, structure, font, updateFunction, depth)
     local item = CreateFrame("Frame", nil, popupFrame, "BackdropTemplate")
     item:SetHeight(18)
     if previousItem then
@@ -423,6 +421,7 @@ function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, struc
             if button == "LeftButton" then
                 item.value = not item.value
                 FrameBuilder.UpdateFilterMenu(popupFrame)
+                updateFunction()
             end
         end)
     elseif type(structure) == "table" then
@@ -431,7 +430,7 @@ function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, struc
         item.arrow:SetFont(font, 12)
         item.arrow:SetPoint("TOPRIGHT", -3, -3)
 
-        item.popup = FrameBuilder.CreateFilterMenu(item, structure, font, depth+1)
+        item.popup = FrameBuilder.CreateFilterMenu(item, structure, font, updateFunction, depth+1)
         item.popup:SetPoint("TOPLEFT", item, "TOPRIGHT", 0, 0)
         item.popup:Hide()
         item:SetScript("OnEnter", function ()
