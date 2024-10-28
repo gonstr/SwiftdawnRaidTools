@@ -18,6 +18,20 @@ RosterExplorer = setmetatable({
 }, SRTWindow)
 RosterExplorer.__index = RosterExplorer
 
+local availablePlayerFilterDefaults = {
+    Class = {
+        Paladin = true,
+        Hunter = true,
+        Druid = false,
+        Priest = false
+    },
+    Guild_Rank = {
+        [1] = false,
+        [2] = true
+    },
+    Online = true,
+}
+
 ---@return RosterExplorer
 function RosterExplorer:New(height)
     local obj = SRTWindow.New(self, "RosterExplorer", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
@@ -136,7 +150,7 @@ function RosterExplorer:Initialize()
     self.availablePlayersPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
     -- Create available players left pane
     self.availablePlayersPaneLeft = CreateFrame("Frame", nil, self.availablePlayersPane)
-    self.availablePlayersPaneLeft:SetClipsChildren(true)
+    -- self.availablePlayersPaneLeft:SetClipsChildren(true)
     self.availablePlayersPaneLeft:SetPoint("TOPLEFT", self.availablePlayersPane, "TOPLEFT", 0, -0)
     self.availablePlayersPaneLeft:SetPoint("TOPRIGHT", self.availablePlayersPane, "TOP", -5, 0)
     self.availablePlayersPaneLeft:SetPoint("BOTTOMLEFT", self.availablePlayersPane, "BOTTOMLEFT", 0, 0)
@@ -147,20 +161,46 @@ function RosterExplorer:Initialize()
     self.availablePlayersTitle:SetText("Available Players")
     self.availablePlayersTitle:SetFont(self:GetHeaderFont(), 16)
     self.availablePlayersTitle:SetTextColor(1, 1, 1, 0.8)
+    self.availablePlayersFilterButton = CreateFrame("Button", nil, self.availablePlayersPaneLeft, "BackdropTemplate")
+    self.availablePlayersFilterButton.texture = self.availablePlayersFilterButton:CreateTexture(nil, "BACKGROUND")
+    self.availablePlayersFilterButton.texture:SetTexture("Interface\\Addons\\SwiftdawnRaidTools\\Media\\filter_white_64x64.tga")
+    self.availablePlayersFilterButton.texture:SetAllPoints()
+    self.availablePlayersFilterButton.texture:SetAlpha(0.8)
+    self.availablePlayersFilterButton:SetSize(18, 18)
+    self.availablePlayersFilterButton:SetPoint("TOPRIGHT", self.availablePlayersPaneLeft, "TOPRIGHT", -5, -5)
+
+    local filterPopup = FrameBuilder.CreateFilterMenu(self.availablePlayersFilterButton, availablePlayerFilterDefaults, self:GetPlayerFontType())
+    filterPopup:SetPoint("TOPLEFT", self.availablePlayersFilterButton, "BOTTOMLEFT", 0, -3)
+    filterPopup:Hide()
+    self.availablePlayersFilterButton:SetScript("OnClick", function ()
+        if filterPopup:IsShown() then filterPopup:Hide() else filterPopup:Show() end
+    end)
+
     -- Create scrolling roster content
     self.availablePlayersScrollFrame = CreateFrame("ScrollFrame", "availablePlayersScrollFrame", self.availablePlayersPaneLeft, "UIPanelScrollFrameTemplate")
-    self.availablePlayersScrollFrame:SetPoint("TOPLEFT", self.availablePlayersPaneLeft, "TOPLEFT", 0, -21)
-    self.availablePlayersScrollFrame:SetPoint("TOPRIGHT", self.availablePlayersPaneLeft, "TOPRIGHT", 0, -21)
+    self.availablePlayersScrollFrame:SetPoint("TOPLEFT", self.availablePlayersPaneLeft, "TOPLEFT", 0, -28)
+    self.availablePlayersScrollFrame:SetPoint("TOPRIGHT", self.availablePlayersPaneLeft, "TOPRIGHT", 0, -28)
     self.availablePlayersScrollFrame:SetPoint("BOTTOMLEFT", self.availablePlayersPaneLeft, "BOTTOMLEFT", 0, 5)
     self.availablePlayersScrollFrame:SetPoint("BOTTOMRIGHT", self.availablePlayersPaneLeft, "BOTTOMRIGHT", 0, 5)
     self.availablePlayersScrollFrame.ScrollBar:SetValueStep(20)  -- Set scrolling speed per scroll step
     self.availablePlayersScrollFrame.ScrollBar:SetMinMaxValues(0, 400)  -- Set based on content height - frame height
-
     self.availablePlayersScrollContentFrame = CreateFrame("Frame", nil, self.availablePlayersScrollFrame)
-    -- self.availablePlayersScrollContentFrame:SetSize(self.availablePlayersPaneLeft:GetWidth(), 8000)  -- Set the size of the content frame (height is larger for scrolling)
+    self.availablePlayersScrollContentFrame:SetSize(500, 8000)  -- Set the size of the content frame (height is larger for scrolling)
     self.availablePlayersScrollContentFrame:SetPoint("TOPLEFT")
     self.availablePlayersScrollContentFrame:SetPoint("TOPRIGHT")
     self.availablePlayersScrollFrame:SetScrollChild(self.availablePlayersScrollContentFrame)
+    
+    self.availablePlayersScrollBar = _G["availablePlayersScrollFrameScrollBar"]
+    self.availablePlayersScrollBar.scrollStep = 23*3  -- Change this value to adjust the scroll amount per tick
+    self.availablePlayersScrollBar:SetPoint("TOPRIGHT", self.availablePlayersScrollFrame, "TOPRIGHT", -12, 0)
+    self.availablePlayersScrollBar:SetPoint("BOTTOMRIGHT", self.availablePlayersScrollFrame, "BOTTOMRIGHT", -12, 0)
+    self.availablePlayersScrollBar.ScrollUpButton:SetAlpha(0)
+    self.availablePlayersScrollBar.ScrollDownButton:SetAlpha(0)
+    local thumbTexture = self.availablePlayersScrollBar:GetThumbTexture()
+    thumbTexture:SetColorTexture(0, 0, 0, 0.8)  -- RGBA (0, 0, 0, 1) sets it to solid black
+    thumbTexture:SetWidth(5)  -- Customize the size as needed
+    self.availablePlayersScrollBar:Show()
+
     -- Create available players right pane
     self.availablePlayersPaneRight = CreateFrame("Frame", nil, self.availablePlayersPane)
     self.availablePlayersPaneRight:SetClipsChildren(true)
@@ -177,6 +217,57 @@ function RosterExplorer:Initialize()
     end)
     -- Update appearance
     self:UpdateAppearance()
+end
+
+function RosterExplorer:CreateFilterPopup(parentFrame, filters)
+    local filterPopup = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
+    filterPopup:SetWidth(120)
+    filterPopup:SetHeight(240)
+    filterPopup:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 240,
+    })
+    filterPopup:SetBackdropColor(0, 0, 0, 0.8)
+
+    for name, item in ipairs(filters) do
+        filterPopup[name] = self:CreateFilterPopupItem(filterPopup, true, name, item)
+    end
+
+    return filterPopup
+end
+
+function RosterExplorer:CreateFilterPopupItem(anchor, first, name, defaultSetting)
+    local filterOption = anchor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    filterOption:SetText(name)
+    if type(defaultSetting) == "table" then
+        -- Create sub-filter-popup
+        filterOption[name.."Title"] = anchor
+        filterOption[name] = self:CreateFilterPopup(defaultSetting)
+        filterOption[name]:SetPoint("TOPLEFT", 20, -10)
+        return filterOption
+    elseif type(defaultSetting) == "boolean" then
+        -- Create simple option
+        if first then
+            filterOption:SetPoint("TOPLEFT", anchor, "TOPLEFT", 5, -5)
+        else
+            filterOption:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 5, -5)
+        end
+        local filterOptionCheck = CreateFrame("Button", nil, anchor, "BackdropTemplate")
+        filterOptionCheck:SetPoint("TOPRIGHT", anchor, "TOPRIGHT", -5, -5)
+        filterOptionCheck:SetSize(16, 16)
+        filterOptionCheck.texture = filterOptionCheck:CreateTexture(nil, "OVERLAY")
+        if defaultSetting then
+            filterOptionCheck.texture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+        else
+            filterOptionCheck.texture:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
+        end
+        filterOptionCheck.texture:SetAllPoints()
+        return filterOption
+    else
+        print("Error: bad default setting type found! "..tostring(defaultSetting))
+        return nil
+    end
 end
 
 function RosterExplorer:UpdateAppearance()
@@ -224,7 +315,7 @@ function RosterExplorer:UpdateAvailablePlayersPane()
         if lastPlayerFrame then
             playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -3)
         else
-            playerFrame:SetPoint("TOPLEFT", self.availablePlayersTitle, "BOTTOMLEFT", 0, -7)
+            playerFrame:SetPoint("TOPLEFT", self.availablePlayersScrollContentFrame, "TOPLEFT", 0, 0)
         end
         self.availablePlayers.guild.players[guildMember.name] = playerFrame
 
@@ -237,6 +328,7 @@ function RosterExplorer:UpdateAvailablePlayersPane()
         lastPlayerFrame = playerFrame
     end
     -- Set the size of the content frame (height is larger for scrolling)
+    -- DevTool:AddData(self.availablePlayers.guild.players, "availablePlayers.guild.players")
     self.availablePlayersScrollContentFrame:SetHeight(7 + (20 + 3) * #self.availablePlayers.guild.players)
 
     if self.availablePlayersPane.selectedName then
@@ -264,11 +356,13 @@ function RosterExplorer:GetGuildMembers()
     for index = 1, numTotalGuildMembers, 1 do
         local name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index)
         if level == 85 then
-            table.insert(guildMembers, { name = name, class = classFileName, rank = rankIndex })
+            table.insert(guildMembers, { name = name, class = classFileName, rank = rankIndex, achievementPoints = achievementPoints })
         end
     end
     table.sort(guildMembers, function (a, b)
-        if a.rank ~= b.rank then
+        if a.standing ~= b.standing then
+            return a.standing > b.standing
+        elseif a.rank ~= b.rank then
             return a.rank < b.rank
         else
             return a.name < b.name

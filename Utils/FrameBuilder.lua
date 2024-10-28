@@ -333,3 +333,131 @@ function FrameBuilder.UpdateSelector(selector)
         lastRow = row
     end
 end
+
+---@return table|Frame|BackdropTemplate
+function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, depth)
+    if not depth then depth = 1 end
+    DevTool:AddData({ parentFrame=parentFrame, structure=structure, font=font }, "CreateFilterMenu")
+    local popup = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
+    popup:SetWidth(120)
+    popup:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 240,
+    })
+    popup:SetBackdropColor(0, 0, 0, 0.5)
+
+    local lastItem
+    local count = 0
+    popup.items = {}
+    for name, structure in pairs(structure) do
+        DevTool:AddData({ name=name, structure=structure }, "pairs(structure)")
+        popup.items[name] = FrameBuilder.CreateFilterMenuItem(popup, lastItem, name, structure, font, depth)
+        lastItem = popup.items[name]
+        count = count + 1
+    end
+
+    if depth == 1 then
+        popup.items.close = CreateFrame("Frame", nil, popup, "BackdropTemplate")
+        popup.items.close:SetHeight(18)
+        popup.items.close:SetPoint("TOPLEFT", lastItem, "BOTTOMLEFT")
+        popup.items.close:SetPoint("TOPRIGHT", lastItem, "BOTTOMRIGHT")
+        popup.items.close.text = popup.items.close:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        popup.items.close.text:SetText("Close")
+        popup.items.close.text:SetFont(font, 12)
+        popup.items.close.text:SetPoint("TOPLEFT", 3, -3)
+        popup.items.close:SetScript("OnEnter", function ()
+            for _, otherItem in pairs(popup.items) do
+                if otherItem.popup then
+                    otherItem.popup:Hide()
+                end
+            end
+        end)
+        popup.items.close:SetScript("OnMouseDown", function (_, button)
+            if button == "LeftButton" then popup:Hide() end
+        end)
+        count = count + 1
+    end
+
+    popup:SetHeight(18 * count)
+
+    return popup
+end
+
+---@return table|Frame|BackdropTemplate
+function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, structure, font, depth)
+    DevTool:AddData({ popupFrame=popupFrame, previousItem=previousItem, name=name, structure=structure, font=font }, "CreateFilterMenuItem")
+    local item = CreateFrame("Frame", nil, popupFrame, "BackdropTemplate")
+    item:SetHeight(18)
+    if previousItem then
+        item:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT")
+        item:SetPoint("TOPRIGHT", previousItem, "BOTTOMRIGHT")
+    else
+        item:SetPoint("TOPLEFT")
+        item:SetPoint("TOPRIGHT")
+    end
+    item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    item.text:SetText(name)
+    item.text:SetFont(font, 12)
+    item.text:SetPoint("TOPLEFT", 3, -3)
+    if type(structure) == "boolean" then
+        item.value = structure
+        item.icon = CreateFrame("Button", nil, item, "BackdropTemplate")
+        item.icon:SetPoint("TOPRIGHT", item, "TOPRIGHT", -3, -3)
+        item.icon:SetSize(12, 12)
+        item.icon.texture = item.icon:CreateTexture(nil, "OVERLAY")
+        if item.value then
+            item.icon.texture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+        else
+            item.icon.texture:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
+        end
+        item.icon.texture:SetAllPoints()
+        item:SetScript("OnEnter", function ()
+            for _, otherItem in pairs(popupFrame.items) do
+                if otherItem.popup then
+                    otherItem.popup:Hide()
+                end
+            end
+        end)
+        item:SetScript("OnMouseDown", function (_, button)
+            if button == "LeftButton" then
+                item.value = not item.value
+                FrameBuilder.UpdateFilterMenu(popupFrame)
+            end
+        end)
+    elseif type(structure) == "table" then
+        item.arrow = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        item.arrow:SetText(">")
+        item.arrow:SetFont(font, 12)
+        item.arrow:SetPoint("TOPRIGHT", -3, -3)
+
+        item.popup = FrameBuilder.CreateFilterMenu(item, structure, font, depth+1)
+        item.popup:SetPoint("TOPLEFT", item, "TOPRIGHT", 0, 0)
+        item.popup:Hide()
+        item:SetScript("OnEnter", function ()
+            for _, otherItem in pairs(popupFrame.items) do
+                if otherItem.popup then
+                    otherItem.popup:Hide()
+                end
+            end
+            item.popup:Show()
+        end)
+    end
+    return item
+end
+
+function FrameBuilder.UpdateFilterMenu(popup)
+    for _, item in pairs(popup.items) do
+        if item.icon then
+            -- option
+            if item.value then
+                item.icon.texture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+            else
+                item.icon.texture:SetTexture("Interface\\RAIDFRAME\\ReadyCheck-NotReady")
+            end
+        elseif item.popup then
+            -- menu
+            FrameBuilder.UpdateFilterMenu(item.popup)
+        end
+    end
+end
