@@ -3,7 +3,6 @@ local SharedMedia = LibStub("LibSharedMedia-3.0")
 
 ---@class SRTOverview:SRTWindow
 SRTOverview = setmetatable({
-    popupListItems = {},
     bossAbilities = {},
     assignmentGroups = {}
 }, SRTWindow)

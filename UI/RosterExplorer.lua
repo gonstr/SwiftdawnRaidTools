@@ -14,7 +14,6 @@ local State = {
 RosterExplorer = setmetatable({
     state = State.ROSTER,
     lastState = State.ROSTER,
-    popupListItems = {},
 }, SRTWindow)
 RosterExplorer.__index = RosterExplorer
 

@@ -22,7 +22,6 @@ AssignmentExplorer = setmetatable({
     encounter = {},
     player = {},
     roster = {},
-    popupListItems = {},
 }, SRTWindow)
 AssignmentExplorer.__index = AssignmentExplorer
 

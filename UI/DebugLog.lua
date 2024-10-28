@@ -1,7 +1,6 @@
 local MAX_SCROLLBACK = 500
 
 SRTDebugLog = setmetatable({
-    popupListItems = {},
     logItems = {}
 }, SRTWindow)
 SRTDebugLog.__index = SRTDebugLog

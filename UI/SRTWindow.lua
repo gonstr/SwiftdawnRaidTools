@@ -27,6 +27,7 @@ function SRTWindow:New(name, height, width, minHeight, maxHeight, minWidth, maxW
     obj.menuButton = CreateFrame("Button", "SRT_"..name.."_MenuButton", obj.header)
     obj.main = CreateFrame("Frame", "SRT_"..name.."_Main", obj.container)
     obj.resizeButton = CreateFrame("Button", "SRT_"..name.."_ResizeButton", obj.container)
+    obj.popupListItems = {}
     return obj
 end
 
@@ -300,7 +301,7 @@ end
 
 function SRTWindow:ShowPopupListItem(index, text, setting, onClick, accExtraOffset, extraOffset)
     if not self.popupListItems[index] then
-        self.popupListItems[index] = self:CreatePopupMenuItem(self.overviewPopup)
+        self.popupListItems[index] = self:CreatePopupMenuItem(text, onClick)
     end
     local item = self.popupListItems[index]
     local yOfs = -10 - (20 * (index -1))
