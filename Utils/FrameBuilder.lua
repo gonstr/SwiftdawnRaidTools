@@ -14,6 +14,7 @@ FrameBuilder.__index = FrameBuilder
 ---@param iconSize integer
 function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, width, height, font, fontSize, iconSize)
     local playerFrame = CreateFrame("Frame", parentFrame:GetName() .. "_" .. playerName, parentFrame, "BackdropTemplate")
+    playerFrame:EnableMouse(true)
     playerFrame:SetSize(width, height)
     playerFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -23,6 +24,7 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
     playerFrame:SetBackdropColor(0, 0, 0, 0)
 
     playerFrame.name = playerFrame.name or playerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    playerFrame.name:EnableMouse(false)
     playerFrame.name:SetPoint("LEFT", playerFrame, "LEFT", 5, 0)
     playerFrame.name:SetFont(font, fontSize)
     playerFrame.name:SetText(strsplit("-", playerName))
@@ -30,9 +32,9 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
     playerFrame.spells = playerFrame.spells or {}
     local color
     for i, spellID in ipairs(SwiftdawnRaidTools:SpellsGetClassSpells(classFileName)) do
-        color = SwiftdawnRaidTools:GetSpellColor(spellID)
         local _, _, icon, _, _, _, _, _ = GetSpellInfo(spellID)
         local iconFrame = playerFrame.spells[i] or CreateFrame("Frame", nil, playerFrame)
+        iconFrame:EnableMouse(false)
         iconFrame:SetSize(iconSize, iconSize)
         if i == 1 then
             iconFrame:SetPoint("LEFT", playerFrame.name, "RIGHT", 7, 0)
@@ -45,7 +47,7 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
         iconFrame.icon:SetTexture(icon)
         playerFrame.spells[i] = iconFrame
     end
-    color = color or { r = 1, g = 1, b = 1 }
+    color = SwiftdawnRaidTools:GetClassColor(classFileName) or { r = 1, g = 1, b = 1 }
     playerFrame.name:SetTextColor(color.r, color.g, color.b)
 
     playerFrame:SetScript("OnEnter", function () playerFrame:SetBackdropColor(1, 1, 1, 0.4) end)
@@ -345,7 +347,7 @@ function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, updateFunct
         tile = true,
         tileSize = 240,
     })
-    popup:SetBackdropColor(0, 0, 0, 0.5)
+    popup:SetBackdropColor(0, 0, 0, 0.8)
 
     local lastItem
     local count = 0
@@ -364,6 +366,7 @@ function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, updateFunct
         popup.items.close.text = popup.items.close:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         popup.items.close.text:SetText("Close")
         popup.items.close.text:SetFont(font, 12)
+        popup.items.close.text:SetTextColor(1, 1, 1, 0.8)
         popup.items.close.text:SetPoint("TOPLEFT", 3, -3)
         popup.items.close:SetScript("OnEnter", function ()
             for _, otherItem in pairs(popup.items) do
@@ -397,6 +400,7 @@ function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, struc
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     item.text:SetText(name)
     item.text:SetFont(font, 12)
+    item.text:SetTextColor(1, 1, 1, 0.8)
     item.text:SetPoint("TOPLEFT", 3, -3)
     if type(structure) == "boolean" then
         item.value = structure
@@ -428,6 +432,7 @@ function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, struc
         item.arrow = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         item.arrow:SetText(">")
         item.arrow:SetFont(font, 12)
+        item.arrow:SetTextColor(1, 1, 1, 0.8)
         item.arrow:SetPoint("TOPRIGHT", -3, -3)
 
         item.popup = FrameBuilder.CreateFilterMenu(item, structure, font, updateFunction, depth+1)
