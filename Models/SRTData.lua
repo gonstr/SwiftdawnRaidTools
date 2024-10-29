@@ -45,16 +45,16 @@ function SRTData:Initialize()
     }
     -- Preseed our database with static information
     self.classes = {
-        DeathKnight = Class:New("Death Knight"),
-        Druid = Class:New("Druid"),
-        Hunter = Class:New("Hunter"),
-        Mage = Class:New("Mage"),
-        Paladin = Class:New("Paladin"),
-        Priest = Class:New("Priest"),
-        Rogue = Class:New("Rogue"),
-        Shaman = Class:New("Shaman"),
-        Warlock = Class:New("Warlock"),
-        Warrior = Class:New("Warrior")
+        DeathKnight = Class:New("Death Knight", "DEATHKNIGHT"),
+        Druid = Class:New("Druid", "DRUID"),
+        Hunter = Class:New("Hunter", "HUNTER"),
+        Mage = Class:New("Mage", "MAGE"),
+        Paladin = Class:New("Paladin", "PALADIN"),
+        Priest = Class:New("Priest", "PRIEST"),
+        Rogue = Class:New("Rogue", "ROGUE"),
+        Shaman = Class:New("Shaman", "SHAMAN"),
+        Warlock = Class:New("Warlock", "WARLOCK"),
+        Warrior = Class:New("Warrior", "WARRIOR")
     }
     self.specs = {
         Blood = Spec:New("Blood", self.classes.DeathKnight),
@@ -99,8 +99,8 @@ function SRTData:LoadData()
 end
 
 ---@param name string
----@param class? string
----@param spec? string
+---@param class? Class
+---@param spec? Spec
 function SRTData:AddPlayer(name, class, spec)
     if not self.pool[name] then
         self.pool[name] = Player:New(name, class, spec)
