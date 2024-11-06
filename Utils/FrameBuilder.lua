@@ -261,7 +261,7 @@ function FrameBuilder.CreateSelector(parentFrame, items, width, font, fontSize, 
     selector.text:SetPoint("LEFT", selector, "LEFT", 5, 0)
     selector.text:SetFont(selector.font, selector.fontSize)
     selector.text:SetText(selectedName)
-    selector.text:SetTextColor(1, 1, 1, 0.8)
+    selector.text:SetTextColor(0.8, 0.8, 0.8, 1)
     selector.text:SetJustifyH("LEFT")
     selector.button = CreateFrame("Button", "SRT_DropdownButton", selector)
     selector.button:SetSize(selector.fontSize*1.4, selector.fontSize*1.4)
@@ -317,8 +317,14 @@ function FrameBuilder.UpdateSelector(selector)
             tileSize = 16,
         })
         row:SetBackdropColor(0, 0, 0, 0)
-        row:SetScript("OnEnter", function(r) r:SetBackdropColor(0.8, 0.5, 0.3, 1) end)
-        row:SetScript("OnLeave", function(r) r:SetBackdropColor(0, 0, 0, 0) end)
+        row:SetScript("OnEnter", function(r)
+            r:SetBackdropColor(1, 0.8235, 0, 1)
+            r.text:SetTextColor(0.2, 0.2, 0.2, 1)
+        end)
+        row:SetScript("OnLeave", function(r)
+            r:SetBackdropColor(0, 0, 0, 0)
+            r.text:SetTextColor(0.8, 0.8, 0.8, 1)
+        end)
         row:SetScript("OnMouseDown", function (r)
             selector.dropdown:Hide()
             selector.selectedName = item.name
@@ -329,7 +335,7 @@ function FrameBuilder.UpdateSelector(selector)
         row.text:SetPoint("LEFT", row, "LEFT", 10, 0)
         row.text:SetFont(selector.font, selector.fontSize)
         row.text:SetText(item.name)
-        row.text:SetTextColor(1, 1, 1, 0.8)
+        row.text:SetTextColor(0.8, 0.8, 0.8, 1)
         row.text:SetJustifyH("LEFT")
         selector.dropdown.rows[rowIndex] = row
         lastRow = row
@@ -352,10 +358,12 @@ function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, updateFunct
     local lastItem
     local count = 0
     popup.items = {}
-    for name, structure in OrderedPairs(structure) do
-        popup.items[name] = FrameBuilder.CreateFilterMenuItem(popup, lastItem, name, structure, font, updateFunction, depth)
-        lastItem = popup.items[name]
-        count = count + 1
+    for name, subStructure in OrderedPairs(structure) do
+        if name ~= "_function" then 
+            popup.items[name] = FrameBuilder.CreateFilterMenuItem(popup, lastItem, name, structure._function, subStructure, font, updateFunction, depth)
+            lastItem = popup.items[name]
+            count = count + 1
+        end
     end
 
     if depth == 1 then
@@ -387,7 +395,7 @@ function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, updateFunct
 end
 
 ---@return table|Frame|BackdropTemplate
-function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, structure, font, updateFunction, depth)
+function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, nameFunction, structure, font, updateFunction, depth)
     local item = CreateFrame("Frame", nil, popupFrame, "BackdropTemplate")
     item:SetHeight(18)
     if previousItem then
@@ -398,7 +406,11 @@ function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, struc
         item:SetPoint("TOPRIGHT")
     end
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    item.text:SetText(name)
+    if nameFunction then
+        item.text:SetText(nameFunction(name))
+    else
+        item.text:SetText(name)
+    end
     item.text:SetFont(font, 12)
     item.text:SetTextColor(1, 1, 1, 0.8)
     item.text:SetPoint("TOPLEFT", 3, -3)
