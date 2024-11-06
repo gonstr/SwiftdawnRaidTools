@@ -339,7 +339,9 @@ Example:
 function __genOrderedIndex( t )
     local orderedIndex = {}
     for key in pairs(t) do
-        table.insert( orderedIndex, key )
+        if string.sub(key, 1, 1) ~= "_"  then
+            table.insert(orderedIndex, key)
+        end
     end
     table.sort( orderedIndex )
     return orderedIndex
@@ -378,4 +380,17 @@ function OrderedPairs(t)
     -- Equivalent of the pairs() function on tables. Allows to iterate
     -- in order
     return orderedNext, t, nil
+end
+
+-- Make sure guild roster data is loaded
+GuildRoster()
+
+-- Function to get the name of a guild rank by index
+function GetGuildRankNameByIndex(rankIndex)
+    if rankIndex < 0 or rankIndex >= GuildControlGetNumRanks() then
+        print("Invalid rank index")
+        return nil
+    end
+    
+    return GuildControlGetRankName(rankIndex)
 end
