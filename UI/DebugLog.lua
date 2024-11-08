@@ -120,7 +120,7 @@ function SRTDebugLog:UpdatePopupMenu()
 
     index = index + 1
 
-    local configurationFunc = function() InterfaceOptionsFrame_OpenToCategory("Swiftdawn Raid Tools") end
+    local configurationFunc = function() Settings.OpenToCategory("Swiftdawn Raid Tools") end
     self:ShowPopupListItem(index, "Configuration", true, configurationFunc, 0, false)
 
     index = index + 1
