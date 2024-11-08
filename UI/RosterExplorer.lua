@@ -13,8 +13,8 @@ local State = {
 --- Roster Explorer window class object
 ---@class RosterExplorer:SRTWindow
 RosterExplorer = setmetatable({
-    state = State.ROSTER_AND_AVAILABLE_PLAYERS,
-    lastState = State.ROSTER_AND_AVAILABLE_PLAYERS,
+    state = State.LOAD_OR_CREATE_ROSTER,
+    lastState = State.LOAD_OR_CREATE_ROSTER,
     roster = {},
     availablePlayers = {
         guild = {
@@ -83,12 +83,12 @@ function RosterExplorer:InitializeLoadRosterPane()
     self.loadRosterPane = CreateFrame("Frame", "SRTRoster_Load", self.content)
     self.loadRosterPane:SetClipsChildren(false)
     self:SetToLeftSide(self.loadRosterPane, self.content)
-    self.loadRosterTitle = self.loadRosterPane:CreateFontString("SRTRoster_Load_Title", "OVERLAY", "GameFontNormal")
+    self.loadRosterTitle = self.loadRosterPane:CreateFontString(self.loadRosterPane:GetName().."_Title", "OVERLAY", "GameFontNormal")
     self.loadRosterTitle:SetPoint("TOPLEFT", self.loadRosterPane, "TOPLEFT", 5 , -5)
     self.loadRosterTitle:SetText("Roster")
     self.loadRosterTitle:SetFont(self:GetHeaderFont(), 16)
     self.loadRosterTitle:SetTextColor(1, 1, 1, 0.8)
-    self.loadRosterScrollFrame = CreateFrame("ScrollFrame", "SRTRoster_Load_Scroll", self.loadRosterPane, "UIPanelScrollFrameTemplate")
+    self.loadRosterScrollFrame = CreateFrame("ScrollFrame", self.loadRosterPane:GetName().."_Scroll", self.loadRosterPane, "UIPanelScrollFrameTemplate")
     self.loadRosterScrollFrame:SetClipsChildren(false)
     self.loadRosterScrollFrame:SetPoint("TOPLEFT", self.loadRosterPane, "TOPLEFT", 0, -28)
     self.loadRosterScrollFrame:SetPoint("TOPRIGHT", self.loadRosterPane, "TOPRIGHT", 0, -28)
@@ -96,7 +96,7 @@ function RosterExplorer:InitializeLoadRosterPane()
     self.loadRosterScrollFrame:SetPoint("BOTTOMRIGHT", self.loadRosterPane, "BOTTOMRIGHT", 0, 35)
     self.loadRosterScrollFrame.ScrollBar:SetValueStep(20)  -- Set scrolling speed per scroll step
     self.loadRosterScrollFrame.ScrollBar:SetMinMaxValues(0, 400)  -- Set based on content height - frame height
-    self.loadRosterScrollContentFrame = CreateFrame("Frame", "SRTRoster_RosterPane_ScrollContent", self.loadRosterScrollFrame)
+    self.loadRosterScrollContentFrame = CreateFrame("Frame", self.loadRosterPane:GetName().."_ScrollContent", self.loadRosterScrollFrame)
     self.loadRosterScrollContentFrame:SetSize(500, 8000)  -- Set the size of the content frame (height is larger for scrolling)
     self.loadRosterScrollContentFrame:SetPoint("TOPLEFT")
     self.loadRosterScrollContentFrame:SetPoint("TOPRIGHT")
@@ -107,18 +107,72 @@ function RosterExplorer:InitializeLoadRosterPane()
     self.loadRosterScrollBar:SetPoint("BOTTOMRIGHT", self.loadRosterScrollFrame, "BOTTOMRIGHT", -12, 0)
     self.loadRosterScrollBar.ScrollUpButton:SetAlpha(0)
     self.loadRosterScrollBar.ScrollDownButton:SetAlpha(0)
+    local thumbTexture = self.loadRosterScrollBar:GetThumbTexture()
+    thumbTexture:SetColorTexture(0, 0, 0, 0.8)  -- RGBA (0, 0, 0, 1) sets it to solid black
+    thumbTexture:SetWidth(5)  -- Customize the size as needed
+    self.loadRosterScrollBar:Show()
+end
+
+function RosterExplorer:InitializeSelectedRosterInfoPane()
+    self.selectedRosterInfoPane = CreateFrame("Frame", "SRTRoster_SelectedInfo", self.content)
+    self.selectedRosterInfoPane:SetClipsChildren(false)
+    self:SetToRightSide(self.selectedRosterInfoPane, self.content)
+    self.selectedRosterInfoTitle = self.selectedRosterInfoPane:CreateFontString(self.selectedRosterInfoPane:GetName().."_Title", "OVERLAY", "GameFontNormal")
+    self.selectedRosterInfoTitle:SetPoint("TOPLEFT", self.selectedRosterInfoPane, "TOPLEFT", 5 , -5)
+    self.selectedRosterInfoTitle:SetText("Selected Player Info")
+    self.selectedRosterInfoTitle:SetFont(self:GetHeaderFont(), 16)
+    self.selectedRosterInfoTitle:SetTextColor(1, 1, 1, 0.8)
+    self.selectedRosterInfoScrollFrame = CreateFrame("ScrollFrame", self.selectedRosterInfoPane:GetName().."_Scroll", self.selectedRosterInfoPane, "UIPanelScrollFrameTemplate")
+    self.selectedRosterInfoScrollFrame:SetClipsChildren(false)
+    self.selectedRosterInfoScrollFrame:SetPoint("TOPLEFT", self.selectedRosterInfoPane, "TOPLEFT", 0, -28)
+    self.selectedRosterInfoScrollFrame:SetPoint("TOPRIGHT", self.selectedRosterInfoPane, "TOPRIGHT", 0, -28)
+    self.selectedRosterInfoScrollFrame:SetPoint("BOTTOMLEFT", self.selectedRosterInfoPane, "BOTTOMLEFT", 0, 35)
+    self.selectedRosterInfoScrollFrame:SetPoint("BOTTOMRIGHT", self.selectedRosterInfoPane, "BOTTOMRIGHT", 0, 35)
+    self.selectedRosterInfoScrollFrame.ScrollBar:SetValueStep(20)  -- Set scrolling speed per scroll step
+    self.selectedRosterInfoScrollFrame.ScrollBar:SetMinMaxValues(0, 400)  -- Set based on content height - frame height
+    self.selectedRosterInfoScrollContentFrame = CreateFrame("Frame", self.selectedRosterInfoPane:GetName().."_ScrollContent", self.selectedRosterInfoScrollFrame)
+    self.selectedRosterInfoScrollContentFrame:SetSize(500, 8000)  -- Set the size of the content frame (height is larger for scrolling)
+    self.selectedRosterInfoScrollContentFrame:SetPoint("TOPLEFT")
+    self.selectedRosterInfoScrollContentFrame:SetPoint("TOPRIGHT")
+    self.selectedRosterInfoScrollFrame:SetScrollChild(self.selectedRosterInfoScrollContentFrame)
+    self.selectedRosterInfoScrollBar = _G[self.selectedRosterInfoScrollFrame:GetName().."ScrollBar"]
+    self.selectedRosterInfoScrollBar.scrollStep = 23*3  -- Change this value to adjust the scroll amount per tick
+    self.selectedRosterInfoScrollBar:SetPoint("TOPRIGHT", self.selectedRosterInfoScrollFrame, "TOPRIGHT", -12, 0)
+    self.selectedRosterInfoScrollBar:SetPoint("BOTTOMRIGHT", self.selectedRosterInfoScrollFrame, "BOTTOMRIGHT", -12, 0)
+    self.selectedRosterInfoScrollBar.ScrollUpButton:SetAlpha(0)
+    self.selectedRosterInfoScrollBar.ScrollDownButton:SetAlpha(0)
+    local thumbTexture = self.selectedRosterInfoScrollBar:GetThumbTexture()
+    thumbTexture:SetColorTexture(0, 0, 0, 0.8)  -- RGBA (0, 0, 0, 1) sets it to solid black
+    thumbTexture:SetWidth(5)  -- Customize the size as needed
+    self.selectedRosterInfoScrollBar:Show()
+
+    -- Create buttons
+    self.buttonCreateNewRoster = FrameBuilder.CreateButton(self.selectedRosterInfoPane, 95, 25, "Create New", SRTColor.Green, SRTColor.GreenHighlight)
+    self.buttonCreateNewRoster:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", -5, 5)
+    self.buttonCreateNewRoster:SetScript("OnMouseDown", function (button)
+        -- TODO: Empty roster and start fresh one
+        self.state = State.ROSTER_AND_AVAILABLE_PLAYERS
+        self:UpdateAppearance()
+    end)
+    self.buttonLoadRoster = FrameBuilder.CreateButton(self.selectedRosterInfoPane, 95, 25, "Load", SRTColor.Gray, SRTColor.Gray)
+    self.buttonLoadRoster:SetPoint("RIGHT", self.buttonCreateNewRoster, "LEFT", -5, 0)
+    self.buttonLoadRoster:SetScript("OnMouseDown", function (button)
+        -- TODO: Actually load whatever is selected, if something is selected!
+        self.state = State.ROSTER_AND_AVAILABLE_PLAYERS
+        self:UpdateAppearance()
+    end)
 end
 
 function RosterExplorer:InitializeRosterPane()
     self.rosterPane = CreateFrame("Frame", "SRTRoster_RosterPane", self.content)
     self.rosterPane:SetClipsChildren(false)
     self:SetToLeftSide(self.rosterPane, self.content)
-    self.rosterTitle = self.rosterPane:CreateFontString("SRTRoster_RosterPane_Title", "OVERLAY", "GameFontNormal")
+    self.rosterTitle = self.rosterPane:CreateFontString(self.rosterPane:GetName().."_Title", "OVERLAY", "GameFontNormal")
     self.rosterTitle:SetPoint("TOPLEFT", self.rosterPane, "TOPLEFT", 5 , -5)
     self.rosterTitle:SetText("Roster")
     self.rosterTitle:SetFont(self:GetHeaderFont(), 16)
     self.rosterTitle:SetTextColor(1, 1, 1, 0.8)
-    self.rosterScrollFrame = CreateFrame("ScrollFrame", "SRTRoster_RosterPane_Scroll", self.rosterPane, "UIPanelScrollFrameTemplate")
+    self.rosterScrollFrame = CreateFrame("ScrollFrame", self.rosterPane:GetName().."_Scroll", self.rosterPane, "UIPanelScrollFrameTemplate")
     self.rosterScrollFrame:SetClipsChildren(false)
     self.rosterScrollFrame:SetPoint("TOPLEFT", self.rosterPane, "TOPLEFT", 0, -28)
     self.rosterScrollFrame:SetPoint("TOPRIGHT", self.rosterPane, "TOPRIGHT", 0, -28)
@@ -126,7 +180,7 @@ function RosterExplorer:InitializeRosterPane()
     self.rosterScrollFrame:SetPoint("BOTTOMRIGHT", self.rosterPane, "BOTTOMRIGHT", 0, 35)
     self.rosterScrollFrame.ScrollBar:SetValueStep(20)  -- Set scrolling speed per scroll step
     self.rosterScrollFrame.ScrollBar:SetMinMaxValues(0, 400)  -- Set based on content height - frame height
-    self.rosterScrollContentFrame = CreateFrame("Frame", "SRTRoster_RosterPane_ScrollContent", self.rosterScrollFrame)
+    self.rosterScrollContentFrame = CreateFrame("Frame", self.rosterPane:GetName().."_ScrollContent", self.rosterScrollFrame)
     self.rosterScrollContentFrame:SetSize(500, 8000)  -- Set the size of the content frame (height is larger for scrolling)
     self.rosterScrollContentFrame:SetPoint("TOPLEFT")
     self.rosterScrollContentFrame:SetPoint("TOPRIGHT")
@@ -141,18 +195,25 @@ function RosterExplorer:InitializeRosterPane()
     thumbTexture:SetColorTexture(0, 0, 0, 0.8)  -- RGBA (0, 0, 0, 1) sets it to solid black
     thumbTexture:SetWidth(5)  -- Customize the size as needed
     self.rosterScrollBar:Show()
+    self.buttonBackToLoad = FrameBuilder.CreateButton(self.rosterPane, 95, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
+    self.buttonBackToLoad:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 5, 5)
+    self.buttonBackToLoad:SetScript("OnMouseDown", function (button)
+        -- TODO: Actually load whatever is selected, if something is selected!
+        self.state = State.LOAD_OR_CREATE_ROSTER
+        self:UpdateAppearance()
+    end)
 end
 
 function RosterExplorer:InitializeAvailablePlayersPane()
     self.availablePlayersPane = CreateFrame("Frame", "SRTRoster_AvailablePlayers", self.content)
     self.availablePlayersPane:SetClipsChildren(false)
     self:SetToRightSide(self.availablePlayersPane, self.content)
-    self.availablePlayersTitle = self.availablePlayersPane:CreateFontString("SRTRoster_AvailablePlayers_Title", "OVERLAY", "GameFontNormal")
+    self.availablePlayersTitle = self.availablePlayersPane:CreateFontString(self.availablePlayersPane:GetName().."_Title", "OVERLAY", "GameFontNormal")
     self.availablePlayersTitle:SetPoint("TOPLEFT", self.availablePlayersPane, "TOPLEFT", 5 , -5)
     self.availablePlayersTitle:SetText("Available Players")
     self.availablePlayersTitle:SetFont(self:GetHeaderFont(), 16)
     self.availablePlayersTitle:SetTextColor(1, 1, 1, 0.8)
-    self.availablePlayersFilterButton = CreateFrame("Button", "SRTRoster_AvailablePlayers_Filter", self.availablePlayersPane, "BackdropTemplate")
+    self.availablePlayersFilterButton = CreateFrame("Button", self.availablePlayersPane:GetName().."_Filter", self.availablePlayersPane, "BackdropTemplate")
     self.availablePlayersFilterButton.texture = self.availablePlayersFilterButton:CreateTexture(nil, "BACKGROUND")
     self.availablePlayersFilterButton.texture:SetTexture("Interface\\Addons\\SwiftdawnRaidTools\\Media\\filter_white_64x64.tga")
     self.availablePlayersFilterButton.texture:SetAllPoints()
@@ -165,7 +226,7 @@ function RosterExplorer:InitializeAvailablePlayersPane()
     self.availablePlayersFilterButton:SetScript("OnClick", function ()
         if self.availablePlayersFilterPopup:IsShown() then self.availablePlayersFilterPopup:Hide() else self.availablePlayersFilterPopup:Show() end
     end)
-    self.availablePlayersScrollFrame = CreateFrame("ScrollFrame", "SRTRoster_AvailablePlayers_Scroll", self.availablePlayersPane, "UIPanelScrollFrameTemplate")
+    self.availablePlayersScrollFrame = CreateFrame("ScrollFrame", self.availablePlayersPane:GetName().."_Scroll", self.availablePlayersPane, "UIPanelScrollFrameTemplate")
     self.availablePlayersScrollFrame:SetClipsChildren(false)
     self.availablePlayersScrollFrame:SetPoint("TOPLEFT", self.availablePlayersPane, "TOPLEFT", 0, -28)
     self.availablePlayersScrollFrame:SetPoint("TOPRIGHT", self.availablePlayersPane, "TOPRIGHT", 0, -28)
@@ -173,13 +234,13 @@ function RosterExplorer:InitializeAvailablePlayersPane()
     self.availablePlayersScrollFrame:SetPoint("BOTTOMRIGHT", self.availablePlayersPane, "BOTTOMRIGHT", 0, 35)
     self.availablePlayersScrollFrame.ScrollBar:SetValueStep(20)  -- Set scrolling speed per scroll step
     self.availablePlayersScrollFrame.ScrollBar:SetMinMaxValues(0, 400)  -- Set based on content height - frame height
-    self.availablePlayersScrollContentFrame = CreateFrame("Frame", "SRTRoster_AvailablePlayers_ScrollContent", self.availablePlayersScrollFrame)
+    self.availablePlayersScrollContentFrame = CreateFrame("Frame", self.availablePlayersPane:GetName().."_ScrollContent", self.availablePlayersScrollFrame)
     self.availablePlayersScrollContentFrame:SetClipsChildren(false)
     self.availablePlayersScrollContentFrame:SetSize(500, 8000)  -- Set the size of the content frame (height is larger for scrolling)
     self.availablePlayersScrollContentFrame:SetPoint("TOPLEFT")
     self.availablePlayersScrollContentFrame:SetPoint("TOPRIGHT")
     self.availablePlayersScrollFrame:SetScrollChild(self.availablePlayersScrollContentFrame)
-    self.availablePlayersScrollBar = _G["SRTRoster_AvailablePlayers_ScrollScrollBar"]
+    self.availablePlayersScrollBar = _G[self.availablePlayersScrollFrame:GetName().."ScrollBar"]
     self.availablePlayersScrollBar.scrollStep = 23*3  -- Change this value to adjust the scroll amount per tick
     self.availablePlayersScrollBar:SetPoint("TOPRIGHT", self.availablePlayersScrollFrame, "TOPRIGHT", -12, 0)
     self.availablePlayersScrollBar:SetPoint("BOTTOMRIGHT", self.availablePlayersScrollFrame, "BOTTOMRIGHT", -12, 0)
@@ -189,9 +250,30 @@ function RosterExplorer:InitializeAvailablePlayersPane()
     thumbTexture:SetColorTexture(0, 0, 0, 0.8)  -- RGBA (0, 0, 0, 1) sets it to solid black
     thumbTexture:SetWidth(5)  -- Customize the size as needed
     self.availablePlayersScrollBar:Show()
-    self.availablePlayersPaneReturn = FrameBuilder.CreateButton(self.availablePlayersPane, 75, 25, "Return", SRTColor.Red, SRTColor.RedHighlight)
-    self.availablePlayersPaneReturn:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", -5, 5)
-    self.availablePlayersPaneReturn:SetScript("OnMouseDown", function (button)
+    self.buttonAssignRoles = FrameBuilder.CreateButton(self.availablePlayersPane, 95, 25, "Assign Roles", SRTColor.Green, SRTColor.GreenHighlight)
+    self.buttonAssignRoles:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", -5, 5)
+    self.buttonAssignRoles:SetScript("OnMouseDown", function (button)
+        -- TODO: Actually load whatever is selected, if something is selected!
+        self.state = State.ROSTER_AND_ROLE_BUCKETS
+        self:UpdateAppearance()
+    end)
+end
+
+function RosterExplorer:InitializeRoleBucketsPane()
+    self.roleBucketsPane = CreateFrame("Frame", "SRTRoster_SelectedInfo", self.content)
+    self.roleBucketsPane:SetClipsChildren(false)
+    self:SetToRightSide(self.roleBucketsPane, self.content)
+    self.roleBucketsTitle = self.roleBucketsPane:CreateFontString(self.roleBucketsPane:GetName().."_Title", "OVERLAY", "GameFontNormal")
+    self.roleBucketsTitle:SetPoint("TOPLEFT", self.roleBucketsPane, "TOPLEFT", 5 , -5)
+    self.roleBucketsTitle:SetText("Role Buckets")
+    self.roleBucketsTitle:SetFont(self:GetHeaderFont(), 16)
+    self.roleBucketsTitle:SetTextColor(1, 1, 1, 0.8)
+
+    -- Create buttons
+    self.buttonRaidAssignments = FrameBuilder.CreateButton(self.roleBucketsPane, 95, 25, "Assignments", SRTColor.Green, SRTColor.GreenHighlight)
+    self.buttonRaidAssignments:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", -5, 5)
+    self.buttonRaidAssignments:SetScript("OnMouseDown", function (button)
+        -- TODO: Empty roster and start fresh one
         self.state = State.LOAD_OR_CREATE_ROSTER
         self:UpdateAppearance()
     end)
@@ -215,70 +297,11 @@ function RosterExplorer:Initialize()
 
     -- Create possible left/right panes
     self:InitializeLoadRosterPane()
+    self:InitializeSelectedRosterInfoPane()
     self:InitializeRosterPane()
     self:InitializeAvailablePlayersPane()
+    self:InitializeRoleBucketsPane()
 
-    self.rosterInfoPane = CreateFrame("Frame", "SRTRoster_RosterInfo", self.content)
-    self.rosterInfoPane:SetClipsChildren(false)
-    self:SetToRightSide(self.rosterInfoPane, self.content)
-
-    -- Fill in right side info panel
-    self.rosterInfoPaneAddButton = FrameBuilder.CreateButton(self.rosterInfoPane, 85, 25, "Add Players", SRTColor.Green, SRTColor.GreenHighlight)
-    self.rosterInfoPaneAddButton:SetPoint("BOTTOMRIGHT", self.rosterInfoPane, "BOTTOMRIGHT", -5, 5)
-    self.rosterInfoPaneAddButton:SetScript("OnMouseDown", function (button)
-        self.state = State.ROSTER_AND_AVAILABLE_PLAYERS
-        self:UpdateAppearance()
-    end)
-    self.rosterInfoPaneLoadButton = FrameBuilder.CreateButton(self.rosterInfoPane, 85, 25, "Load Roster", SRTColor.Green, SRTColor.GreenHighlight)
-    self.rosterInfoPaneLoadButton:SetPoint("RIGHT", self.rosterInfoPaneAddButton, "LEFT", -10, 0)
-    self.rosterInfoPaneLoadButton:SetScript("OnMouseDown", function (button)
-        self.state = State.LOAD_ROSTER
-        self:UpdateAppearance()
-    end)
-
-    -- Create saved roster pane
-    self.savedRosterPane = CreateFrame("Frame", "SRTRoster_Saved", self.main)
-    self.savedRosterPane:SetClipsChildren(false)
-    self.savedRosterPane:SetAllPoints()
-    -- Create saved roster left pane
-    self.savedRosterPaneLeft = CreateFrame("Frame", "SRTRoster_SavedLeft", self.savedRosterPane)
-    self.savedRosterPaneLeft:SetClipsChildren(false)
-    self.savedRosterPaneLeft:SetPoint("TOPLEFT", self.savedRosterPane, "TOPLEFT", 0, -0)
-    self.savedRosterPaneLeft:SetPoint("TOPRIGHT", self.savedRosterPane, "TOP", -5, 0)
-    self.savedRosterPaneLeft:SetPoint("BOTTOMLEFT", self.savedRosterPane, "BOTTOMLEFT", 0, 0)
-    self.savedRosterPaneLeft:SetPoint("BOTTOMRIGHT", self.savedRosterPane, "BOTTOM", -5, 0)
-    -- Create header for left pane
-    self.savedRosterTitle = self.savedRosterPaneLeft:CreateFontString("SRTRoster_SavedLeft_Title", "OVERLAY", "GameFontNormal")
-    self.savedRosterTitle:SetPoint("TOPLEFT", self.savedRosterPaneLeft, "TOPLEFT", 5 , -5)
-    self.savedRosterTitle:SetText("Saved Rosters")
-    self.savedRosterTitle:SetFont(self:GetHeaderFont(), 16)
-    self.savedRosterTitle:SetTextColor(1, 1, 1, 0.8)
-    -- Create saved roster right pane
-    self.savedRosterPaneRight = CreateFrame("Frame", "SRTRoster_SavedRight", self.savedRosterPane)
-    self.savedRosterPaneRight:SetClipsChildren(false)
-    self.savedRosterPaneRight:SetPoint("TOPLEFT", self.savedRosterPane, "TOP", 5, 0)
-    self.savedRosterPaneRight:SetPoint("TOPRIGHT", self.savedRosterPane, "TOPRIGHT", 0, 0)
-    self.savedRosterPaneRight:SetPoint("BOTTOMLEFT", self.savedRosterPane, "BOTTOM", 5, 0)
-    self.savedRosterPaneRight:SetPoint("BOTTOMRIGHT", self.savedRosterPane, "BOTTOMRIGHT", 0, 0)
-    -- Create buttons
-    self.savedRosterPaneRightCancel = FrameBuilder.CreateButton(self.savedRosterPaneRight, 75, 25, "Cancel", SRTColor.Red, SRTColor.RedHighlight)
-    self.savedRosterPaneRightCancel:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", -5, 5)
-    self.savedRosterPaneRightCancel:SetScript("OnMouseDown", function (button)
-        self.state = State.LOAD_OR_CREATE_ROSTER
-        self:UpdateAppearance()
-    end)
-    self.savedRosterPaneRightDelete = FrameBuilder.CreateButton(self.savedRosterPaneRight, 75, 25, "Delete", SRTColor.Red, SRTColor.RedHighlight)
-    self.savedRosterPaneRightDelete:SetPoint("RIGHT", self.savedRosterPaneRightCancel, "LEFT", -10, 0)
-    self.savedRosterPaneRightDelete:SetScript("OnMouseDown", function (button)
-        self.state = State.LOAD_OR_CREATE_ROSTER
-        self:UpdateAppearance()
-    end)
-    self.savedRosterPaneRightLoad = FrameBuilder.CreateButton(self.savedRosterPaneRight, 75, 25, "Load", SRTColor.Red, SRTColor.RedHighlight)
-    self.savedRosterPaneRightLoad:SetPoint("RIGHT", self.savedRosterPaneRightDelete, "LEFT", -10, 0)
-    self.savedRosterPaneRightLoad:SetScript("OnMouseDown", function (button)
-        self.state = State.LOAD_OR_CREATE_ROSTER
-        self:UpdateAppearance()
-    end)
     -- Update appearance
     self:UpdateAppearance()
 end
@@ -290,7 +313,7 @@ function RosterExplorer:UpdateAppearance()
     self:UpdateSelectedSavedRosterPane()
     self:UpdateRosterPane()
     self:UpdateAvailablePlayersPane()
-    self:UpdateSavedRostersPane()
+    self:UpdateRoleBucketsPane()
 end
 
 --- Update left side of Load or Create state
@@ -302,25 +325,26 @@ function RosterExplorer:UpdateLoadRosterPane()
         return
     end
 
-    self.loadRosterTitle:SetText("Saved Roster")
+    self.loadRosterTitle:SetText("Saved Rosters")
 end
 
 --- Update right side of Load and Create state 
 function RosterExplorer:UpdateSelectedSavedRosterPane()
     if self.state == State.LOAD_OR_CREATE_ROSTER then
-        self.rosterInfoPane:Show()
+        self.selectedRosterInfoPane:Show()
     else
-        self.rosterInfoPane:Hide()
+        self.selectedRosterInfoPane:Hide()
         return
     end
+    self.selectedRosterInfoTitle:SetText("Selected Roster Info")
 end
 
 --- Update roster; used in Create Roster and Select Role states
 function RosterExplorer:UpdateRosterPane()
-    if self.state == State.ROSTER_AND_AVAILABLE_PLAYERS then
-        self.content:Show()
+    if self.state == State.ROSTER_AND_AVAILABLE_PLAYERS or self.state == State.ROSTER_AND_ROLE_BUCKETS then
+        self.rosterPane:Show()
     else
-        self.content:Hide()
+        self.rosterPane:Hide()
         for _, player in pairs(self.roster) do
             player.frame:Hide()
         end
@@ -477,14 +501,15 @@ function RosterExplorer:UpdateAvailablePlayersPane()
     self.availablePlayersScrollContentFrame:SetHeight(23 * visiblePlayers)
 end
 
---- TODO: No design for this!
-function RosterExplorer:UpdateSavedRostersPane()
-    if self.state == State.LOAD_ROSTER then
-        self.savedRosterPane:Show()
+--- Update right side of Load and Create state 
+function RosterExplorer:UpdateRoleBucketsPane()
+    if self.state == State.ROSTER_AND_ROLE_BUCKETS then
+        self.roleBucketsPane:Show()
     else
-        self.savedRosterPane:Hide()
+        self.roleBucketsPane:Hide()
         return
     end
+    self.roleBucketsTitle:SetText("Role Buckets")
 end
 
 function RosterExplorer:Update()
