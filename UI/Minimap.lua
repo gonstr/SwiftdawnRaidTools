@@ -10,7 +10,7 @@ function SwiftdawnRaidTools:MinimapInit()
         icon = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\swiftdawn.png",
         OnClick = function(self, button)
             if button == "LeftButton" then
-                InterfaceOptionsFrame_OpenToCategory("Swiftdawn Raid Tools")
+                Settings.OpenToCategory("Swiftdawn Raid Tools")
             else
                 if IsShiftKeyDown() then
                     SwiftdawnRaidTools:NotificationsToggleFrameLock()
