@@ -43,6 +43,18 @@ triggers:
   spell_id: 12345
 ```
 
+#### SPELL_AURA_REMOVED
+
+Required values: `spell_id`.
+
+Context variables: `spell_name`, `source_name`.
+
+```yaml
+triggers:
+- type: SPELL_AURA_REMOVED
+  spell_id: 12345
+```
+
 #### SPELL_CAST
 
 Required values: `spell_id`.

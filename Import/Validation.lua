@@ -174,7 +174,7 @@ local function validateTriggers(import)
                 return false, "Import trigger is missing a type field."
             end
 
-            if not (trigger.type == "UNIT_HEALTH" or trigger.type == "SPELL_CAST" or trigger.type == "SPELL_AURA" or trigger.type == "RAID_BOSS_EMOTE" or trigger.type == "ENCOUNTER_START" or trigger.type == "FOJJI_NUMEN_TIMER") then
+            if not (trigger.type == "UNIT_HEALTH" or trigger.type == "SPELL_CAST" or trigger.type == "SPELL_AURA" or trigger.type == "SPELL_AURA_REMOVED" or trigger.type == "RAID_BOSS_EMOTE" or trigger.type == "ENCOUNTER_START" or trigger.type == "FOJJI_NUMEN_TIMER") then
                 return false, "Import has an invalid trigger type."
             end
 
@@ -211,6 +211,16 @@ local function validateTriggers(import)
             if trigger.type == "SPELL_AURA" then
                 if not trigger.spell_id then
                     return false, "Import with trigger type SPELL_AURA is missing a spell_id field."
+                end
+    
+                if type(trigger.spell_id) ~= "number" or trigger.spell_id ~= math.floor(trigger.spell_id) then
+                    return false, "Import has an invalid spell_id value: " .. stringSafe(trigger.spell_id) .. "."
+                end
+            end
+
+            if trigger.type == "SPELL_AURA_REMOVED" then
+                if not trigger.spell_id then
+                    return false, "Import with trigger type SPELL_AURA_REMOVED is missing a spell_id field."
                 end
     
                 if type(trigger.spell_id) ~= "number" or trigger.spell_id ~= math.floor(trigger.spell_id) then
