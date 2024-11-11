@@ -9,7 +9,7 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
         local trimmed = input:trim()
         
         if trimmed == "config" then
-            InterfaceOptionsFrame_OpenToCategory("Swiftdawn Raid Tools")
+            Settings.OpenToCategory("Swiftdawn Raid Tools")
         elseif trimmed == "show" or trimmed == "hide" then
             self.db.profile.overview.show = trimmed == "show" and true or false
             self:OverviewUpdate()
