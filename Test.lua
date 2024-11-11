@@ -18,7 +18,7 @@ function SwiftdawnRaidTools:InternalTestStart()
 
     self:ENCOUNTER_START(nil, 1082)
 
-    C_Timer.NewTimer(20, function()
+    C_Timer.NewTimer(10, function()
         SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Sinestra", nil, nil, 90125)
     end)
 

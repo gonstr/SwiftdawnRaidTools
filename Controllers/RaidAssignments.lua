@@ -38,6 +38,9 @@ local fojjiNumenTimers = {}
 -- key: part uuid, value = [C_Timer.NewTimer]
 local delayTimers = {}
 
+-- key: spellid, value = number of casts
+local spellCastCache = {}
+
 local function resetState()
     activeEncounter = nil
     unitHealthTriggersCache = {}
@@ -49,6 +52,7 @@ local function resetState()
     raidBossEmoteTriggersCache = {}
     raidBossEmoteUntriggersCache = {}
     fojjiNumenTimersTriggersCache = {}
+    spellCastCache = {}
 
     for key, timer in pairs(fojjiNumenTimers) do
         timer:Cancel()
@@ -338,6 +342,26 @@ local function triggerConditionsTrue(conditions)
                         return false
                     end
                 end
+            elseif condition.type == "SPELL_CAST_COUNT" then
+                local casts = spellCastCache[condition.spell_id]
+
+                if condition.eq then
+                    if not casts or casts ~= condition.eq then
+                        return false
+                    end
+                end
+
+                if condition.lt then
+                    if casts and casts >= condition.lt then
+                         return false
+                    end
+                end
+
+                if condition.gt then
+                    if not casts or casts <= condition.gt then
+                        return false
+                    end
+                end
             end
         end
     end
@@ -491,6 +515,14 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourc
     end
 
     local triggers = spellCastTriggersCache[spellId]
+
+    if event == "SPELL_CAST_SUCCESS" then
+        if not spellCastCache[spellId] then
+            spellCastCache[spellId] = 0
+        end
+    
+        spellCastCache[spellId] = spellCastCache[spellId] + 1
+    end
 
     if triggers then
         local spellName, _, _, castTime = GetSpellInfo(spellId)
