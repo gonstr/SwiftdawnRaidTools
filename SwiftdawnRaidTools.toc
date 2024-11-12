@@ -50,5 +50,6 @@ Models\LogItem.lua
 Models\Class.lua
 Models\Spec.lua
 Models\Player.lua
+Models\Roster.lua
 Models\SRTData.lua
 Models\SRTColor.lua
