@@ -129,8 +129,6 @@ function SRTWindow:SetupHeader()
     end
     self.header:SetPoint("TOPLEFT", 0, 0)
     self.header:SetPoint("TOPRIGHT", 0, 0)
-    self.header:SetMovable(true)
-    self.header:EnableMouse(true)
     self.header:RegisterForDrag("LeftButton")
     self.header:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -138,11 +136,6 @@ function SRTWindow:SetupHeader()
         tileSize = 16,
     })
     self.header:SetBackdropColor(0, 0, 0, self:GetAppearance().titleBarOpacity)
-    self.header:SetScript("OnMouseDown", function(self, button)
-        if button == "RightButton" then
-            showPopup()
-        end
-    end)
     self.header:SetScript("OnDragStart", function(_)
         self.container:StartMoving()
         self.container:SetScript("OnUpdate", function()  -- Continuously update the frame size
@@ -152,8 +145,8 @@ function SRTWindow:SetupHeader()
         end)
     end)
     self.header:SetScript("OnDragStop", function(_)
-        self.container:StopMovingOrSizing()
         self.container:SetScript("OnUpdate", nil)
+        self.container:StopMovingOrSizing()
     end)
 
     self.header:SetScript("OnEnter", function()
