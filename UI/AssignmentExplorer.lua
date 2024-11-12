@@ -45,7 +45,7 @@ function AssignmentExplorer:Initialize()
     self.encounterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 10, 5)
     self.encounterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOM", -5, 5)
 
-    self.encounter.selector = self.encounter.selector or FrameBuilder.CreateSelector(self.encounterPane, {}, 285, self:GetHeaderFontType(), 14, "Maloriak")
+    self.encounter.selector = self.encounter.selector or FrameBuilder.CreateSelector(self.encounterPane, {}, 285, self:GetHeaderFontType(), 14, "Select encounter...")
     self.encounter.selector:SetPoint("TOPLEFT", self.encounterPane, "TOPLEFT", 0, -5)
     self.encounter.selector.selectedName = "Maloriak"
     self.encounter.bossAbilities = self.encounter.bossAbilities or {}
@@ -158,27 +158,24 @@ end
 
 function AssignmentExplorer:Update()
     SRTWindow.Update(self)
-    self.encounter.selector.selectedName = self:GetEncounterName(self.selectedEncounterID)
-    FrameBuilder.UpdateSelector(self.encounter.selector)
-end
-
-function AssignmentExplorer:UpdateEncounterPane()
-    local encounterItems = {}
-    local encounters = SwiftdawnRaidTools:BossEncountersGetAll()
-    for encounterID, _ in pairs(self:GetEncounters()) do
+    self.encounter.selector.items = {}
+    SwiftdawnRaidTools:BossEncountersInit()
+    for encounterID, name in pairs(SwiftdawnRaidTools:BossEncountersGetAll()) do
         local item = {
-            name = encounters[encounterID],
+            name = name,
             encounterID = encounterID,
             onClick = function (row)
                 self.selectedEncounterID = row.item.encounterID
                 self:UpdateAppearance()
             end
         }
-        table.insert(encounterItems, item)
+        table.insert(self.encounter.selector.items, item)
     end
-    self.encounter.selector.items = encounterItems
-    FrameBuilder.UpdateSelector(self.encounter.selector)
+    self.encounter.selector.selectedName = self:GetEncounterName(self.selectedEncounterID)
+    self.encounter.selector.Update()
+end
 
+function AssignmentExplorer:UpdateEncounterPane()
     local encounterAssignments = self:GetEncounters()[self.selectedEncounterID]
     if not encounterAssignments then
         return
