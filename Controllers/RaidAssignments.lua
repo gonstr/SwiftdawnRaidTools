@@ -23,6 +23,12 @@ local spellAuraTriggersCache = {}
 -- key: spellId, value = triggers
 local spellAuraUntriggersCache = {}
 
+-- key: spellId, value = triggers
+local spellAuraRemovedTriggersCache = {}
+
+-- key: spellId, value = triggers
+local spellAuraRemovedUntriggersCache = {}
+
 -- key: text, value = triggers
 local raidBossEmoteTriggersCache = {}
 
@@ -38,6 +44,9 @@ local fojjiNumenTimers = {}
 -- key: part uuid, value = [C_Timer.NewTimer]
 local delayTimers = {}
 
+-- key: spellid, value = number of casts
+local spellCastCache = {}
+
 local function resetState()
     activeEncounter = nil
     unitHealthTriggersCache = {}
@@ -45,10 +54,12 @@ local function resetState()
     spellCastTriggersCache = {}
     spellCastUntriggersCache = {}
     spellAuraTriggersCache = {}
+    spellAuraRemovedTriggersCache = {}
     spellAuraUntriggersCache = {}
     raidBossEmoteTriggersCache = {}
     raidBossEmoteUntriggersCache = {}
     fojjiNumenTimersTriggersCache = {}
+    spellCastCache = {}
 
     for key, timer in pairs(fojjiNumenTimers) do
         timer:Cancel()
@@ -110,11 +121,17 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId, encounter
                         spellAuraTriggersCache[trigger.spell_id] = {}
                     end
 
-                    insert(spellAuraTriggersCache[trigger.spell_id], trigger)
-                elseif trigger.type == "RAID_BOSS_EMOTE" then
-                    if not raidBossEmoteTriggersCache[trigger.text] then
-                        raidBossEmoteTriggersCache[trigger.text] = {}
-                    end
+                        insert(spellAuraTriggersCache[trigger.spell_id], trigger)
+                    elseif trigger.type == "SPELL_AURA_REMOVED" then
+                        if not spellAuraRemovedTriggersCache[trigger.spell_id] then
+                            spellAuraRemovedTriggersCache[trigger.spell_id] = {}
+                        end
+
+                        insert(spellAuraRemovedTriggersCache[trigger.spell_id], trigger)
+                    elseif trigger.type == "RAID_BOSS_EMOTE" then
+                        if not raidBossEmoteTriggersCache[trigger.text] then
+                            raidBossEmoteTriggersCache[trigger.text] = {}
+                        end
 
                     insert(raidBossEmoteTriggersCache[trigger.text], trigger)
                 elseif trigger.type == "FOJJI_NUMEN_TIMER" then
@@ -150,11 +167,17 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId, encounter
                             spellAuraUntriggersCache[untrigger.spell_id] = {}
                         end
 
-                        insert(spellAuraUntriggersCache[untrigger.spell_id], untrigger)
-                    elseif untrigger.type == "RAID_BOSS_EMOTE" then
-                        if not raidBossEmoteUntriggersCache[untrigger.text] then
-                            raidBossEmoteUntriggersCache[untrigger.text] = {}
-                        end
+                            insert(spellAuraUntriggersCache[untrigger.spell_id], untrigger)
+                        elseif untrigger.type == "SPELL_AURA_REMOVED" then
+                            if not spellAuraRemovedUntriggersCache[untrigger.spell_id] then
+                                spellAuraRemovedUntriggersCache[untrigger.spell_id] = {}
+                            end
+
+                            insert(spellAuraRemovedUntriggersCache[untrigger.spell_id], untrigger)
+                        elseif untrigger.type == "RAID_BOSS_EMOTE" then
+                            if not raidBossEmoteUntriggersCache[untrigger.text] then
+                                raidBossEmoteUntriggersCache[untrigger.text] = {}
+                            end
 
                         insert(raidBossEmoteUntriggersCache[untrigger.text], untrigger)
                     end
@@ -341,6 +364,26 @@ local function triggerConditionsTrue(conditions)
                         return false
                     end
                 end
+            elseif condition.type == "SPELL_CAST_COUNT" then
+                local casts = spellCastCache[condition.spell_id]
+
+                if condition.eq then
+                    if not casts or casts ~= condition.eq then
+                        return false
+                    end
+                end
+
+                if condition.lt then
+                    if casts and casts >= condition.lt then
+                         return false
+                    end
+                end
+
+                if condition.gt then
+                    if not casts or casts <= condition.gt then
+                        return false
+                    end
+                end
             end
         end
     end
@@ -498,6 +541,14 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourc
 
     local triggers = spellCastTriggersCache[spellId]
 
+    if event == "SPELL_CAST_SUCCESS" then
+        if not spellCastCache[spellId] then
+            spellCastCache[spellId] = 0
+        end
+    
+        spellCastCache[spellId] = spellCastCache[spellId] + 1
+    end
+
     if triggers then
         local spellName, _, _, castTime = GetSpellInfo(spellId)
 
@@ -529,12 +580,10 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellCast(event, spellId, sourc
     end
 end
 
-function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceName, destName)
+function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
     if not activeEncounter then
         return
     end
-
-    local triggers = spellAuraTriggersCache[spellId]
 
     local spellName = GetSpellInfo(spellId)
 
@@ -544,17 +593,37 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleSpellAura(_, spellId, sourceNam
         dest_name = destName
     }
 
-    if triggers then
-        for _, trigger in ipairs(triggers) do
-            self:RaidAssignmentsTrigger(trigger, ctx)
+    if subEvent == "SPELL_AURA_APPLIED" then
+        local triggers = spellAuraTriggersCache[spellId]
+
+        if triggers then
+            for _, trigger in ipairs(triggers) do
+                self:RaidAssignmentsTrigger(trigger, ctx)
+            end
         end
-    end
+    
+        local untriggers = spellAuraUntriggersCache[spellId]
+    
+        if untriggers then
+            for _, untrigger in ipairs(untriggers) do
+                cancelDelayTimers(untrigger.uuid)
+            end
+        end
+    elseif subEvent == "SPELL_AURA_REMOVED" then
+        local triggers = spellAuraRemovedTriggersCache[spellId]
 
-    local untriggers = spellAuraUntriggersCache[spellId]
-
-    if untriggers then
-        for _, untrigger in ipairs(untriggers) do
-            cancelDelayTimers(untrigger.uuid)
+        if triggers then
+            for _, trigger in ipairs(triggers) do
+                self:RaidAssignmentsTrigger(trigger, ctx)
+            end
+        end
+    
+        local untriggers = spellAuraRemovedUntriggersCache[spellId]
+    
+        if untriggers then
+            for _, untrigger in ipairs(untriggers) do
+                cancelDelayTimers(untrigger.uuid)
+            end
         end
     end
 end

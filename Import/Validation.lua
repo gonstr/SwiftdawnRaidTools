@@ -174,7 +174,7 @@ local function validateTriggers(import)
                 return false, "Import trigger is missing a type field."
             end
 
-            if not (trigger.type == "UNIT_HEALTH" or trigger.type == "SPELL_CAST" or trigger.type == "SPELL_AURA" or trigger.type == "RAID_BOSS_EMOTE" or trigger.type == "ENCOUNTER_START" or trigger.type == "FOJJI_NUMEN_TIMER") then
+            if not (trigger.type == "UNIT_HEALTH" or trigger.type == "SPELL_CAST" or trigger.type == "SPELL_AURA" or trigger.type == "SPELL_AURA_REMOVED" or trigger.type == "RAID_BOSS_EMOTE" or trigger.type == "ENCOUNTER_START" or trigger.type == "FOJJI_NUMEN_TIMER") then
                 return false, "Import has an invalid trigger type."
             end
 
@@ -211,6 +211,16 @@ local function validateTriggers(import)
             if trigger.type == "SPELL_AURA" then
                 if not trigger.spell_id then
                     return false, "Import with trigger type SPELL_AURA is missing a spell_id field."
+                end
+    
+                if type(trigger.spell_id) ~= "number" or trigger.spell_id ~= math.floor(trigger.spell_id) then
+                    return false, "Import has an invalid spell_id value: " .. stringSafe(trigger.spell_id) .. "."
+                end
+            end
+
+            if trigger.type == "SPELL_AURA_REMOVED" then
+                if not trigger.spell_id then
+                    return false, "Import with trigger type SPELL_AURA_REMOVED is missing a spell_id field."
                 end
     
                 if type(trigger.spell_id) ~= "number" or trigger.spell_id ~= math.floor(trigger.spell_id) then
@@ -260,7 +270,7 @@ local function validateTriggers(import)
                         return false, "Import condition is missing a type field."
                     end
 
-                    if not (condition.type == "UNIT_HEALTH") then
+                    if not (condition.type == "UNIT_HEALTH") and not (condition.type == "SPELL_CAST_COUNT") then
                         return false, "Import has an invalid condition type."
                     end
 
@@ -289,6 +299,30 @@ local function validateTriggers(import)
 
                         if conditions ~= 1 then
                             return false, "Import condition of type UNIT_HEALTH requires exactly one of lt, gt, pct_gt or pct_lt fields."
+                        end
+                    elseif condition.type == "SPELL_CAST_COUNT" then
+                        if not condition.spell_id then
+                            return false, "Import condition of type SPELL_CAST_COUNT is missing a spell_id field."
+                        end
+
+                        if condition.eq then
+                            if condition.lt or condition.gt then
+                                return false, "Import condition of type SPELL_CAST_COUNT has `eq` combined `gt` or `lt` fields."
+                            end
+                        else
+                            local conditions = 0
+
+                            if condition.lt then
+                                conditions = conditions + 1
+                            end
+    
+                            if condition.gt then
+                                conditions = conditions + 1
+                            end
+    
+                            if conditions == 0 then
+                                return false, "Import condition of type SPELL_CAST_COUNT requires at least one of lt, gt fields."
+                            end
                         end
                     end
                 end

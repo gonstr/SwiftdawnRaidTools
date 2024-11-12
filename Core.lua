@@ -345,7 +345,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
             self:NotificationsUpdateSpells()
         end)
         self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
-    elseif subEvent == "SPELL_AURA_APPLIED" then
+    elseif subEvent == "SPELL_AURA_APPLIED" or subEvent =="SPELL_AURA_REMOVED" then
         self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
         if self:IsFriendlyRaidMemberOrPlayer(destGUID) then

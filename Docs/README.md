@@ -43,6 +43,18 @@ triggers:
   spell_id: 12345
 ```
 
+#### SPELL_AURA_REMOVED
+
+Required values: `spell_id`.
+
+Context variables: `spell_name`, `source_name`.
+
+```yaml
+triggers:
+- type: SPELL_AURA_REMOVED
+  spell_id: 12345
+```
+
 #### SPELL_CAST
 
 Required values: `spell_id`.
@@ -109,7 +121,7 @@ All triggers support `conditions`. Conditions is a list of things that need to b
 
 #### UNIT_HEALTH
 
-Only trigger if the health of the boss is below 20%.
+Trigger if the health of the boss is below or above a certain value.
 
 Required values: `unit` and one of `lt`, `gt`, `pct_lt` or `pct_gt`.
 
@@ -119,6 +131,20 @@ triggers:
   spell_id: 12345
   conditions: [{ type: UNIT_HEALTH, unit: boss1, pct_lt: 20 }]
 ```
+
+#### SPELL_CAST_COUNT
+
+Trigger if a spell has been cast a certain amount of time.
+
+Required values: `spell_id` and one or both of `lt`, `gt` or `eq`.
+
+```yaml
+triggers:
+- type: SPELL_CAST
+  spell_id: 12345
+  conditions: [{ type: SPELL_CAST_COUNT, spell_id: 54321, eq: 2 }]
+```
+
 ### Metadata
 
 Raid assignment metadata. `title` is required and is the text that will be shown in the overview and notifications.
