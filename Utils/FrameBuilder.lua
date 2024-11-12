@@ -58,6 +58,30 @@ end
 
 ---@return table|BackdropTemplate|Frame
 ---@param parentFrame Frame
+---@param roster Roster
+function FrameBuilder.CreateRosterFrame(parentFrame, roster, width, height, font, fontSize)
+    local rosterFrame = CreateFrame("Frame", parentFrame:GetName() .. "_" .. Roster.GetName(roster), parentFrame, "BackdropTemplate")
+    rosterFrame:EnableMouse(true)
+    rosterFrame:SetSize(width, height)
+    rosterFrame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 16,
+    })
+    rosterFrame:SetBackdropColor(0, 0, 0, 0)
+    rosterFrame.name = rosterFrame.name or rosterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    rosterFrame.name:EnableMouse(false)
+    rosterFrame.name:SetPoint("LEFT", rosterFrame, "LEFT", 5, 0)
+    rosterFrame.name:SetFont(font, fontSize)
+    rosterFrame.name:SetText(Roster.GetName(roster) .. "  -  " .. Roster.GetTimestamp(roster))
+    rosterFrame.name:SetTextColor(0.8, 0.8, 0.8, 1)
+    rosterFrame:SetScript("OnEnter", function () rosterFrame:SetBackdropColor(1, 1, 1, 0.4) end)
+    rosterFrame:SetScript("OnLeave", function () rosterFrame:SetBackdropColor(0, 0, 0, 0) end)
+    return rosterFrame
+end
+
+---@return table|BackdropTemplate|Frame
+---@param parentFrame Frame
 ---@param height integer
 function FrameBuilder.CreateAssignmentGroupFrame(parentFrame, height)
     local groupFrame = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
@@ -272,7 +296,7 @@ function FrameBuilder.CreateSelector(parentFrame, items, width, font, fontSize, 
     selector.button:SetAlpha(0.8)
     selector.button:SetScript("OnEnter", function(b) b:SetAlpha(1) end)
     selector.button:SetScript("OnLeave", function(b) b:SetAlpha(0.8) end)
-    selector.button:SetScript("OnClick", function(b) 
+    selector.button:SetScript("OnClick", function(b)
         if selector.dropdown:IsShown() then
             selector.dropdown:Hide()
             -- selector:SetBackdropColor(0, 0, 0, 0)
@@ -286,7 +310,10 @@ function FrameBuilder.CreateSelector(parentFrame, items, width, font, fontSize, 
     selector.dropdown:SetPoint("TOPRIGHT", selector, "BOTTOMRIGHT", -10, -5)
     selector.dropdown:SetFrameStrata("DIALOG")
     selector.dropdown:Hide()
-    FrameBuilder.UpdateSelector(selector)
+    selector.Update = function ()
+        FrameBuilder.UpdateSelector(selector)
+    end
+    selector.Update()
     return selector
 end
 
@@ -328,13 +355,18 @@ function FrameBuilder.UpdateSelector(selector)
         row:SetScript("OnMouseDown", function (r)
             selector.dropdown:Hide()
             selector.selectedName = item.name
+            selector.text:SetText(item.name)
             item.onClick(r)
         end)
         row.item = item
         row.text = row.text or row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         row.text:SetPoint("LEFT", row, "LEFT", 10, 0)
-        row.text:SetFont(selector.font, selector.fontSize)
-        row.text:SetText(item.name)
+        row.text:SetFont(selector.font, selector.fontSize - 2)
+        if item.name then
+            row.text:SetText(item.name)
+        else
+            row.text:SetText("[empty]")
+        end
         row.text:SetTextColor(0.8, 0.8, 0.8, 1)
         row.text:SetJustifyH("LEFT")
         selector.dropdown.rows[rowIndex] = row
@@ -391,6 +423,9 @@ function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, updateFunct
 
     popup:SetHeight(18 * count)
 
+    popup.Update = function ()
+        FrameBuilder.UpdateFilterMenu(popup)
+    end
     return popup
 end
 
@@ -436,7 +471,7 @@ function FrameBuilder.CreateFilterMenuItem(popupFrame, previousItem, name, nameF
         item:SetScript("OnMouseDown", function (_, button)
             if button == "LeftButton" then
                 item.value = not item.value
-                FrameBuilder.UpdateFilterMenu(popupFrame)
+                popupFrame.Update()
                 updateFunction()
             end
         end)
@@ -473,7 +508,136 @@ function FrameBuilder.UpdateFilterMenu(popup)
             end
         elseif item.popup then
             -- menu
-            FrameBuilder.UpdateFilterMenu(item.popup)
+            item.popup.Update()
         end
     end
+end
+
+---@return table|Frame|ScrollFrame
+function FrameBuilder.CreateScrollArea(parentFrame, areaName)
+    local scrollFrame
+    scrollFrame = CreateFrame("ScrollFrame", string.format("%s_%sScroll", parentFrame:GetName(), areaName), parentFrame, "UIPanelScrollFrameTemplate")
+    scrollFrame:SetClipsChildren(true)
+    scrollFrame.ScrollBar:SetValueStep(20)  -- Set scrolling speed per scroll step
+    scrollFrame.ScrollBar:SetMinMaxValues(0, 400)  -- Set based on content height - frame height
+    scrollFrame.content = CreateFrame("Frame", string.format("%s_%sScrollContent", parentFrame:GetName(), areaName), scrollFrame)
+    scrollFrame.content:SetClipsChildren(false)
+    scrollFrame.content:SetSize(500, 8000)  -- Set the size of the content frame (height is larger for scrolling)
+    scrollFrame.content:SetPoint("TOPLEFT")
+    scrollFrame.content:SetPoint("TOPRIGHT")
+    scrollFrame:SetScrollChild(scrollFrame.content)
+    scrollFrame.bar = _G[scrollFrame:GetName().."ScrollBar"]
+    scrollFrame.bar.scrollStep = 23*3  -- Change this value to adjust the scroll amount per tick
+    scrollFrame.bar:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", -12, 0)
+    scrollFrame.bar:SetPoint("BOTTOMRIGHT", scrollFrame, "BOTTOMRIGHT", -12, 0)
+    scrollFrame.bar.ScrollUpButton:SetAlpha(0)
+    scrollFrame.bar.ScrollDownButton:SetAlpha(0)
+    local thumbTexture = scrollFrame.bar:GetThumbTexture()
+    thumbTexture:SetColorTexture(0, 0, 0, 0.8)  -- RGBA (0, 0, 0, 1) sets it to solid black
+    thumbTexture:SetWidth(5)  -- Customize the size as needed
+    scrollFrame.bar:Show()
+    scrollFrame.items = {}
+    scrollFrame.FindFirstItem = function ()
+        for _, item in pairs(scrollFrame.items) do
+            local _, previousItem = item:GetPoint(1)
+            if previousItem and previousItem:GetName() == scrollFrame.content:GetName() then
+                return item
+            end
+        end
+    end
+    scrollFrame.FindNextItem = function (name, item)
+        for otherName, otherItem in pairs(scrollFrame.items) do
+            if otherName ~= name then
+                local _, otherPreviousItem = otherItem:GetPoint(1)
+                if otherPreviousItem and otherPreviousItem:GetName() == item:GetName() then
+                    return otherItem
+                end
+            end
+        end
+        return nil
+    end
+    scrollFrame.ConnectItem = function(name, item)
+        -- Administration
+        scrollFrame.items[name] = item
+        -- Change parent to scroll content
+        item:SetParent(scrollFrame.content)
+        -- Attach first item to our bottom
+        local firstItem = scrollFrame.FindFirstItem()
+        if firstItem then
+            firstItem:SetPoint("TOPLEFT", item, "BOTTOMLEFT", 0, -3)
+        end
+        -- Attach item to top
+        item:SetPoint("TOPLEFT", scrollFrame.content, "TOPLEFT", 10, 0)
+    end
+    scrollFrame.DisconnectItem = function (name, item, newParent)
+        -- Administration
+        scrollFrame.items[name] = nil
+        -- Change parent to content to avoid cutoff
+        item:SetParent(newParent)
+        -- Cleverly connect next item to previous item
+        local _, previousItem = item:GetPoint(1)
+        local nextItem = scrollFrame.FindNextItem(name, item)
+        if nextItem then
+            if previousItem:GetName() == scrollFrame.content:GetName() then
+                nextItem:SetPoint("TOPLEFT", previousItem, "TOPLEFT", 10, 0)
+            else
+                nextItem:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -3)
+            end
+        end
+        -- Disconnect
+        item:ClearAllPoints()
+    end
+    scrollFrame.IsMouseOverArea = function ()
+        return FrameBuilder.IsMouseOverFrame(scrollFrame)
+    end
+    return scrollFrame
+end
+
+---@return boolean
+function FrameBuilder.IsMouseOverFrame(frame)
+    local x, y = GetCursorPosition()
+    local scale = UIParent:GetScale()
+    local left = frame:GetLeft() * scale
+    local right = frame:GetRight() * scale
+    local top = frame:GetTop() * scale
+    local bottom = frame:GetBottom() * scale
+    if left < x and right > x and top > y and bottom < y then
+        return true
+    else
+        return false
+    end
+end
+
+---@return table|Frame|BackdropTemplate
+function FrameBuilder.CreateBossAbilityAssignmentsFrame(parentFrame, name, width, font, fontSize)
+    local frameName = parentFrame:GetName().."_BossAbilityAssignments_"..name
+    local frame = CreateFrame("Frame", frameName, parentFrame, "BackdropTemplate")
+    frame.width = width
+    frame.displayText = name
+    frame.font = font
+    frame.fontSize = fontSize
+    frame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = 25,
+    })
+    frame:SetBackdropColor(0, 0, 0, 0)
+    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.title:SetText(name)
+    frame.title:SetTextColor(0.8, 0.8, 0.8, 1)
+    frame.title:SetPoint("TOPLEFT", 5, -3)
+    frame.groups = {}
+    frame.IsMouseOverFrame = function ()
+        return FrameBuilder.IsMouseOverFrame(frame)
+    end
+    frame.Update = function ()
+        FrameBuilder.UpdateBossAbilityAssignmentsFrame(frame)
+    end
+    frame.Update()
+    return frame
+end
+
+function FrameBuilder.UpdateBossAbilityAssignmentsFrame(frame)
+    frame:SetSize(frame.width, 3 + frame.fontSize + 3 + ((7 + frame.fontSize) * (#frame.groups + 1)))
+    frame.title:SetFont(frame.font, frame.fontSize)
 end
