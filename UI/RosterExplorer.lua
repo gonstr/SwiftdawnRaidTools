@@ -257,8 +257,8 @@ function RosterExplorer:InitializeCreateAssignments()
     self.assignments.encounter.title:SetText("")
     self.assignments.encounter.title:SetPoint("TOPLEFT", self.assignments.encounter.pane, "TOPLEFT", 10, -8)
     self.assignments.encounter.scroll = FrameBuilder.CreateScrollArea(self.assignments.encounter.pane, "Encounter")
-    self.assignments.encounter.scroll:SetPoint("TOPLEFT", 0, -8)
-    self.assignments.encounter.scroll:SetPoint("TOPRIGHT", 0, -8)
+    self.assignments.encounter.scroll:SetPoint("TOPLEFT", 0, -5)
+    self.assignments.encounter.scroll:SetPoint("TOPRIGHT", 0, -5)
     self.assignments.encounter.scroll:SetPoint("BOTTOMLEFT", 0, 35)
     self.assignments.encounter.scroll:SetPoint("BOTTOMRIGHT", 0, 35)
 
@@ -351,7 +351,8 @@ function RosterExplorer:UpdateLoadOrCreateRoster()
         rosterInfo.timestamp = rosterInfo.timestamp or self.loadCreate.info.scroll.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         rosterInfo.timestamp:SetFont(self:GetPlayerFontType(), self:GetAppearance().playerFontSize)
         rosterInfo.timestamp:SetText("Created on "..self.selectedRoster.timestamp)
-        rosterInfo.timestamp:SetPoint("TOPLEFT", 10, 0)
+        rosterInfo.timestamp:SetTextColor(0.8, 0.8, 0.8, 1)
+        rosterInfo.timestamp:SetPoint("TOPLEFT", 10, -5)
         rosterInfo.timestamp:Show()
 
         rosterInfo.players = rosterInfo.players or self.loadCreate.info.scroll.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -365,11 +366,44 @@ function RosterExplorer:UpdateLoadOrCreateRoster()
             end
         end
         rosterInfo.players:SetText(playerNames)
+        rosterInfo.players:SetTextColor(0.8, 0.8, 0.8, 1)
         rosterInfo.players:SetWidth(260)
         rosterInfo.players:SetJustifyH("LEFT")
         rosterInfo.players:SetWordWrap(true)
         rosterInfo.players:SetPoint("TOPLEFT", rosterInfo.timestamp, "BOTTOMLEFT", 0, -3)
         rosterInfo.players:Show()
+
+        rosterInfo.encounters = rosterInfo.encounters or self.loadCreate.info.scroll.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        rosterInfo.encounters:SetFont(self:GetPlayerFontType(), self:GetAppearance().playerFontSize)
+        local playerNames = nil
+        -- self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index]
+        local encounterIDsWithFilledAssignments = function ()
+            local ids = {}
+            for encounterID, encounter in pairs(self.selectedRoster.encounters) do
+                for _, abilityFrame in pairs(encounter) do
+                    if #abilityFrame.assignments > 0 then
+                        table.insert(ids, encounterID)
+                        break
+                    end
+                end
+            end
+            return ids
+        end
+        local encounters = nil
+        for _, encounterID in pairs(encounterIDsWithFilledAssignments()) do
+            if encounters then
+                encounters = string.format("%s, %d", encounters, encounterID)
+            else
+                encounters = string.format("\nEncounters: \n\n%d", encounterID)
+            end
+        end
+        rosterInfo.encounters:SetText(encounters)
+        rosterInfo.encounters:SetTextColor(0.8, 0.8, 0.8, 1)
+        rosterInfo.encounters:SetWidth(260)
+        rosterInfo.encounters:SetJustifyH("LEFT")
+        rosterInfo.encounters:SetWordWrap(true)
+        rosterInfo.encounters:SetPoint("TOPLEFT", rosterInfo.players, "BOTTOMLEFT", 0, -3)
+        rosterInfo.encounters:Show()
     else
         self.loadCreate.deleteButton.color = SRTColor.Gray
         self.loadCreate.deleteButton.colorHighlight = SRTColor.GrayHighlight
@@ -384,6 +418,9 @@ function RosterExplorer:UpdateLoadOrCreateRoster()
         end
         if rosterInfo.players then
             rosterInfo.players:Hide()
+        end
+        if rosterInfo.encounters then
+            rosterInfo.encounters:Hide()
         end
         self.loadCreate.info.title:SetText("No roster selected")
     end
@@ -582,8 +619,10 @@ function RosterExplorer:UpdateCreateAssignments()
                                     break
                                 end
                                 -- TODO: Add spell select pane (similar to assignment explorer)
+                                local classSpells = SwiftdawnRaidTools:SpellsGetClassSpells(playerFrame.info.classFileName)
+                                local spellID = #classSpells > 0 and classSpells[math.random(#classSpells)] or nil
                                 table.insert(self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index], {
-                                    ["spell_id"] = 64843,
+                                    ["spell_id"] = spellID,
                                     ["type"] = "SPELL",
                                     ["player"] = name,
                                 })
@@ -596,9 +635,11 @@ function RosterExplorer:UpdateCreateAssignments()
                         self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex] = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex] or {}
                         self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments or {}
                         -- TODO: Add spell select pane (similar to assignment explorer)
+                        local classSpells = SwiftdawnRaidTools:SpellsGetClassSpells(playerFrame.info.classFileName)
+                        local spellID = #classSpells > 0 and classSpells[math.random(#classSpells)] or nil
                         table.insert(self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments, {
                             [1] = {
-                                ["spell_id"] = 64843,
+                                ["spell_id"] = spellID,
                                 ["type"] = "SPELL",
                                 ["player"] = name,
                             }
@@ -619,9 +660,13 @@ function RosterExplorer:UpdateCreateAssignments()
         return
     elseif SRTData.GetAssignmentDefaults()[self.selectedEncounterID] == nil then
         self.assignments.encounter.title:SetText("No defaults available yet...")
+        self.assignments.encounter.scroll:Hide()
         return
+    else
+        self.assignments.encounter.title:SetText("")
+        self.assignments.encounter.scroll:Show()
     end
-
+    
     self.selectedRoster.encounters = self.selectedRoster.encounters or {}
     local encounterAssignments = self.selectedRoster.encounters[self.selectedEncounterID] or SRTData.GetAssignmentDefaults()[self.selectedEncounterID]
     for _, item in pairs(self.assignments.encounter.scroll.items) do item:Hide() end
@@ -629,11 +674,12 @@ function RosterExplorer:UpdateCreateAssignments()
     local lastAbilityFrame = nil
     for bossAbilityIndex, bossAbility in ipairs(encounterAssignments) do
         -- Create frame for boss ability assignment groups
-        local abilityFrame = self.assignments.encounter.scroll.items[bossAbilityIndex] or FrameBuilder.CreateBossAbilityAssignmentsFrame(self.assignments.encounter.scroll.content, bossAbility.metadata.name, bossAbilityIndex, 260, self:GetPlayerFontType(), 14)
+        local abilityFrameID = string.format("%d-%d", self.selectedEncounterID, bossAbilityIndex)
+        local abilityFrame = self.assignments.encounter.scroll.items[abilityFrameID] or FrameBuilder.CreateBossAbilityAssignmentsFrame(self.assignments.encounter.scroll.content, bossAbility.metadata.name, bossAbilityIndex, 260, self:GetPlayerFontType(), 14)
         if lastAbilityFrame then
             abilityFrame:SetPoint("TOPLEFT", lastAbilityFrame, "BOTTOMLEFT", 0, -3)
         else
-            abilityFrame:SetPoint("TOPLEFT", self.assignments.encounter.scroll.content, "TOPLEFT", 10, 0)
+            abilityFrame:SetPoint("TOPLEFT", self.assignments.encounter.scroll.content, "TOPLEFT", 5, 0)
         end
         abilityFrame:Show()
 
@@ -649,7 +695,7 @@ function RosterExplorer:UpdateCreateAssignments()
         end
         abilityFrame.Update()
 
-        self.assignments.encounter.scroll.items[bossAbilityIndex] = abilityFrame
+        self.assignments.encounter.scroll.items[abilityFrameID] = abilityFrame
         lastAbilityFrame = abilityFrame
     end
 end

@@ -131,8 +131,8 @@ function FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, u
         cd:Hide()
     end
     for assignmentIndex, assignment in ipairs(group) do
-        local assignmentFrame = groupFrame.assignments[assignmentIndex] or FrameBuilder.CreateAssignmentFrame(groupFrame, font, fontSize, iconSize)
-        FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment, assignmentIndex)
+        local assignmentFrame = groupFrame.assignments[assignmentIndex] or FrameBuilder.CreateAssignmentFrame(groupFrame, assignment, assignmentIndex, font, fontSize, iconSize)
+        FrameBuilder.UpdateAssignmentFrame(assignmentFrame)
         assignmentFrame.groupIndex = index
         groupFrame.assignments[assignmentIndex] = assignmentFrame
     end
@@ -143,8 +143,11 @@ end
 ---@param font any
 ---@param fontSize integer
 ---@param iconSize integer
-function FrameBuilder.CreateAssignmentFrame(parentFrame, font, fontSize, iconSize)
+function FrameBuilder.CreateAssignmentFrame(parentFrame, assignment, index, font, fontSize, iconSize)
     local assignmentFrame = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
+    assignmentFrame.index = index
+    assignmentFrame.player = assignment.player
+    assignmentFrame.spellId = assignment.spell_id
     assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
     assignmentFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -165,27 +168,24 @@ function FrameBuilder.CreateAssignmentFrame(parentFrame, font, fontSize, iconSiz
     assignmentFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
     assignmentFrame.text = assignmentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     assignmentFrame.text:SetFont(font, fontSize)
-    assignmentFrame.text:SetTextColor(1, 1, 1, 1)
+    assignmentFrame.text:SetTextColor(0.8, 0.8, 0.8, 1)
     assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "CENTER", iconSize/2+4, -1)
     return assignmentFrame
 end
 
 ---@param assignmentFrame table|BackdropTemplate|Frame
----@param assignment table
----@param assignmentIndex integer
-function FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment, assignmentIndex)
+function FrameBuilder.UpdateAssignmentFrame(assignmentFrame)
     assignmentFrame:Show()
-    assignmentFrame.assignment = assignment
-    assignmentFrame.player = assignment.player
-    assignmentFrame.spellId = assignment.spell_id
-    local _, _, icon = GetSpellInfo(assignment.spell_id)
-    assignmentFrame.icon:SetTexture(icon)
-    assignmentFrame.text:SetText(strsplit("-", assignment.player))
-    local color = SwiftdawnRaidTools:GetSpellColor(assignment.spell_id)
-    assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
+    if assignmentFrame.spellId then
+        local _, _, icon = GetSpellInfo(assignmentFrame.spellId)
+        assignmentFrame.icon:SetTexture(icon)
+        local color = SwiftdawnRaidTools:GetSpellColor(assignmentFrame.spellId)
+        assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
+    end
+    assignmentFrame.text:SetText(strsplit("-", assignmentFrame.player))
     assignmentFrame.cooldownFrame:Clear()
     assignmentFrame:ClearAllPoints()
-    if assignmentIndex > 1 then
+    if assignmentFrame.index > 1 then
         assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOM")
         assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
     else
@@ -642,7 +642,6 @@ function FrameBuilder.CreateBossAbilityAssignmentsFrame(parentFrame, name, abili
     })
     frame:SetBackdropColor(0, 0, 0, 0)
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    frame.title:SetText(name)
     frame.title:SetTextColor(0.8, 0.8, 0.8, 1)
     frame.title:SetPoint("TOPLEFT", 5, -3)
     frame.groups = {}
@@ -664,6 +663,7 @@ function FrameBuilder.UpdateBossAbilityAssignmentsFrame(frame)
         tileSize = frame:GetHeight(),
     })
     frame:SetBackdropColor(0, 0, 0, 0)
+    frame.title:SetText(frame.name)
     frame.title:SetFont(frame.font, frame.fontSize)
     if #frame.groups >= 1 then
         frame.groups[1]:SetPoint("TOPLEFT", frame, "TOPLEFT", 5, -(frame.fontSize + 10))
