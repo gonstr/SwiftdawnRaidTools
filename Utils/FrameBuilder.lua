@@ -93,6 +93,9 @@ function FrameBuilder.CreateAssignmentGroupFrame(parentFrame, height)
     })
     groupFrame:SetBackdropColor(0, 0, 0, 0)
     groupFrame.assignments = {}
+    groupFrame.IsMouseOverFrame = function ()
+        return FrameBuilder.IsMouseOverFrame(groupFrame)
+    end
     return groupFrame
 end
 
