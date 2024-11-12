@@ -89,7 +89,7 @@ SwiftdawnRaidTools.defaults = {
                 playerFontType = "Friz Quadrata TT",
                 playerFontSize = 10,
                 titleBarOpacity = 0.8,
-                backgroundOpacity = 0.4,
+                backgroundOpacity = 0.6,
                 iconSize = 14
             }
         },
