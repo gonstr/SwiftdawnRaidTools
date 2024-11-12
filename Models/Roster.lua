@@ -30,6 +30,7 @@ function Roster:New()
     obj.name = nil
     obj.timestamp = timestamp()
     obj.players = {}
+    obj.encounters = {}
     return obj
 end
 
