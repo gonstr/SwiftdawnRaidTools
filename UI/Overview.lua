@@ -284,7 +284,7 @@ function SRTOverview:UpdateActiveGroups()
                 end
             end
         end
-    end    
+    end
 end
 
 function SRTOverview:UpdateSpells()
