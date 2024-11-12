@@ -15,13 +15,16 @@ function Player:New(name, class, spec)
     obj.specs = {
         spec
     }
+    obj.info = {}
     return obj
 end
 
-function Player:SetClass(class)
-    self.class = class
+---@param class Class
+function Player.SetClass(player, class)
+    player.class = class
 end
 
-function Player:AddSpec(spec)
-    table.insert(self.specs, spec)
+---@param spec Spec
+function Player.AddSpec(player, spec)
+    table.insert(player.specs, spec)
 end
