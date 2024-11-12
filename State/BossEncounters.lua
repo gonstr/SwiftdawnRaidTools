@@ -12,8 +12,10 @@ function SwiftdawnRaidTools:BossEncountersInit()
 
     local currTier = EJ_GetCurrentTier()
 
-    for tier = EJ_GetNumTiers(), EJ_GetNumTiers() do
-        EJ_SelectTier(tier)
+    local numTiers = EJ_GetNumTiers()
+
+    for tierIndex = 1, numTiers do
+        EJ_SelectTier(tierIndex)
 
         local instance_index = 1
         local instance_id = EJ_GetInstanceByIndex(instance_index, true)
