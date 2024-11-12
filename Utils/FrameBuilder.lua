@@ -89,7 +89,7 @@ function FrameBuilder.CreateAssignmentGroupFrame(parentFrame, height)
     groupFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
-        tileSize = 16,
+        tileSize = height,
     })
     groupFrame:SetBackdropColor(0, 0, 0, 0)
     groupFrame.assignments = {}
@@ -116,6 +116,14 @@ function FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, u
         groupFrame:SetPoint("TOPLEFT", groupFrame:GetParent(), "TOPLEFT", 0, -16)
         groupFrame:SetPoint("TOPRIGHT", groupFrame:GetParent(), "TOPRIGHT", 0, -16)
     end
+    local height = (fontSize > iconSize and fontSize or iconSize) + 10
+    groupFrame:SetHeight(height)
+    groupFrame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = height,
+    })
+    groupFrame:SetBackdropColor(0, 0, 0, 0)
     for _, cd in pairs(groupFrame.assignments) do
         cd:Hide()
     end
@@ -169,7 +177,7 @@ function FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment, assignm
     assignmentFrame.spellId = assignment.spell_id
     local _, _, icon = GetSpellInfo(assignment.spell_id)
     assignmentFrame.icon:SetTexture(icon)
-    assignmentFrame.text:SetText(assignment.player)
+    assignmentFrame.text:SetText(strsplit("-", assignment.player))
     local color = SwiftdawnRaidTools:GetSpellColor(assignment.spell_id)
     assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
     assignmentFrame.cooldownFrame:Clear()
@@ -181,6 +189,12 @@ function FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment, assignm
         assignmentFrame:SetPoint("BOTTOMLEFT")
         assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, 0)
     end
+    assignmentFrame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = assignmentFrame:GetHeight(),
+    })
+    assignmentFrame:SetBackdropColor(0, 0, 0, 0)
 end
 
 ---@return table|BackdropTemplate|Frame
@@ -609,9 +623,11 @@ function FrameBuilder.IsMouseOverFrame(frame)
 end
 
 ---@return table|Frame|BackdropTemplate
-function FrameBuilder.CreateBossAbilityAssignmentsFrame(parentFrame, name, width, font, fontSize)
+function FrameBuilder.CreateBossAbilityAssignmentsFrame(parentFrame, name, abilityIndex, width, font, fontSize)
     local frameName = parentFrame:GetName().."_BossAbilityAssignments_"..name
     local frame = CreateFrame("Frame", frameName, parentFrame, "BackdropTemplate")
+    frame.name = name
+    frame.abilityIndex = abilityIndex
     frame.width = width
     frame.displayText = name
     frame.font = font
@@ -638,6 +654,16 @@ function FrameBuilder.CreateBossAbilityAssignmentsFrame(parentFrame, name, width
 end
 
 function FrameBuilder.UpdateBossAbilityAssignmentsFrame(frame)
-    frame:SetSize(frame.width, 3 + frame.fontSize + 3 + ((7 + frame.fontSize) * (#frame.groups + 1)))
+    frame:SetSize(frame.width, frame.fontSize + 10 + ((10 + 14) * (#frame.groups + 0)) + 5)
+    frame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = frame:GetHeight(),
+    })
+    frame:SetBackdropColor(0, 0, 0, 0)
     frame.title:SetFont(frame.font, frame.fontSize)
+    if #frame.groups >= 1 then
+        frame.groups[1]:SetPoint("TOPLEFT", frame, "TOPLEFT", 5, -(frame.fontSize + 10))
+        frame.groups[1]:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -5, -(frame.fontSize + 10))
+    end
 end
