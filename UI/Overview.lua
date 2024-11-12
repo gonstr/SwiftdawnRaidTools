@@ -65,25 +65,25 @@ end
 
 function SRTOverview:Resize()
     local encounters = SwiftdawnRaidTools:GetEncounters()
-    local maxHeight = 0
+    local totalHeight = 0
     for _, encounter in pairs(encounters) do
         -- Overview Header
-        local height = 20
+        local height = self.header:GetHeight()
         if encounter then
             for _, part in ipairs(encounter) do
                 if part.type == "RAID_ASSIGNMENTS" then
                     height = height + 30
                     for _ in ipairs(part.assignments) do
-                        height = height + 20
+                        height = height + self:GetAssignmentGroupHeight() + 3
                     end
                 end
             end
         end
-        if height > maxHeight then
-            maxHeight = height
+        if height > totalHeight then
+            totalHeight = height
         end
     end
-    self.container:SetHeight(math.max(MIN_HEIGHT, maxHeight))
+    self.container:SetHeight(math.max(MIN_HEIGHT, totalHeight))
 end
 
 function SRTOverview:Update()
