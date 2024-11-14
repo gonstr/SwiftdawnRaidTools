@@ -139,21 +139,7 @@ local mainOptions = {
                         SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                     order = 5,
-                },
-                resetAnchors = {
-                    type = "execute",
-                    name = "Reset Anchors",
-                    desc = "Reset to default locations.",
-                    func = function()
-                        SwiftdawnRaidTools.db.profile.notifications.anchorX = 0
-                        SwiftdawnRaidTools.db.profile.notifications.anchorY = 200
-
-                        SwiftdawnRaidTools.overview:UpdateAppearance()
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
-                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
-                    end,
-                    order = 6,
-                },
+                }
             },
         },
         separator01 = {
@@ -242,7 +228,7 @@ local mainOptions = {
             width = "half",
             set = function(info, value)
                 SwiftdawnRaidTools.db.profile.debuglog.locked = value
-                SwiftdawnRaidTools.assignmentExplorer:Update()
+                SwiftdawnRaidTools.debugLog:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.locked end,
             order = 23,
@@ -925,7 +911,6 @@ local importOptions = {
 
                 SwiftdawnRaidTools:SyncSchedule()
                 SwiftdawnRaidTools.overview:Update()
-                SwiftdawnRaidTools.assignmentExplorer:Update()
             end,
         },
     },
