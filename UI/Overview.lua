@@ -164,6 +164,7 @@ function SRTOverview:UpdatePopupMenu()
 
     local toggleAnchorsFunc = function()
         SRT_Profile().notifications.locked = not SRT_Profile().notifications.locked
+        SwiftdawnRaidTools:NotificationsToggleFrameLock(SRT_Profile().notifications.locked)
     end
     
     local anchorsText = "Hide Anchors"
@@ -179,6 +180,14 @@ function SRTOverview:UpdatePopupMenu()
     local lockedText = "Lock Overview"
     if self:GetProfile().locked then lockedText = "Unlock Overview" end
     self:ShowPopupListItem(index, lockedText, true, lockFunc, 0, encounterListItems)
+
+    index = index + 1
+
+    local debugLogFunc = function()
+        SRT_Profile().debuglog.show = true
+        SwiftdawnRaidTools.debugLog:Update()
+    end
+    self:ShowPopupListItem(index, "Debug Log", true, debugLogFunc, 0, encounterListItems)
 
     index = index + 1
 
