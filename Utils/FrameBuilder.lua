@@ -670,3 +670,113 @@ function FrameBuilder.UpdateBossAbilityAssignmentsFrame(frame)
         frame.groups[1]:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -5, -(frame.fontSize + 10))
     end
 end
+
+function FrameBuilder.CreatePopupMenu(parentFrame, items)
+    local popupMenu = CreateFrame("Frame", "SRT_"..parentFrame:GetName().."_PopupMenu", UIParent, "BackdropTemplate")
+    popupMenu.Update = function (i)
+        FrameBuilder.UpdatePopupMenu(popupMenu, i)
+    end
+    popupMenu:SetClampedToScreen(true)
+    popupMenu:SetSize(200, 50)
+    popupMenu:SetBackdrop({
+        bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true,
+        tileSize = 16,
+        edgeSize = 12,
+        insets = {
+            left = 2,
+            right = 2,
+            top = 2,
+            bottom = 2,
+        },
+    })
+    popupMenu:SetBackdropColor(0, 0, 0, 1)
+    popupMenu:SetFrameStrata("DIALOG")
+    popupMenu:Hide() -- Start hidden
+    popupMenu.items = {}
+    popupMenu.Update(items)
+    return popupMenu
+end
+
+function FrameBuilder.CreatePopupMenuItem(popupMenu, text, onClick, isSetting)
+    local item = CreateFrame("Frame", nil, popupMenu, "BackdropTemplate")
+    item:SetHeight(20)
+    item:EnableMouse(true)
+    item:SetScript("OnEnter", function() item.highlight:Show() end)
+    item:SetScript("OnLeave", function() item.highlight:Hide() end)
+    item:EnableMouse(true)
+    item:SetScript("OnMouseDown", function(_, button)
+        if button == "LeftButton" then
+            if item.onClick then item.onClick() end
+            popupMenu:Hide()
+        end
+    end)
+    item.highlight = item:CreateTexture(nil, "HIGHLIGHT")
+    item.highlight:SetPoint("TOPLEFT", 10, 0)
+    item.highlight:SetPoint("BOTTOMRIGHT", -10, 0)
+    item.highlight:SetTexture("Interface\\Buttons\\UI-Listbox-Highlight")
+    item.highlight:SetBlendMode("ADD")
+    item.highlight:SetAlpha(0.5)
+    item.highlight:Hide()
+    item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    item.text:SetFont(SwiftdawnRaidTools:AppearancePopupFontType(), 10)
+    if isSetting then
+        item.text:SetTextColor(0.8, 0.8, 0.8, 1)
+    else
+        item.text:SetTextColor(1, 0.8235, 0, 1)
+    end
+    item.text:SetPoint("BOTTOMLEFT", 15, 5)
+    item.Update = function (t, oc)
+        FrameBuilder.UpdatePopupMenuItem(item, t, oc)
+    end
+    item.Update(text, onClick)
+    return item
+end
+
+function FrameBuilder.UpdatePopupMenuItem(item, text, onClick)
+    item.text:SetText(text)
+    item.onClick = onClick
+end
+
+function FrameBuilder.UpdatePopupMenu(popupMenu, items)
+    if not items then
+        popupMenu:Hide()
+        return
+    end
+    for _, item in pairs(popupMenu.items) do
+        item:Hide()
+    end
+    local previousItem = nil
+    local leaveSpace = false
+    local height = 20
+    for index, item in pairs(items) do
+        if item.name then
+            local itemFrame = popupMenu.items[index] or FrameBuilder.CreatePopupMenuItem(popupMenu, item.name, item.onClick, item.isSetting)
+            itemFrame.Update(item.name, item.onClick)
+            height = height + 20
+            if previousItem then
+                if leaveSpace then
+                    itemFrame:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, -10)
+                    itemFrame:SetPoint("TOPRIGHT", previousItem, "BOTTOMRIGHT", 0, -10)
+                    height = height + 10
+                    leaveSpace = false
+                else
+                    itemFrame:SetPoint("TOPLEFT", previousItem, "BOTTOMLEFT", 0, 0)
+                    itemFrame:SetPoint("TOPRIGHT", previousItem, "BOTTOMRIGHT", 0, 0)
+                end
+            else
+                itemFrame:SetPoint("TOPLEFT", popupMenu, "TOPLEFT", 0, -10)
+                itemFrame:SetPoint("TOPRIGHT", popupMenu, "TOPRIGHT", 0, -10)
+            end
+            popupMenu.items[index] = itemFrame
+            itemFrame:Show()
+            previousItem = itemFrame
+        else
+            leaveSpace = true
+        end
+    end
+    if height > 0 then
+        popupMenu:SetHeight(height)
+    end
+end

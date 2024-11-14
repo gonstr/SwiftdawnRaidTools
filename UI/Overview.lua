@@ -17,6 +17,13 @@ end
 
 function SRTOverview:Initialize()
     SRTWindow.Initialize(self)
+    self.menuButton:SetScript("OnClick", function()
+        if not SRT_IsTesting() and (InCombatLockdown() or SwiftdawnRaidTools:RaidAssignmentsInEncounter()) then
+            return
+        end
+        self:UpdatePopupMenu()
+        self.popupMenu:Show()
+    end)
     self:UpdateAppearance()
 end
 
@@ -96,6 +103,7 @@ function SRTOverview:Update()
     end
 
     self:UpdateHeaderText()
+    self:UpdatePopupMenu()
     self:UpdateMain()
     self:UpdateSpells()
 end
@@ -133,67 +141,54 @@ function SRTOverview:UpdatePopupMenu()
     if InCombatLockdown() then
         return
     end
-
-    -- Update list items
-    for _, item in pairs(self.popupListItems) do
-        item:Hide()
-    end
-
+    local menuItems = {}
     local encounterIndexes = {}
     for encounterId in pairs(SwiftdawnRaidTools:GetEncounters()) do
         table.insert(encounterIndexes, encounterId)
     end
     table.sort(encounterIndexes)
-
-    local index = 1
-    for _, encounterId in ipairs(encounterIndexes) do
-        local selectFunc = function() self:SelectEncounter(encounterId) end
-        self:ShowPopupListItem(index, SwiftdawnRaidTools:BossEncountersGetAll()[encounterId], false, selectFunc)
-        index = index + 1
+    for index, encounterId in ipairs(encounterIndexes) do
+        menuItems[index] = { name = SwiftdawnRaidTools:BossEncountersGetAll()[encounterId], onClick = function() self:SelectEncounter(encounterId) end }
     end
-
-    local encounterListItems = index > 1
-
-    local toggleAnchorsFunc = function()
-        SRT_Profile().notifications.locked = not SRT_Profile().notifications.locked
-        SwiftdawnRaidTools:NotificationsToggleFrameLock(SRT_Profile().notifications.locked)
+    if #encounterIndexes > 0 then
+        table.insert(menuItems, {})
     end
-    
-    local anchorsText = "Hide Anchors"
-    if SRT_Profile().notifications.locked then anchorsText = "Show Anchors" end
-    self:ShowPopupListItem(index, anchorsText, true, toggleAnchorsFunc, 0, encounterListItems)
-
-    index = index + 1
-
-    local lockFunc = function()
-        self:ToggleLock()
-        LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools")
-    end
-    local lockedText = "Lock Overview"
-    if self:GetProfile().locked then lockedText = "Unlock Overview" end
-    self:ShowPopupListItem(index, lockedText, true, lockFunc, 0, encounterListItems)
-
-    index = index + 1
-
-    local debugLogFunc = function()
-        SRT_Profile().debuglog.show = true
-        SwiftdawnRaidTools.debugLog:Update()
-    end
-    self:ShowPopupListItem(index, "Debug Log", true, debugLogFunc, 0, encounterListItems)
-
-    index = index + 1
-
-    local configurationFunc = function() Settings.OpenToCategory("Swiftdawn Raid Tools") end
-    self:ShowPopupListItem(index, "Configuration", true, configurationFunc, encounterListItems and 10 or 0, false)
-
-    index = index + 1
-
-    local yOfs = self:ShowPopupListItem(index, "Close", true, nil, encounterListItems and 10 or 0, true)
-
-    local popupHeight = math.abs(yOfs) + 30
-
-    -- Update popup size
-    self.popupMenu:SetHeight(popupHeight)
+    table.insert(menuItems, {
+        name = SRT_Profile().notifications.locked and "Show Anchors" or "Hide Anchors",
+        onClick = function()
+            SRT_Profile().notifications.locked = not SRT_Profile().notifications.locked
+            SwiftdawnRaidTools:NotificationsToggleFrameLock(SRT_Profile().notifications.locked)
+        end,
+        isSetting = true
+    })
+    table.insert(menuItems, {
+        name = self:GetProfile().locked and "Unlock Overview" or "Lock Overview",
+        onClick = function()
+            self:ToggleLock()
+            LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools")
+        end,
+        isSetting = true
+    })
+    table.insert(menuItems, {
+        name = "Debug Log",
+        onClick = function()
+            SRT_Profile().debuglog.show = true
+            SwiftdawnRaidTools.debugLog:Update()
+        end,
+        isSetting = true
+    })
+    table.insert(menuItems, {
+        name = "Configuration",
+        onClick = function() Settings.OpenToCategory("Swiftdawn Raid Tools") end,
+        isSetting = true
+    })
+    table.insert(menuItems, {})
+    table.insert(menuItems, {
+        name = "Close",
+        onClick = nil,
+        isSetting = true
+    })
+    self.popupMenu.Update(menuItems)
 end
 
 function SRTOverview:UpdateMain()

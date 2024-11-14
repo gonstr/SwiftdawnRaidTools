@@ -38,6 +38,14 @@ function SRTDebugLog:Initialize()
     -- Set the content frame as the scroll frame's scroll child
     self.scrollFrame:SetScrollChild(self.scrollContentFrame)
 
+    self.menuButton:SetScript("OnClick", function()
+        if not SRT_IsTesting() and InCombatLockdown() then
+            return
+        end
+        self:UpdatePopupMenu()
+        self.popupMenu:Show()
+    end)
+
     self:UpdateAppearance()
 end
 
@@ -106,42 +114,14 @@ function SRTDebugLog:UpdatePopupMenu()
         return
     end
 
-    local index = 1
-
-    local clearFunc = function() self:ClearWindow() end
-    self:ShowPopupListItem(index, "Clear log", false, clearFunc, 0, false)
-
-    index = index + 1
-
-    local scrollFunc = function() self:ToggleAutoScroll() end
-    local scrollText = self:GetProfile().scrollToBottom and "Don't autoscroll" or "Autoscroll"
-    self:ShowPopupListItem(index, scrollText, false, scrollFunc, 0, false)
-
-    index = index + 1
-
-    local lockFunc = function() self:ToggleLock() end
-    local lockedText = self:GetProfile().locked and "Unlock Window" or "Lock Window"
-    self:ShowPopupListItem(index, lockedText, true, lockFunc, 10, false)
-
-    index = index + 1
-
-    local debugLogFunc = function()
-        SRT_Profile().debuglog.show = false
-        self:Update()
-    end
-    self:ShowPopupListItem(index, "Close Window", true, debugLogFunc, 10, false)
-
-    index = index + 1
-
-    local configurationFunc = function() Settings.OpenToCategory("Swiftdawn Raid Tools") end
-    self:ShowPopupListItem(index, "Configuration", true, configurationFunc, 10, false)
-
-    index = index + 1
-
-    local yOfs = self:ShowPopupListItem(index, "Close", true, nil, 10, true)
-
-    local popupHeight = math.abs(yOfs) + 30
-
-    -- Update popup size
-    self.popupMenu:SetHeight(popupHeight)
+    self.popupMenu.Update({
+        { name = "Clear Log", onClick = function() self:ClearWindow() end },
+        { name = self:GetProfile().scrollToBottom and "Don't autoscroll" or "Autoscroll", onClick = function() self:ToggleAutoScroll() end },
+        {},
+        { name = self:GetProfile().locked and "Unlock Window" or "Lock Window", onClick = function() self:ToggleLock() end, isSetting = true },
+        { name = "Close Window", onClick = function() self:CloseWindow() end, isSetting = true },
+        { name = "Configuration", onClick = function() Settings.OpenToCategory("Swiftdawn Raid Tools") end, isSetting = true },
+        {},
+        { name = "Close", onClick = nil, isSetting = true },
+    })
 end
