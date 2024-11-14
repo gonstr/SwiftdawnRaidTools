@@ -109,28 +109,36 @@ function SRTDebugLog:UpdatePopupMenu()
     local index = 1
 
     local clearFunc = function() self:ClearWindow() end
-    self:ShowPopupListItem(index, "Clear log", true, clearFunc, 0, false)
-
-    index = index + 1
-
-    local lockFunc = function() self:ToggleLock() end
-    local lockedText = self:GetProfile().locked and "Unlock Debug Log" or "Lock Debug Log"
-    self:ShowPopupListItem(index, lockedText, true, lockFunc, 0, false)
+    self:ShowPopupListItem(index, "Clear log", false, clearFunc, 0, false)
 
     index = index + 1
 
     local scrollFunc = function() self:ToggleAutoScroll() end
-    local scrollText = self:GetProfile().scrollToBottom and "Don't autoscroll" or "Scroll to bottom"
-    self:ShowPopupListItem(index, scrollText, true, scrollFunc, 0, false)
+    local scrollText = self:GetProfile().scrollToBottom and "Don't autoscroll" or "Autoscroll"
+    self:ShowPopupListItem(index, scrollText, false, scrollFunc, 0, false)
+
+    index = index + 1
+
+    local lockFunc = function() self:ToggleLock() end
+    local lockedText = self:GetProfile().locked and "Unlock Window" or "Lock Window"
+    self:ShowPopupListItem(index, lockedText, true, lockFunc, 10, false)
+
+    index = index + 1
+
+    local debugLogFunc = function()
+        SRT_Profile().debuglog.show = false
+        self:Update()
+    end
+    self:ShowPopupListItem(index, "Close Window", true, debugLogFunc, 10, false)
 
     index = index + 1
 
     local configurationFunc = function() Settings.OpenToCategory("Swiftdawn Raid Tools") end
-    self:ShowPopupListItem(index, "Configuration", true, configurationFunc, 0, false)
+    self:ShowPopupListItem(index, "Configuration", true, configurationFunc, 10, false)
 
     index = index + 1
 
-    local yOfs = self:ShowPopupListItem(index, "Close", true, nil, 0, true)
+    local yOfs = self:ShowPopupListItem(index, "Close", true, nil, 10, true)
 
     local popupHeight = math.abs(yOfs) + 30
 
