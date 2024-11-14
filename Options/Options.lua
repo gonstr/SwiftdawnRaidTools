@@ -106,6 +106,15 @@ local mainOptions = {
                     name = "Reset Appearance",
                     desc = "Reset to default settings.",
                     func = function()
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize = 14
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize = 12
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize = 12
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.scale = 1.2
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = 0.9
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = 16
                         SwiftdawnRaidTools.db.profile.overview.appearance.scale = 1.0
                         SwiftdawnRaidTools.db.profile.overview.appearance.titleFontType = "Friz Quadrata TT"
                         SwiftdawnRaidTools.db.profile.overview.appearance.titleFontSize = 10
@@ -116,15 +125,6 @@ local mainOptions = {
                         SwiftdawnRaidTools.db.profile.overview.appearance.titleBarOpacity = 0.8
                         SwiftdawnRaidTools.db.profile.overview.appearance.backgroundOpacity = 0.4
                         SwiftdawnRaidTools.db.profile.overview.appearance.iconSize = 14
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType = "Friz Quadrata TT"
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize = 14
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType = "Friz Quadrata TT"
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize = 12
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType = "Friz Quadrata TT"
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize = 12
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.scale = 1.2
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = 0.9
-                        SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = 16
                         SwiftdawnRaidTools.db.profile.debuglog.appearance.scale = 1.0
                         SwiftdawnRaidTools.db.profile.debuglog.appearance.headerFontType = "Friz Quadrata TT"
                         SwiftdawnRaidTools.db.profile.debuglog.appearance.headerFontSize = 10
@@ -145,12 +145,8 @@ local mainOptions = {
                     name = "Reset Anchors",
                     desc = "Reset to default locations.",
                     func = function()
-                        SwiftdawnRaidTools.db.profile.overview.anchorX = -800
-                        SwiftdawnRaidTools.db.profile.overview.anchorY = 200
                         SwiftdawnRaidTools.db.profile.notifications.anchorX = 0
                         SwiftdawnRaidTools.db.profile.notifications.anchorY = 200
-                        SwiftdawnRaidTools.db.profile.debuglog.anchorX = -800
-                        SwiftdawnRaidTools.db.profile.debuglog.anchorY = 0
 
                         SwiftdawnRaidTools.overview:UpdateAppearance()
                         SwiftdawnRaidTools:NotificationsUpdateAppearance()
@@ -250,117 +246,9 @@ local mainOptions = {
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.locked end,
             order = 23,
-        },
-        showAssignmentsExplorerDescription = {
-            type = "description",
-            name = "Show Assignments Explorer",
-            width = "normal",
-            order = 30,
-        },
-        showAssignmentsExplorer = {
-            name = " ",
-            desc = "Enables / Disables Assignments Explorer window",
-            type = "toggle",
-            width = "half",
-            set = function(info, value)
-                SwiftdawnRaidTools.db.profile.assignmentexplorer.show = value
-                SwiftdawnRaidTools.assignmentExplorer:Update()
-            end,
-            get = function(info) return SwiftdawnRaidTools.db.profile.assignmentexplorer.show end,
-            order = 31,
-        },
-        lockAssignmentsExplorerDescription = {
-            type = "description",
-            name = "Lock Assignments Explorer",
-            width = "normal",
-            order = 32,
-        },
-        lockAssignmentsExplorer = {
-            name = " ",
-            desc = "Lock / Unlocks Assignments Explorer window",
-            type = "toggle",
-            width = "half",
-            set = function(info, value)
-                SwiftdawnRaidTools.db.profile.rosterexplorer.locked = value
-                SwiftdawnRaidTools.rosterExplorer:Update()
-            end,
-            get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.locked end,
-            order = 33,
-        },
-        showRosterExplorerDescription = {
-            type = "description",
-            name = "Show Roster Explorer",
-            width = "normal",
-            order = 40,
-        },
-        showRosterExplorer = {
-            name = " ",
-            desc = "Enables / Disables Roster Explorer window",
-            type = "toggle",
-            width = "half",
-            set = function(info, value)
-                SwiftdawnRaidTools.db.profile.rosterexplorer.show = value
-                SwiftdawnRaidTools.rosterExplorer:Update()
-            end,
-            get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.show end,
-            order = 41,
-        },
-        lockRosterExplorerDescription = {
-            type = "description",
-            name = "Lock Roster Explorer",
-            width = "normal",
-            order = 42,
-        },
-        lockRosterExplorer = {
-            name = " ",
-            desc = "Lock / Unlocks Roster Explorer window",
-            type = "toggle",
-            width = "half",
-            set = function(info, value)
-                SwiftdawnRaidTools.db.profile.rosterexplorer.locked = value
-                SwiftdawnRaidTools.rosterExplorer:Update()
-            end,
-            get = function(info) return SwiftdawnRaidTools.db.profile.rosterexplorer.locked end,
-            order = 43,
-        },
+        }
     },
 }
-
--- Convert from TOPLEFT to CENTER coordinates
-function TopLeftToCenterX(topLeftX, frameWidth)
-    local screenWidth = GetScreenWidth()
-    -- Adjust for center point and correct for Y-axis inversion
-    local centerX = topLeftX - (screenWidth / 2) + (frameWidth / 2)
-    return centerX
-end
-
--- Convert from TOPLEFT to CENTER coordinates
-function TopLeftToCenterY(topLeftY, frameHeight)
-    local screenHeight = GetScreenHeight()
-    -- Adjust for center point and correct for Y-axis inversion
-    local centerY = -(topLeftY - (screenHeight / 2) + (frameHeight / 2))
-    return centerY
-end
-
--- Convert from CENTER to TOPLEFT coordinates
-function CenterToTopLeftX(centerX, frameWidth)
-    local screenWidth = GetScreenWidth()
-
-    -- Adjust for center point and correct for Y-axis inversion
-    local topLeftX = centerX + (screenWidth / 2) - (frameWidth / 2)
-
-    return topLeftX
-end
-
--- Convert from CENTER to TOPLEFT coordinates
-function CenterToTopLeftY(centerY, frameHeight)
-    local screenHeight = GetScreenHeight()
-
-    -- Adjust for center point and correct for Y-axis inversion
-    local topLeftY = -(centerY - (screenHeight / 2) + (frameHeight / 2)) + screenHeight
-
-    return topLeftY
-end
 
 local appearanceOptions = {
     name = "Appearance",
@@ -372,64 +260,6 @@ local appearanceOptions = {
             name = "Overview",
             order = 1, 
             args = {
-                overviewPositionDescription = {
-                    type = "description",
-                    name = "Position",
-                    width = "normal",
-                    order = 12,
-                },
-                overviewPositionXDescription = {
-                    type = "description",
-                    name = "              X",
-                    width = "half",
-                    order = 13,
-                },
-                overviewPositionX = {
-                    type = "input",
-                    name = "",
-                    width = "half",
-                    desc = "Overview anchor X position",
-                    get = function(info)
-                        return string.format("%.1f", TopLeftToCenterX(SwiftdawnRaidTools.db.profile.overview.anchorX, SwiftdawnRaidTools.overview.container:GetWidth()))
-                    end,
-                    set = function(info, value)
-                        local numValue = tonumber(value)
-                        if numValue then
-                            SwiftdawnRaidTools.db.profile.overview.anchorX = CenterToTopLeftX(numValue, SwiftdawnRaidTools.overview.container:GetWidth())
-                            SwiftdawnRaidTools.overview:UpdateAppearance()
-                        else
-                            print("Please enter a valid number for X position.")
-                        end
-                    end,
-                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
-                    order = 14
-                },
-                overviewPositionYDescription = {
-                    type = "description",
-                    name = "              Y",
-                    width = "half",
-                    order = 15,
-                },
-                overviewPositionY = {
-                    type = "input",
-                    name = "",
-                    width = "half",
-                    desc = "Overview anchor Y position",
-                    get = function(info)
-                        return string.format("%.1f", SwiftdawnRaidTools.db.profile.overview.anchorY)
-                    end,
-                    set = function(info, value)
-                        local numValue = tonumber(value)
-                        if numValue then
-                            SwiftdawnRaidTools.db.profile.overview.anchorY = numValue
-                            SwiftdawnRaidTools.overview:UpdateAppearance()
-                        else
-                            print("Please enter a valid number for Y position.")
-                        end
-                    end,
-                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
-                    order = 16
-                },
                 overviewScaleDescription = {
                     type = "description",
                     name = "Scale",
@@ -636,62 +466,6 @@ local appearanceOptions = {
             name = "Notifications",
             order = 2,
             args = {
-                notificationsPositionDescription = {
-                    type = "description",
-                    name = "Position",
-                    width = "normal",
-                    order = 63,
-                },
-                notificationsPositionXDescription = {
-                    type = "description",
-                    name = "              X",
-                    width = "half",
-                    order = 64,
-                },
-                notificationsPositionX = {
-                    type = "input",
-                    name = "",
-                    width = "half",
-                    desc = "Notifications anchor X position",
-                    get = function(info)
-                        return string.format("%.1f", TopLeftToCenterX(SwiftdawnRaidTools.db.profile.notifications.anchorX, SwiftdawnRaidTools.notificationFrame:GetWidth()))
-                    end,
-                    set = function(info, value)
-                        local numValue = tonumber(value)
-                        if numValue then
-                            SwiftdawnRaidTools.db.profile.notifications.anchorX = CenterToTopLeftX(numValue, SwiftdawnRaidTools.notificationFrame:GetWidth())
-                            SwiftdawnRaidTools:NotificationsUpdateAppearance()
-                        else
-                            print("Please enter a valid number for X position.")
-                        end
-                    end,
-                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
-                    order = 65
-                },
-                notificationsPositionYDescription = {
-                    type = "description",
-                    name = "              Y",
-                    width = "half",
-                    order = 66,
-                },
-                notificationsPositionY = {
-                    type = "input",
-                    name = "",
-                    width = "half",
-                    desc = "Notifications anchor Y position",
-                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.notifications.anchorY) end,
-                    set = function(info, value)
-                        local numValue = tonumber(value)
-                        if numValue then
-                            SwiftdawnRaidTools.db.profile.notifications.anchorY = numValue
-                            SwiftdawnRaidTools:NotificationsUpdateAppearance()
-                        else
-                            print("Please enter a valid number for Y position.")
-                        end
-                    end,
-                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
-                    order = 67
-                },
                 notificationsScaleDescription = {
                     type = "description",
                     name = "Scale",
@@ -876,60 +650,6 @@ local appearanceOptions = {
             name = "Debug Log",
             order = 3,
             args = {
-                debugLogPositionDescription = {
-                    type = "description",
-                    name = "Position",
-                    width = "normal",
-                    order = 1,
-                },
-                debugLogPositionXDescription = {
-                    type = "description",
-                    name = "              X",
-                    width = "half",
-                    order = 2,
-                },
-                debugLogPositionX = {
-                    type = "input",
-                    name = "",
-                    width = "half",
-                    desc = "Debug Log anchor X position",
-                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.debuglog.anchorX) end,
-                    set = function(info, value)
-                        local numValue = tonumber(value)
-                        if numValue then
-                            SwiftdawnRaidTools.db.profile.debuglog.anchorX = numValue
-                            SwiftdawnRaidTools.debugLog:UpdateAppearance()
-                        else
-                            print("Please enter a valid number for X position.")
-                        end
-                    end,
-                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
-                    order = 3
-                },
-                debugLogPositionYDescription = {
-                    type = "description",
-                    name = "              Y",
-                    width = "half",
-                    order = 5,
-                },
-                debugLogPositionY = {
-                    type = "input",
-                    name = "",
-                    width = "half",
-                    desc = "Debug Log anchor Y position",
-                    get = function(info) return tostring(SwiftdawnRaidTools.db.profile.debuglog.anchorY) end,
-                    set = function(info, value)
-                        local numValue = tonumber(value)
-                        if numValue then
-                            SwiftdawnRaidTools.db.profile.debuglog.anchorY = numValue
-                            SwiftdawnRaidTools.debugLog:UpdateAppearance()
-                        else
-                            print("Please enter a valid number for Y position.")
-                        end
-                    end,
-                    pattern = "^[+-]?(\d*\.\d+|\d+\.?)([eE][+-]?\d+)?$",  -- Allows negative and positive integers
-                    order = 6
-                },
                 debugLogScaleDescription = {
                     type = "description",
                     name = "Scale",
