@@ -1,14 +1,17 @@
 local MAX_SCROLLBACK = 500
 
+---@class SRTDebugLog:SRTWindow
 SRTDebugLog = setmetatable({
     logItems = {}
 }, SRTWindow)
 SRTDebugLog.__index = SRTDebugLog
 
+---@return SRTDebugLog
 function SRTDebugLog:New(height, width)
-    local o = SRTWindow.New(self, "DebugLog", height, width)
+    local obj = SRTWindow.New(self, "DebugLog", height, width)
+    ---@cast obj SRTDebugLog
     self.__index = self
-    return o
+    return obj
 end
 
 function SRTDebugLog:Initialize()
@@ -43,6 +46,8 @@ function SRTDebugLog:ScrollToBottom()
     self.scrollBar:SetValue(15 + #self.logItems * (logFontSize + 3))
 end
 
+--- Add a log statement to the debug log
+---@param logItem LogItem
 function SRTDebugLog:AddItem(logItem)
     logItem:CreateFrame(self.scrollContentFrame)
     -- fix connection points for new and old lines

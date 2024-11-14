@@ -1,11 +1,14 @@
 local SharedMedia = LibStub("LibSharedMedia-3.0")
 
+---@class LogItem
 LogItem = {
     showExtra = false
 }
 LogItem.__index = LogItem
 
+---@return LogItem
 function LogItem:New(data)
+    ---@class LogItem
     local obj = {}
     setmetatable(obj, LogItem)
     obj.triggerType = data.triggerType
@@ -14,7 +17,6 @@ function LogItem:New(data)
     obj.countdown = data.countdown
     obj.delay = data.delay
     obj.context = data.context
-
     return obj
 end
 
