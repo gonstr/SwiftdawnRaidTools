@@ -7,23 +7,16 @@ local SONAR_SOUND_FILE = "Interface\\AddOns\\SwiftdawnRaidTools\\Media\\PowerAur
 function SwiftdawnRaidTools:NotificationsInit()
     -- The base frame that dictates the size of the notification
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsNotification", UIParent, "BackdropTemplate")
+    container:SetFrameStrata("HIGH")
     container:SetMovable(true)
     container:SetUserPlaced(true)
     container:SetClampedToScreen(true)
     container:RegisterForDrag("LeftButton")
     container:SetScript("OnDragStart", function(self)
         self:StartMoving()
-        container:SetScript("OnUpdate", function()  -- Continuously update the frame size
-            local point, relativeTo, relativePoint, xOffset, yOffset = container:GetPoint()
-            SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(string.format("%.2f", xOffset))
-            SwiftdawnRaidTools.db.profile.notifications.anchorY = tonumber(string.format("%.2f", yOffset))
-            LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Appearance")
-            SwiftdawnRaidTools:NotificationsUpdateAppearance()
-        end)
     end)
     container:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
-        self:SetScript("OnUpdate", nil)
     end)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -93,9 +86,6 @@ function SwiftdawnRaidTools:NotificationsInit()
 end
 
 function SwiftdawnRaidTools:NotificationsUpdateAppearance()
-    self.notificationFrame:ClearAllPoints()
-    self.notificationFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", self.db.profile.notifications.anchorX, self.db.profile.notifications.anchorY)
-
     local headerFontSize = self:AppearanceGetNotificationsBossAbilityFontSize()
     local countdownFontSize = self:AppearanceGetNotificationsCountdownFontSize()
     local playerFontSize = self:AppearanceGetNotificationsPlayerFontSize()
@@ -384,7 +374,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
                         self.notificationRaidAssignmentGroups[groupIndex] = createNotificationGroup(self.notificationContentFrame, #part.assignments[index])
                     end
                     local groupFrame = self.notificationRaidAssignmentGroups[groupIndex]
-                    updateNotificationGroup(groupFrame, part.assignments[index], part.uuid, i)
+                    updateNotificationGroup(groupFrame, part.assignments[index], part.uuid, index)
                     groupIndex = groupIndex + 1
                 end
 
