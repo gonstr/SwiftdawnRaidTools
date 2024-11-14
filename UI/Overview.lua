@@ -3,8 +3,7 @@ local SharedMedia = LibStub("LibSharedMedia-3.0")
 
 ---@class SRTOverview:SRTWindow
 SRTOverview = setmetatable({
-    bossAbilities = {},
-    assignmentGroups = {}
+    bossAbilities = {}
 }, SRTWindow)
 SRTOverview.__index = SRTOverview
 
@@ -48,19 +47,18 @@ function SRTOverview:UpdateAppearance()
 
     for _, bossAbilityFrame in pairs(self.bossAbilities) do
         bossAbilityFrame.name:SetFont(self:GetHeaderFont(), headerFontSize)
-        -- bossAbilityFrame:SetHeight(self:GetBossAbilityHeight())
-    end
-
-    for _, assignmentGroupFrame in pairs(self.assignmentGroups) do
-        assignmentGroupFrame:SetHeight(self:GetAssignmentGroupHeight())
-        for _, assignmentFrame in pairs(assignmentGroupFrame.assignments) do
-            assignmentFrame.text:SetFont(self:GetPlayerNameFont(), playerFontSize)
-            assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
-            assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "CENTER", iconSize/2+4, -1)
+        for _, assignmentGroupFrame in pairs(bossAbilityFrame.groups) do
+            assignmentGroupFrame:SetHeight(self:GetAssignmentGroupHeight())
+            for _, assignmentFrame in pairs(assignmentGroupFrame.assignments) do
+                assignmentFrame.text:SetFont(self:GetPlayerNameFont(), playerFontSize)
+                assignmentFrame.iconFrame:SetSize(iconSize, iconSize)
+                assignmentFrame.text:SetPoint("LEFT", assignmentFrame.iconFrame, "CENTER", iconSize/2+4, -1)
+            end
         end
     end
 
     self:UpdateMain()
+    self:UpdateSpells()
 end
 
 function SRTOverview:Resize()
@@ -198,12 +196,8 @@ function SRTOverview:UpdatePopupMenu()
 end
 
 function SRTOverview:UpdateMain()
-    for _, bossAbilityFrame in pairs(self.bossAbilities) do
-        bossAbilityFrame:Hide()
-    end
-
-    for _, group in pairs(self.assignmentGroups) do
-        group:Hide()
+    for _, ability in pairs(self.bossAbilities) do
+        ability:Hide()
     end
 
     local selectedEncounterId = self:GetProfile().selectedEncounterId
@@ -211,47 +205,47 @@ function SRTOverview:UpdateMain()
 
     if encounter then
 
-        local previousAbility
-        for bossAbilityIndex, bossAbility in ipairs(encounter) do
-            local bossAbilityFrame = self.bossAbilities[bossAbilityIndex] or CreateFrame("Frame", nil, self.main)
-            if previousAbility then
-                bossAbilityFrame:SetPoint("TOPLEFT", previousAbility, "BOTTOMLEFT", 0, 0)
-                bossAbilityFrame:SetPoint("TOPRIGHT", previousAbility, "BOTTOMRIGHT", 0, 0)
+        local previousAbilityFrame
+        for abilityIndex, ability in ipairs(encounter) do
+            local abilityFrame = self.bossAbilities[abilityIndex] or CreateFrame("Frame", nil, self.main)
+            if previousAbilityFrame then
+                abilityFrame:SetPoint("TOPLEFT", previousAbilityFrame, "BOTTOMLEFT", 0, 0)
+                abilityFrame:SetPoint("TOPRIGHT", previousAbilityFrame, "BOTTOMRIGHT", 0, 0)
             else
-                bossAbilityFrame:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 10, -7)
-                bossAbilityFrame:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", -10, -7)
+                abilityFrame:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 10, -7)
+                abilityFrame:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", -10, -7)
             end
-            local bossAbilityFrameHeight = 7
+            local abilityFrameHeight = 7
     
-            bossAbilityFrame.name = bossAbilityFrame.name or bossAbilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            bossAbilityFrame.name:SetPoint("TOPLEFT", bossAbilityFrame, "TOPLEFT", 0, 0)
-            bossAbilityFrame.name:SetText(bossAbility.metadata.name)
-            bossAbilityFrame.name:SetFont(self:GetHeaderFont(), self:GetAppearance().headerFontSize)
-            bossAbilityFrame.name:SetTextColor(1, 1, 1, 0.8)
-            bossAbilityFrameHeight = bossAbilityFrameHeight + self:GetAppearance().headerFontSize
+            abilityFrame.name = abilityFrame.name or abilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            abilityFrame.name:SetPoint("TOPLEFT", abilityFrame, "TOPLEFT", 0, 0)
+            abilityFrame.name:SetText(ability.metadata.name)
+            abilityFrame.name:SetFont(self:GetHeaderFont(), self:GetAppearance().headerFontSize)
+            abilityFrame.name:SetTextColor(1, 1, 1, 0.8)
+            abilityFrameHeight = abilityFrameHeight + self:GetAppearance().headerFontSize
 
-            bossAbilityFrame.groups = bossAbilityFrame.groups or {}
-            for _, groupFrame in ipairs(bossAbilityFrame.groups) do
+            abilityFrame.groups = abilityFrame.groups or {}
+            for _, groupFrame in ipairs(abilityFrame.groups) do
                 groupFrame:Hide()
             end
             local previousGroup = nil
-            for groupIndex, group in ipairs(bossAbility.assignments) do
-                local groupFrame = bossAbilityFrame.groups[groupIndex] or FrameBuilder.CreateAssignmentGroupFrame(bossAbilityFrame, self:GetAssignmentGroupHeight() + 3)
-                FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, previousGroup, group, bossAbility.uuid, groupIndex, self:GetPlayerNameFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
+            for groupIndex, group in ipairs(ability.assignments) do
+                local groupFrame = abilityFrame.groups[groupIndex] or FrameBuilder.CreateAssignmentGroupFrame(abilityFrame, self:GetAssignmentGroupHeight() + 3)
+                FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, previousGroup, group, ability.uuid, groupIndex, self:GetPlayerNameFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
     
-                bossAbilityFrameHeight = bossAbilityFrameHeight + groupFrame:GetHeight()
-                bossAbilityFrame.groups[groupIndex] = groupFrame
+                abilityFrameHeight = abilityFrameHeight + groupFrame:GetHeight()
+                abilityFrame.groups[groupIndex] = groupFrame
     
                 previousGroup = groupFrame
             end
     
-            bossAbilityFrameHeight = bossAbilityFrameHeight + 7
-            bossAbilityFrame:SetHeight(bossAbilityFrameHeight)
+            abilityFrameHeight = abilityFrameHeight + 7
+            abilityFrame:SetHeight(abilityFrameHeight)
 
-            bossAbilityFrame:Show()
+            abilityFrame:Show()
     
-            self.bossAbilities[bossAbilityIndex] = bossAbilityFrame
-            previousAbility = bossAbilityFrame
+            self.bossAbilities[abilityIndex] = abilityFrame
+            previousAbilityFrame = abilityFrame
         end
     end
 
@@ -259,28 +253,30 @@ function SRTOverview:UpdateMain()
 end
 
 function SRTOverview:UpdateActiveGroups()
-    for _, groupFrame in ipairs(self.assignmentGroups) do
-        local selectedEncounterId = self:GetProfile().selectedEncounterId
-        local encounter = SwiftdawnRaidTools:GetEncounters()[selectedEncounterId]
+    for _, ability in pairs(self.bossAbilities) do
+        for _, group in pairs(ability.groups) do
+            local selectedEncounterId = self:GetProfile().selectedEncounterId
+            local encounter = SwiftdawnRaidTools:GetEncounters()[selectedEncounterId]
 
-        if encounter then
-            for _, part in ipairs(encounter) do
-                if part.uuid == groupFrame.uuid then
-                    local activeGroups = SwiftdawnRaidTools:GroupsGetActive(groupFrame.uuid)
+            if encounter then
+                for _, part in ipairs(encounter) do
+                    if part.uuid == group.uuid then
+                        local activeGroups = SwiftdawnRaidTools:GroupsGetActive(group.uuid)
 
-                    if activeGroups and #activeGroups > 0 then
-                        for _, index in ipairs(activeGroups) do
-                            if index == groupFrame.index then
-                                groupFrame:SetBackdropColor(1, 1, 1, 0.6)
-                            else
-                                groupFrame:SetBackdropColor(0, 0, 0, 0)
+                        if activeGroups and #activeGroups > 0 then
+                            for _, index in ipairs(activeGroups) do
+                                if index == group.index then
+                                    group:SetBackdropColor(1, 1, 1, 0.6)
+                                else
+                                    group:SetBackdropColor(0, 0, 0, 0)
+                                end
                             end
+                        else
+                            group:SetBackdropColor(0, 0, 0, 0)
                         end
-                    else
-                        groupFrame:SetBackdropColor(0, 0, 0, 0)
-                    end
 
-                    break
+                        break
+                    end
                 end
             end
         end
@@ -288,22 +284,24 @@ function SRTOverview:UpdateActiveGroups()
 end
 
 function SRTOverview:UpdateSpells()
-    for _, groupFrame in pairs(self.assignmentGroups) do
-        for _, assignmentFrame in pairs(groupFrame.assignments) do
-            if SwiftdawnRaidTools:SpellsIsSpellActive(assignmentFrame.player, assignmentFrame.spellId) then
-                local castTimestamp = SwiftdawnRaidTools:SpellsGetCastTimestamp(assignmentFrame.player, assignmentFrame.spellId)
-                local spell = SwiftdawnRaidTools:SpellsGetSpell(assignmentFrame.spellId)
+    for _, ability in pairs(self.bossAbilities) do
+        for _, group in pairs(ability.groups) do
+            for _, assignment in pairs(group.assignments) do
+                if SwiftdawnRaidTools:SpellsIsSpellActive(assignment.player, assignment.spellId) then
+                    local castTimestamp = SwiftdawnRaidTools:SpellsGetCastTimestamp(assignment.player, assignment.spellId)
+                    local spell = SwiftdawnRaidTools:SpellsGetSpell(assignment.spellId)
 
-                if castTimestamp and spell then
-                    assignmentFrame.cooldownFrame:SetCooldown(castTimestamp, spell.duration)
-                end
+                    if castTimestamp and spell then
+                        assignment.cooldownFrame:SetCooldown(castTimestamp, spell.duration)
+                    end
 
-                assignmentFrame:SetAlpha(1)
-            else
-                if SwiftdawnRaidTools:SpellsIsSpellReady(assignmentFrame.player, assignmentFrame.spellId) then
-                    assignmentFrame:SetAlpha(1)
+                    assignment:SetAlpha(1)
                 else
-                    assignmentFrame:SetAlpha(0.4)
+                    if SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spellId) then
+                        assignment:SetAlpha(1)
+                    else
+                        assignment:SetAlpha(0.4)
+                    end
                 end
             end
         end
