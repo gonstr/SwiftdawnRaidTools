@@ -53,7 +53,6 @@ function SwiftdawnRaidTools:TestModeStart()
     self:GroupsReset()
     self:SpellsResetCache()
     self:UnitsResetDeadCache()
-    self.overview:Update()
 
     self.overview:SelectEncounter(42001)
     self:RaidAssignmentsStartEncounter(42001, "The Boss")
@@ -159,7 +158,7 @@ function SwiftdawnRaidTools:GetEncounters()
                     },
                     ["uuid"] = "437efe45-3fe2-4dd2-85a9-0e0b51689f69",
                     ["metadata"] = {
-                        ["name"] = "Spell Aura Trigger Test",
+                        ["name"] = "Spell Aura Trigger",
                     },
                 }, -- [1]  Spell Aura Phase
                 {
@@ -191,7 +190,7 @@ function SwiftdawnRaidTools:GetEncounters()
                     },
                     ["uuid"] = "5450a7eb-cb42-4719-ba6d-e8a7ecca8f98",
                     ["metadata"] = {
-                        ["name"] = "Raid Boss Emote Test",
+                        ["name"] = "Raid Boss Emote",
                     },
                 }, -- [2]  Raid Boss Emote Phase
                 {
@@ -232,7 +231,7 @@ function SwiftdawnRaidTools:GetEncounters()
                     },
                     ["uuid"] = "e8b42653-abbe-418d-b675-6d323d8d78c8",
                     ["metadata"] = {
-                        ["name"] = "Spell Cast Test",
+                        ["name"] = "Spell Cast",
                     },
                 }, -- [3]  Spell Cast Phase
                 --{

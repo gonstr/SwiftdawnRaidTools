@@ -58,14 +58,12 @@ function SRTOverview:UpdateAppearance()
     end
 
     self:UpdateMain()
-    self:UpdateSpells()
 end
 
 function SRTOverview:Resize()
     local encounters = SwiftdawnRaidTools:GetEncounters()
     local totalHeight = 0
     for _, encounter in pairs(encounters) do
-        -- Overview Header
         local height = self.header:GetHeight()
         if encounter then
             for _, part in ipairs(encounter) do
@@ -88,15 +86,9 @@ function SRTOverview:Update()
     SRTWindow.Update(self)
 
     local encounters = SwiftdawnRaidTools:GetEncounters()
-    local selectedEncounterIdFound = false
-    for encounterId, _ in pairs(encounters) do
-        if self:GetProfile().selectedEncounterId == encounterId then
-            selectedEncounterIdFound = true
-        end
-    end
-    if not selectedEncounterIdFound then
+    if encounters[self:GetProfile().selectedEncounterId] == nil then
         local encounterIndexes = {}
-        for encounterId in pairs(SwiftdawnRaidTools:GetEncounters()) do
+        for encounterId in pairs(encounters) do
             table.insert(encounterIndexes, encounterId)
         end
         table.sort(encounterIndexes)
