@@ -257,7 +257,7 @@ end
 
 ---@return table|BackdropTemplate|Frame
 function FrameBuilder.CreateButton(parentFrame, width, height, text, color, colorHightlight)
-    local button = CreateFrame("Frame", "SRT_AssignmentExplorer_ReplaceButton", parentFrame, "BackdropTemplate")
+    local button = CreateFrame("Frame", parentFrame:GetName().."_Button_"..string.gsub(text, " ", ""), parentFrame, "BackdropTemplate")
     button.width = width
     button.height = height
     button.displayText = text
