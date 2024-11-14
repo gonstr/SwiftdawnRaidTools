@@ -43,8 +43,6 @@ UI\DebugLog.lua
 UI\Minimap.lua
 UI\Overview.lua
 UI\Notifications.lua
-UI\AssignmentExplorer.lua
-UI\RosterExplorer.lua
 Utils\FrameBuilder.lua
 Models\LogItem.lua
 Models\Class.lua
