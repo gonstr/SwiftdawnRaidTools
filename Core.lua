@@ -24,6 +24,7 @@ SwiftdawnRaidTools.defaults = {
         minimap = {},
         notifications = {
             showOnlyOwnNotifications = false,
+            locked = true,
             mute = false,
             anchorX = GetScreenWidth()/2,
             anchorY = -(GetScreenHeight()/2) + 200,
@@ -143,8 +144,6 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
 
     self.overview:Update()
     self.debugLog:Update()
-    self.assignmentExplorer:Update()
-    self.rosterExplorer:Update()
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
