@@ -12,7 +12,7 @@ FrameBuilder.__index = FrameBuilder
 ---@param font FontFile
 ---@param fontSize integer
 ---@param iconSize integer
-function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, width, height, font, fontSize, iconSize)
+function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, width, height, font, fontSize, iconSize, showSpells)
     local playerFrame = CreateFrame("Frame", parentFrame:GetName() .. "_" .. playerName, parentFrame, "BackdropTemplate")
     playerFrame:EnableMouse(true)
     playerFrame:SetSize(width, height)
@@ -32,29 +32,30 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
     playerFrame.spells = playerFrame.spells or {}
     local color
     local previousIconFrame = nil
-    for _, spell in pairs(SRTData.GetClass(classFileName).spells) do
-        local _, _, icon, _, _, _, _, _ = GetSpellInfo(spell.id)
-        local iconFrame = playerFrame.spells[spell.id] or CreateFrame("Frame", nil, playerFrame)
-        iconFrame:EnableMouse(false)
-        iconFrame:SetSize(iconSize, iconSize)
-        if previousIconFrame then
-            iconFrame:SetPoint("LEFT", previousIconFrame, "RIGHT", 7, 0)
-        else
-            iconFrame:SetPoint("LEFT", playerFrame.name, "RIGHT", 7, 0)
+    if showSpells then
+        for _, spell in pairs(SRTData.GetClass(classFileName).spells) do
+            local _, _, icon, _, _, _, _, _ = GetSpellInfo(spell.id)
+            local iconFrame = playerFrame.spells[spell.id] or CreateFrame("Frame", nil, playerFrame)
+            iconFrame:EnableMouse(false)
+            iconFrame:SetSize(iconSize, iconSize)
+            if previousIconFrame then
+                iconFrame:SetPoint("LEFT", previousIconFrame, "RIGHT", 7, 0)
+            else
+                iconFrame:SetPoint("LEFT", playerFrame.name, "RIGHT", 7, 0)
+            end
+            iconFrame.icon = iconFrame.icon or iconFrame:CreateTexture(nil, "ARTWORK")
+            iconFrame.icon:SetAllPoints()
+            iconFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+            iconFrame.icon:SetTexture(icon)
+            previousIconFrame = iconFrame
+            playerFrame.spells[spell.id] = iconFrame
         end
-        iconFrame.icon = iconFrame.icon or iconFrame:CreateTexture(nil, "ARTWORK")
-        iconFrame.icon:SetAllPoints()
-        iconFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-        iconFrame.icon:SetTexture(icon)
-        previousIconFrame = iconFrame
-        playerFrame.spells[spell.id] = iconFrame
     end
     color = RAID_CLASS_COLORS[classFileName] or { r = 1, g = 1, b = 1 }
     playerFrame.name:SetTextColor(color.r, color.g, color.b)
 
     playerFrame:SetScript("OnEnter", function () playerFrame:SetBackdropColor(1, 1, 1, 0.4) end)
     playerFrame:SetScript("OnLeave", function () playerFrame:SetBackdropColor(0, 0, 0, 0) end)
-
     return playerFrame
 end
 
@@ -754,4 +755,4 @@ function FrameBuilder.UpdatePopupMenu(popupMenu, items)
     if height > 0 then
         popupMenu:SetHeight(height)
     end
-end
+end 
