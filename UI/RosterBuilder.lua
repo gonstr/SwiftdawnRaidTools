@@ -74,10 +74,6 @@ function RosterBuilder:SetToRightSide(child, parent)
     child:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
 end
 
-function RosterBuilder:SelectRoster()
-
-end
-
 function RosterBuilder:Initialize()
     SRTWindow.Initialize(self)
     -- Unset clipping to show filter menu out the side
