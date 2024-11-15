@@ -635,8 +635,7 @@ SRTData = {
     players = {},
     rosters = {},
     classes = {},
-    spells = {},
-    buffs = {}
+    spells = {}
 }
 SRTData.__index = SRTData
 
@@ -675,17 +674,85 @@ function SRTData:Initialize()
         buffs = {}
     }
     -- Preseed our database with static information
+    self.spells = {
+        -- Death Knight
+        IceboundFortitude = Spell:New(48792, "Icebound Fortitude", 60 * 3, 12),
+        VampiricBlood = Spell:New(55233, "Vampiric Blood", 60 * 1, 10),
+        AntiMagicZone = Spell:New(51052, "Anti-Magic Zone", 60 * 2, 10),
+        -- Druid
+        Innervate = Spell:New(29166, "Innervate", 60 * 3, 10),
+        Barkskin = Spell:New(22812, "Barkskin", 60 * 1, 12),
+        SurvivalInstincts = Spell:New(61336, "Survival Instincts", 60 * 3, 12),
+        FrenziedRegeneration = Spell:New(22842, "Frenzied Regeneration", 60 * 3, 20),
+        Tranquility = Spell:New(740, "Tranquility", 60 * 8, 8),
+        StampedingRoar = Spell:New(77764, "Stampeding Roar", 60 * 2, 8),
+        -- Paladin
+        DivineProtection = Spell:New(498, "Divine Protection", 60 * 1, 10),
+        GuardianOfAncientKings = Spell:New(86659, "Guardian of Ancient Kings", 0, 12),
+        ArdentDefender = Spell:New(31850, "Ardent Defender", 60 * 3, 10),
+        HandOfSalvation = Spell:New(1038, "Hand of Salvation", 60 * 2, 10),
+        HandOfProtection = Spell:New(1022, "Hand of Protection", 60 * 5, 10),
+        AuraMastery = Spell:New(31821, "Aura Mastery", 60 * 2, 6),
+        HandOfSacrifice = Spell:New(6940, "Hand of Sacrifice", 60 * 2, 12),
+        DivineGuardian = Spell:New(70940, "Divine Guardian", 60 * 3, 6),
+        -- Priest
+        HymnOfHope = Spell:New(64901, "Hymn of Hope", 60 * 6, 8),
+        DivineHymn = Spell:New(64843, "Divine Hymn", 60 * 8, 8),
+        PainSuppression = Spell:New(33206, "Pain Suppression", 60 * 3, 8),
+        PowerWordBarrier = Spell:New(62618, "Power Word: Barrier", 60 * 3, 10),
+        -- Shaman
+        ManaTideTotem = Spell:New(16190, "Mana Tide Totem", 60 * 3, 12),
+        SpiritLinkTotem = Spell:New(98008, "Spirit Link Totem", 60 * 3, 6),
+        -- Warrior
+        ShieldWall = Spell:New(871, "Shield Wall", 60 * 5, 12),
+        LastStand = Spell:New(12975, "Last Stand", 60 * 3, 0),
+        EnragedRegeneration = Spell:New(55694, "Enraged Regeneration", 60 * 3, 10),
+        RallyingCry = Spell:New(97462, "Rallying Cry", 60 * 3, 10),
+    }
     self.classes = {
-        DeathKnight = Class:New("Death Knight", "DEATHKNIGHT"),
-        Druid = Class:New("Druid", "DRUID"),
-        Hunter = Class:New("Hunter", "HUNTER"),
-        Mage = Class:New("Mage", "MAGE"),
-        Paladin = Class:New("Paladin", "PALADIN"),
-        Priest = Class:New("Priest", "PRIEST"),
-        Rogue = Class:New("Rogue", "ROGUE"),
-        Shaman = Class:New("Shaman", "SHAMAN"),
-        Warlock = Class:New("Warlock", "WARLOCK"),
-        Warrior = Class:New("Warrior", "WARRIOR")
+        DeathKnight = Class:New("Death Knight", "DEATHKNIGHT", {
+            self.spells.IceboundFortitude,
+            self.spells.VampiricBlood,
+            self.spells.AntiMagicZone,
+        }),
+        Druid = Class:New("Druid", "DRUID", {
+            self.spells.Innervate,
+            self.spells.Barkskin,
+            self.spells.SurvivalInstincts,
+            self.spells.FrenziedRegeneration,
+            self.spells.Tranquility,
+            self.spells.StampedingRoar,
+        }),
+        Hunter = Class:New("Hunter", "HUNTER", {}),
+        Mage = Class:New("Mage", "MAGE", {}),
+        Paladin = Class:New("Paladin", "PALADIN", {
+            self.spells.DivineProtection,
+            self.spells.GuardianOfAncientKings,
+            self.spells.ArdentDefender,
+            self.spells.HandOfSalvation,
+            self.spells.HandOfProtection,
+            self.spells.AuraMastery,
+            self.spells.HandOfSacrifice,
+            self.spells.DivineGuardian,
+        }),
+        Priest = Class:New("Priest", "PRIEST", {
+            self.spells.HymnOfHope,
+            self.spells.DivineHymn,
+            self.spells.PainSuppression,
+            self.spells.PowerWordBarrier,
+        }),
+        Rogue = Class:New("Rogue", "ROGUE", {}),
+        Shaman = Class:New("Shaman", "SHAMAN", {
+            self.spells.ManaTideTotem,
+            self.spells.SpiritLinkTotem,
+        }),
+        Warlock = Class:New("Warlock", "WARLOCK", {}),
+        Warrior = Class:New("Warrior", "WARRIOR", {
+            self.spells.ShieldWall,
+            self.spells.LastStand,
+            self.spells.EnragedRegeneration,
+            self.spells.RallyingCry,
+        })
     }
     self.specs = {
         Blood = Spec:New("Blood", self.classes.DeathKnight),
@@ -719,8 +786,6 @@ function SRTData:Initialize()
         Arms = Spec:New("Arms", self.classes.Warrior),
         Fury = Spec:New("Fury", self.classes.Warrior),
         ProtectionWarrior = Spec:New("Protection", self.classes.Warrior),
-    }
-    self.buffs = {
     }
 end
 
@@ -793,4 +858,32 @@ end
 function SRTData.GetAssignmentDefaults()
     local data = SRTData.Get()
     return SwiftdawnRaidTools:DeepClone(data.defaultAssignments)
+end
+
+---Retrieve spell object by it's in-game ID
+---@param spellID number
+---@return Spell?
+function SRTData.GetSpellByID(spellID)
+    local data = SRTData.Get()
+    for _, spell in pairs(data.spells) do
+        if spell.id == spellID then
+            return spell
+        end
+    end
+    return nil
+end
+
+---comment
+---@param spellID number
+---@return ColorMixin_RCC
+function SRTData.GetClassColorBySpellID(spellID)
+    local data = SRTData.Get()
+    for _, class in pairs(data.classes) do
+        for _, spell in pairs(class.spells) do
+            if spell.id == spellID then
+                return class:GetColor()
+            end
+        end
+    end
+    return { r = 0, g = 0, b = 0, colorStr = "ffffffff" }
 end
