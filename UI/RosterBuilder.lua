@@ -571,7 +571,7 @@ function RosterBuilder:UpdateCreateAssignments()
     local lastPlayerFrame = nil
     for name, player in pairs(self.selectedRoster.players) do
         if shouldShowPlayer(player) then
-            local playerFrame = self.assignments.players.scroll.items[name] or FrameBuilder.CreatePlayerFrame(self.assignments.players.scroll.content, name, player.class.fileName, 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize, 14)
+            local playerFrame = self.assignments.players.scroll.items[name] or FrameBuilder.CreatePlayerFrame(self.assignments.players.scroll.content, name, player.class.fileName, 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize, 14, true)
             playerFrame.info = player.info
             if lastPlayerFrame then
                 playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -3)
