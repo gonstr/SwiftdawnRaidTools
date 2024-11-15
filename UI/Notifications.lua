@@ -7,6 +7,7 @@ local SONAR_SOUND_FILE = "Interface\\AddOns\\SwiftdawnRaidTools\\Media\\PowerAur
 function SwiftdawnRaidTools:NotificationsInit()
     -- The base frame that dictates the size of the notification
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsNotification", UIParent, "BackdropTemplate")
+    container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
     container:SetFrameStrata("HIGH")
     container:SetMovable(true)
     container:SetUserPlaced(true)
@@ -171,7 +172,7 @@ local function updateNotificationGroupAssignment(assignmentFrame, assignment, in
     assignmentFrame.icon:SetTexture(icon)
     assignmentFrame.text:SetText(assignment.player)
 
-    local color = SwiftdawnRaidTools:GetSpellColor(assignment.spell_id)
+    local color = SRTData.GetClassColorBySpellID(assignment.spell_id)
 
     assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
 
@@ -389,7 +390,7 @@ function SwiftdawnRaidTools:NotificationsUpdateSpells()
         for _, assignmentFrame in pairs(groupFrame.assignments) do
             if self:SpellsIsSpellActive(assignmentFrame.player, assignmentFrame.spellId) then
                 local castTimestamp = self:SpellsGetCastTimestamp(assignmentFrame.player, assignmentFrame.spellId)
-                local spell = self:SpellsGetSpell(assignmentFrame.spellId)
+                local spell = SRTData.GetSpellByID(assignmentFrame.spellId)
                 if castTimestamp and spell then
                     assignmentFrame.cooldownFrame:SetCooldown(castTimestamp, spell.duration)
                 end
