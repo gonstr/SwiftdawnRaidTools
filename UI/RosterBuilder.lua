@@ -60,6 +60,9 @@ local availablePlayerFilterDefaults = {
     },
     ["Online only"] = false,
 }
+for i = 0, GuildControlGetNumRanks() - 2, 1 do
+    availablePlayerFilterDefaults["Guild Rank"][i] = true
+end
 
 ---@return RosterBuilder
 function RosterBuilder:New(height)
