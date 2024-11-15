@@ -887,3 +887,18 @@ function SRTData.GetClassColorBySpellID(spellID)
     end
     return { r = 0, g = 0, b = 0, colorStr = "ffffffff" }
 end
+
+---comment
+---@param spellID number
+---@return Class?
+function SRTData.GetClassBySpellID(spellID)
+    local data = SRTData.Get()
+    for _, class in pairs(data.classes) do
+        for _, spell in pairs(class.spells) do
+            if spell.id == spellID then
+                return class
+            end
+        end
+    end
+    return nil
+end
