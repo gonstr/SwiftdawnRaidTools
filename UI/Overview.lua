@@ -208,13 +208,13 @@ function SRTOverview:UpdateMain()
                 abilityFrame:SetPoint("TOPLEFT", previousAbilityFrame, "BOTTOMLEFT", 0, 0)
                 abilityFrame:SetPoint("TOPRIGHT", previousAbilityFrame, "BOTTOMRIGHT", 0, 0)
             else
-                abilityFrame:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 10, -7)
-                abilityFrame:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", -10, -7)
+                abilityFrame:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -7)
+                abilityFrame:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", 0, -7)
             end
             local abilityFrameHeight = 7
     
             abilityFrame.name = abilityFrame.name or abilityFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            abilityFrame.name:SetPoint("TOPLEFT", abilityFrame, "TOPLEFT", 0, 0)
+            abilityFrame.name:SetPoint("TOPLEFT", abilityFrame, "TOPLEFT", 10, 0)
             abilityFrame.name:SetText(ability.metadata.name)
             abilityFrame.name:SetFont(self:GetHeaderFont(), self:GetAppearance().headerFontSize)
             abilityFrame.name:SetTextColor(1, 1, 1, 0.8)
@@ -227,7 +227,36 @@ function SRTOverview:UpdateMain()
             local previousGroup = nil
             for groupIndex, group in ipairs(ability.assignments) do
                 local groupFrame = abilityFrame.groups[groupIndex] or FrameBuilder.CreateAssignmentGroupFrame(abilityFrame, self:GetAssignmentGroupHeight() + 3)
-                FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, previousGroup, group, ability.uuid, groupIndex, self:GetPlayerNameFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
+                FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, ability.uuid, groupIndex, self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
+                
+                groupFrame:ClearAllPoints()
+                if previousGroup then
+                    groupFrame:SetPoint("TOPLEFT", previousGroup, "BOTTOMLEFT", 0, 0)
+                    groupFrame:SetPoint("TOPRIGHT", previousGroup, "BOTTOMRIGHT", 0, 0)
+                else
+                    groupFrame:SetPoint("TOPLEFT", abilityFrame, "TOPLEFT", 0, -16)
+                    groupFrame:SetPoint("TOPRIGHT", abilityFrame, "TOPRIGHT", 0, -16)
+                end
+
+                for _, cd in pairs(groupFrame.assignments) do
+                    cd:Hide()
+                end
+                for assignmentIndex, assignment in ipairs(group) do
+                    local assignmentFrame = groupFrame.assignments[assignmentIndex] or FrameBuilder.CreateAssignmentFrame(groupFrame, assignmentIndex, self:GetPlayerNameFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
+                    FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment)
+                    
+                    assignmentFrame:ClearAllPoints()
+                    if assignmentIndex > 1 then
+                        assignmentFrame:SetPoint("BOTTOMLEFT", groupFrame, "BOTTOM")
+                        assignmentFrame:SetPoint("TOPRIGHT", -10, 0)
+                    else
+                        assignmentFrame:SetPoint("BOTTOMLEFT", 10, 0)
+                        assignmentFrame:SetPoint("TOPRIGHT", groupFrame, "TOP", 0, 0)
+                    end
+
+                    assignmentFrame.groupIndex = groupIndex
+                    groupFrame.assignments[assignmentIndex] = assignmentFrame
+                end
     
                 abilityFrameHeight = abilityFrameHeight + groupFrame:GetHeight()
                 abilityFrame.groups[groupIndex] = groupFrame
@@ -285,7 +314,7 @@ function SRTOverview:UpdateSpells()
             for _, assignment in pairs(group.assignments) do
                 if SwiftdawnRaidTools:SpellsIsSpellActive(assignment.player, assignment.spellId) then
                     local castTimestamp = SwiftdawnRaidTools:SpellsGetCastTimestamp(assignment.player, assignment.spellId)
-                    local spell = SwiftdawnRaidTools:SpellsGetSpell(assignment.spellId)
+                    local spell = SRTData.GetSpellByID(assignment.spellId)
 
                     if castTimestamp and spell then
                         assignment.cooldownFrame:SetCooldown(castTimestamp, spell.duration)

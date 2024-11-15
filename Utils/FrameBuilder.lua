@@ -31,23 +31,24 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
 
     playerFrame.spells = playerFrame.spells or {}
     local color
-    for i, spellID in ipairs(SwiftdawnRaidTools:SpellsGetClassSpells(classFileName)) do
-        local _, _, icon, _, _, _, _, _ = GetSpellInfo(spellID)
-        local iconFrame = playerFrame.spells[i] or CreateFrame("Frame", nil, playerFrame)
+    local previousSpellFrame = nil
+    for _, spell in pairs(SRTData.GetClass(classFileName).spells) do
+        local _, _, icon, _, _, _, _, _ = GetSpellInfo(spell.id)
+        local iconFrame = playerFrame.spells[spell.id] or CreateFrame("Frame", nil, playerFrame)
         iconFrame:EnableMouse(false)
         iconFrame:SetSize(iconSize, iconSize)
-        if i == 1 then
-            iconFrame:SetPoint("LEFT", playerFrame.name, "RIGHT", 7, 0)
+        if previousSpellFrame then
+            iconFrame:SetPoint("LEFT", previousSpellFrame, "RIGHT", 7, 0)
         else
-            iconFrame:SetPoint("LEFT", playerFrame.spells[i-1], "RIGHT", 7, 0)
+            iconFrame:SetPoint("LEFT", playerFrame.name, "RIGHT", 7, 0)
         end
         iconFrame.icon = iconFrame.icon or iconFrame:CreateTexture(nil, "ARTWORK")
         iconFrame.icon:SetAllPoints()
         iconFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
         iconFrame.icon:SetTexture(icon)
-        playerFrame.spells[i] = iconFrame
+        playerFrame.spells[spell.id] = iconFrame
     end
-    color = SwiftdawnRaidTools:GetClassColor(classFileName) or { r = 1, g = 1, b = 1 }
+    color = RAID_CLASS_COLORS[classFileName] or { r = 1, g = 1, b = 1 }
     playerFrame.name:SetTextColor(color.r, color.g, color.b)
 
     playerFrame:SetScript("OnEnter", function () playerFrame:SetBackdropColor(1, 1, 1, 0.4) end)
@@ -100,25 +101,15 @@ function FrameBuilder.CreateAssignmentGroupFrame(parentFrame, height)
 end
 
 ---@param groupFrame table|BackdropTemplate|Frame
----@param prevFrame? Frame
 ---@param group table
 ---@param uuid string
 ---@param index integer
----@param font FontFile
 ---@param fontSize integer
 ---@param iconSize integer
-function FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, uuid, index, font, fontSize, iconSize)
+function FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, uuid, index, fontSize, iconSize)
     groupFrame:Show()
     groupFrame.uuid = uuid
     groupFrame.index = index
-    groupFrame:ClearAllPoints()
-    if prevFrame then
-        groupFrame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
-        groupFrame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
-    else
-        groupFrame:SetPoint("TOPLEFT", groupFrame:GetParent(), "TOPLEFT", 0, -16)
-        groupFrame:SetPoint("TOPRIGHT", groupFrame:GetParent(), "TOPRIGHT", 0, -16)
-    end
     local height = (fontSize > iconSize and fontSize or iconSize) + 10
     groupFrame:SetHeight(height)
     groupFrame:SetBackdrop({
@@ -127,15 +118,6 @@ function FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, prevFrame, group, u
         tileSize = height,
     })
     groupFrame:SetBackdropColor(0, 0, 0, 0)
-    for _, cd in pairs(groupFrame.assignments) do
-        cd:Hide()
-    end
-    for assignmentIndex, assignment in ipairs(group) do
-        local assignmentFrame = groupFrame.assignments[assignmentIndex] or FrameBuilder.CreateAssignmentFrame(groupFrame, assignment, assignmentIndex, font, fontSize, iconSize)
-        FrameBuilder.UpdateAssignmentFrame(assignmentFrame)
-        assignmentFrame.groupIndex = index
-        groupFrame.assignments[assignmentIndex] = assignmentFrame
-    end
 end
 
 ---@return table|BackdropTemplate|Frame
@@ -143,11 +125,9 @@ end
 ---@param font any
 ---@param fontSize integer
 ---@param iconSize integer
-function FrameBuilder.CreateAssignmentFrame(parentFrame, assignment, index, font, fontSize, iconSize)
+function FrameBuilder.CreateAssignmentFrame(parentFrame, index, font, fontSize, iconSize)
     local assignmentFrame = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
     assignmentFrame.index = index
-    assignmentFrame.player = assignment.player
-    assignmentFrame.spellId = assignment.spell_id
     assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
     assignmentFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -174,24 +154,18 @@ function FrameBuilder.CreateAssignmentFrame(parentFrame, assignment, index, font
 end
 
 ---@param assignmentFrame table|BackdropTemplate|Frame
-function FrameBuilder.UpdateAssignmentFrame(assignmentFrame)
+function FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment)
+    assignmentFrame.player = assignment.player
+    assignmentFrame.spellId = assignment.spell_id
     assignmentFrame:Show()
     if assignmentFrame.spellId then
         local _, _, icon = GetSpellInfo(assignmentFrame.spellId)
         assignmentFrame.icon:SetTexture(icon)
-        local color = SwiftdawnRaidTools:GetSpellColor(assignmentFrame.spellId)
+        local color = SRTData.GetClassColorBySpellID(assignmentFrame.spellId)
         assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
     end
     assignmentFrame.text:SetText(strsplit("-", assignmentFrame.player))
     assignmentFrame.cooldownFrame:Clear()
-    assignmentFrame:ClearAllPoints()
-    if assignmentFrame.index > 1 then
-        assignmentFrame:SetPoint("BOTTOMLEFT", assignmentFrame:GetParent(), "BOTTOM")
-        assignmentFrame:SetPoint("TOPRIGHT", 0, 0)
-    else
-        assignmentFrame:SetPoint("BOTTOMLEFT")
-        assignmentFrame:SetPoint("TOPRIGHT", assignmentFrame:GetParent(), "TOP", 0, 0)
-    end
     assignmentFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
