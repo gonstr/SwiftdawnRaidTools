@@ -24,28 +24,6 @@ function SwiftdawnRaidTools:IsArray(table)
     return true
 end
 
-local fallbackColor = { r = 0, g = 0, b = 0 }
-
-function SwiftdawnRaidTools:GetSpellColor(spellId)
-    local spell = self:SpellsGetSpell(spellId)
-
-    if not spell then
-        return fallbackColor
-    end
-
-    return self:GetClassColor(spell.class)
-end
-
-function SwiftdawnRaidTools:GetClassColor(class)
-    local color = RAID_CLASS_COLORS[class]
-
-    if not color then
-        return fallbackColor
-    end
-
-    return color
-end
-
 function SwiftdawnRaidTools:IsFriendlyRaidMemberOrPlayer(guid)
     if UnitGUID("player") == guid then
         return true

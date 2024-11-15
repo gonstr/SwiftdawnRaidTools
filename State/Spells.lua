@@ -3,75 +3,6 @@ local SwiftdawnRaidTools = SwiftdawnRaidTools
 --- key = "unitId:spellId", Value = cast timestamp
 local spellCastCache = {}
 
-local spells = {
-    -- Divine Hymn
-    [64843] = {
-        class = "PRIEST",
-        cooldown = 60 * 8,
-        duration = 8
-    },
-    -- Pain Suppression
-    [33206] = {
-        class = "PRIEST",
-        cooldown = 60 * 3,
-        duration = 8
-    },
-    -- Power Word: Barrier
-    [62618] = {
-        class = "PRIEST",
-        cooldown = 60 * 3,
-        duration = 10
-    },
-    -- Aura Mastery
-    [31821] = {
-        class = "PALADIN",
-        cooldown = 60 * 2,
-        duration = 6
-    },
-    -- Hand of Sacrifice
-    [6940] = {
-        class = "PALADIN",
-        cooldown = 60 * 2,
-        duration = 12
-    },
-    -- Divine Guardian
-    [70940] = {
-        class = "PALADIN",
-        cooldown = 60 * 3,
-        duration = 6
-    },
-    -- Tranquility
-    [740] = {
-        class = "DRUID",
-        cooldown = 60 * 8,
-        duration = 8
-    },
-    -- Stampeding Roar
-    [77764] = {
-        class = "DRUID",
-        cooldown = 60 * 2,
-        duration = 8
-    },
-    -- Spirit Link Totem
-    [98008] = {
-        class = "SHAMAN",
-        cooldown = 60 * 3,
-        duration = 6
-    },
-    -- Rallying Cry
-    [97462] = {
-        class = "WARRIOR",
-        cooldown = 60 * 3,
-        duration = 10
-    },
-    -- Anti-Magic Zone
-    [51052] = {
-        class = "DEATHKNIGHT",
-        cooldown = 60 * 2,
-        duration = 10
-    }
-}
-
 function SwiftdawnRaidTools:SpellsResetCache()
     spellCastCache = {}
 end
@@ -97,7 +28,7 @@ function SwiftdawnRaidTools:SpellsIsSpellReady(unit, spellId, timestamp)
         return true
     end
 
-    if timestamp < cachedCastTimestamp + spells[spellId].cooldown then
+    if timestamp < cachedCastTimestamp + SRTData.GetSpellByID(spellId).cooldown then
         return false
     end
 
@@ -125,7 +56,7 @@ function SwiftdawnRaidTools:SpellsIsSpellActive(unit, spellId, timestamp)
         return false
     end
 
-    if timestamp < cachedCastTimestamp + spells[spellId].duration then
+    if timestamp < cachedCastTimestamp + SRTData.GetSpellByID(spellId).duration then
         return true
     end
 
@@ -138,14 +69,6 @@ function SwiftdawnRaidTools:SpellsGetCastTimestamp(unit, spellId)
     return spellCastCache[key]
 end
 
-function SwiftdawnRaidTools:SpellsGetAll()
-    return spells
-end
-
-function SwiftdawnRaidTools:SpellsGetSpell(spellId)
-    return spells[spellId]
-end
-
 function SwiftdawnRaidTools:SpellsCacheCast(unit, spellId, updateFunc)
     if not self.TEST then
         if not UnitIsPlayer(unit) and not UnitInRaid(unit) then
@@ -153,8 +76,7 @@ function SwiftdawnRaidTools:SpellsCacheCast(unit, spellId, updateFunc)
         end
     end
 
-    local spell = spells[spellId]
-
+    local spell = SRTData.GetSpellByID(spellId)
     if spell then
         local key = unit .. ":" .. spellId
 
@@ -168,23 +90,5 @@ function SwiftdawnRaidTools:SpellsCacheCast(unit, spellId, updateFunc)
 
         C_Timer.After(spell.duration, updateFunc)
         C_Timer.After(spell.cooldown, updateFunc)
-    end
-end
-
-function SwiftdawnRaidTools:SpellsGetClassSpells(class)
-    local spellIDs = {}
-    for spellID, spellInfo in pairs(spells) do
-        if spellInfo.class == class then
-            table.insert(spellIDs, spellID)
-        end
-    end
-    return spellIDs
-end
-
-function SwiftdawnRaidTools:SpellsGetClass(spellID)
-    if spells[spellID] then
-        return spells[spellID].class
-    else
-        return nil
     end
 end
