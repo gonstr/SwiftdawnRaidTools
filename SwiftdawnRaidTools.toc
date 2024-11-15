@@ -45,8 +45,9 @@ UI\Overview.lua
 UI\Notifications.lua
 Utils\FrameBuilder.lua
 Models\LogItem.lua
-Models\Class.lua
+Models\Spell.lua
 Models\Spec.lua
+Models\Class.lua
 Models\Player.lua
 Models\Roster.lua
 Models\SRTData.lua
