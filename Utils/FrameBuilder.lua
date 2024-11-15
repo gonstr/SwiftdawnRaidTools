@@ -31,14 +31,14 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
 
     playerFrame.spells = playerFrame.spells or {}
     local color
-    local previousSpellFrame = nil
+    local previousIconFrame = nil
     for _, spell in pairs(SRTData.GetClass(classFileName).spells) do
         local _, _, icon, _, _, _, _, _ = GetSpellInfo(spell.id)
         local iconFrame = playerFrame.spells[spell.id] or CreateFrame("Frame", nil, playerFrame)
         iconFrame:EnableMouse(false)
         iconFrame:SetSize(iconSize, iconSize)
-        if previousSpellFrame then
-            iconFrame:SetPoint("LEFT", previousSpellFrame, "RIGHT", 7, 0)
+        if previousIconFrame then
+            iconFrame:SetPoint("LEFT", previousIconFrame, "RIGHT", 7, 0)
         else
             iconFrame:SetPoint("LEFT", playerFrame.name, "RIGHT", 7, 0)
         end
@@ -46,6 +46,7 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
         iconFrame.icon:SetAllPoints()
         iconFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
         iconFrame.icon:SetTexture(icon)
+        previousIconFrame = iconFrame
         playerFrame.spells[spell.id] = iconFrame
     end
     color = RAID_CLASS_COLORS[classFileName] or { r = 1, g = 1, b = 1 }
