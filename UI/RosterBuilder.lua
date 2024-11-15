@@ -43,12 +43,13 @@ local availablePlayerFilterDefaults = {
     },
     ["Guild Rank"] = {
         _function = function (key)
-            return GetGuildRankNameByIndex(key + 1)
+            local name = GetGuildRankNameByIndex(key + 1)
+            return name ~= nil and name or "Rank "..key
         end,
     },
     ["Online only"] = false,
 }
-for i = 0, GuildControlGetNumRanks() - 2, 1 do
+for i = 0, GuildControlGetNumRanks() - 1, 1 do
     availablePlayerFilterDefaults["Guild Rank"][i] = true
 end
 
@@ -489,7 +490,7 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
         if not self.addRemove.available.filterPopup.items.Class.popup.items[guildMember.class].value then
             return false
         end
-        if not self.addRemove.available.filterPopup.items["Guild Rank"].popup.items[guildMember.rankIndex].value then
+        if self.addRemove.available.filterPopup.items["Guild Rank"].popup.items[guildMember.rankIndex] and not self.addRemove.available.filterPopup.items["Guild Rank"].popup.items[guildMember.rankIndex].value then
             return false
         end
         if self.addRemove.available.filterPopup.items["Online only"].value then
@@ -753,6 +754,31 @@ function RosterBuilder:Update()
     end
     self.assignments.bossSelector.selectedName = self.selectedEncounterID and SwiftdawnRaidTools:BossEncountersGetAll()[self.selectedEncounterID] or "Select encounter..."
     self.assignments.bossSelector.Update()
+
+    if self.selectedRoster then
+        DevTool:AddData(self.assignments.bossSelector, "self.assignments.bossSelector")
+        DevTool:AddData(self.selectedRoster.encounters, "self.selectedRoster.encounters")
+        for index, item in pairs(self.assignments.bossSelector.items) do
+            DevTool:AddData({index, item}, "index, item")
+            local encounter = self.selectedRoster.encounters[item.encounterID]
+            if encounter then
+                local hasAssignments = false
+                for _, ability in pairs(encounter) do
+                    DevTool:AddData(ability, "ability")
+                    DevTool:AddData(#ability.assignments > 0, "hasAssignments")
+                    if #ability.assignments > 0 then
+                        hasAssignments = true
+                        break
+                    end
+                end
+                if hasAssignments then
+                    self.assignments.bossSelector.dropdown.rows[index].text:SetTextColor(0.8, 0.8, 0.8, 1)
+                else
+                    self.assignments.bossSelector.dropdown.rows[index].text:SetTextColor(1, 0.8235, 0, 1)
+                end
+            end
+        end
+    end
 end
 
 local lastUpdatedGuildMembers = 0
