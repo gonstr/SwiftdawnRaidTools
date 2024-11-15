@@ -504,6 +504,9 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
 
     visiblePlayers = 0
     lastPlayerFrame = nil
+    for name, frame in pairs(self.addRemove.available.scroll.items) do
+        frame:Hide()
+    end
     for name, playerInfo in pairs(self:GetGuildMembers()) do
         if shouldShowPlayer(playerInfo) then
             local playerFrame = self.addRemove.available.scroll.items[playerInfo.name] or FrameBuilder.CreatePlayerFrame(self.addRemove.available.scroll.content, playerInfo.name, playerInfo.classFileName, 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize, 14)
