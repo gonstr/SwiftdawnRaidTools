@@ -5,7 +5,8 @@
 ## Version: @project-version@
 ## X-Curse-Project-ID: 1064414
 ## SavedVariables: SwiftdawnRaidTools
-## OptionalDeps: Ace3
+## OptionalDeps: Ace3, LibCompress
+## X-Embeds: LibCompress
 
 # Ace3
 Libs\LibStub\LibStub.lua
@@ -22,6 +23,7 @@ Libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
 Libs\LibSharedMedia-3.0\LibSharedMedia-3.0.lua
 Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+Libs\LibCompress\lib.xml
 
 Core.lua
 Test.lua

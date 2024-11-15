@@ -1,5 +1,12 @@
 SwiftdawnRaidTools = LibStub("AceAddon-3.0"):NewAddon("SwiftdawnRaidTools", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
 
+-- local enableCompression, errMsg = C_AddOns.LoadAddOn("LibCompress")
+local LibCompress = LibStub:GetLibrary("LibCompress")
+if not LibCompress then
+    print("SwiftdawnRaidTools loading failed! Could not load LibCompress.")
+    return
+end
+
 SwiftdawnRaidTools.DEBUG = false
 SwiftdawnRaidTools.TEST = false
 
@@ -9,6 +16,13 @@ SwiftdawnRaidTools.PREFIX_MAIN = "SRT-M"
 
 SwiftdawnRaidTools.VERSION = C_AddOns.GetAddOnMetadata("SwiftdawnRaidTools", "Version")
 SwiftdawnRaidTools.IS_DEV = SwiftdawnRaidTools.VERSION == '\@project-version\@'
+
+DevTool:AddData({
+    version = SwiftdawnRaidTools.VERSION,
+    debug = SwiftdawnRaidTools.DEBUG,
+    test = SwiftdawnRaidTools.TEST,
+    isDev = SwiftdawnRaidTools.IS_DEV
+}, "SwiftdawnRaidTools")
 
 -- AceDB defaults
 SwiftdawnRaidTools.defaults = {
@@ -78,6 +92,15 @@ SwiftdawnRaidTools.defaults = {
         }
     },
 }
+local serialized = SwiftdawnRaidTools:Serialize(SwiftdawnRaidTools.defaults)
+DevTool:AddData(serialized, "serialized")
+DevTool:AddData(#serialized, "#serialized")
+local compressed = LibCompress:Compress(serialized)
+DevTool:AddData(SwiftdawnRaidTools.defaults, "SwiftdawnRaidTools.defaults")
+DevTool:AddData(compressed, "compressed")
+DevTool:AddData(#compressed, "#compressed")
+local ok, decompressed = SwiftdawnRaidTools:Deserialize(LibCompress:Decompress(compressed))
+DevTool:AddData(decompressed, "decompressed")
 
 function SwiftdawnRaidTools:OnInitialize()
     self:DBInit() 
@@ -166,9 +189,16 @@ function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackF
     -- "Send" message directly to self
     self:HandleMessagePayload(payload)
 
+    local serializedPayload = self:Serialize(payload)
+    local compressedPayload = LibCompress:Compress(serializedPayload)
+
+    DevTool:AddData(payload, "payload")
+    DevTool:AddData(serializedPayload, "serializedPayload")
+    DevTool:AddData(LibCompress:Compress(serializedPayload), "compressedPayload")
+
     -- Send to raid
     if IsInRaid() then
-        self:SendCommMessage(prefix, self:Serialize(payload), "RAID", nil, prio, callbackFn)
+        self:SendCommMessage(prefix, serializedPayload, "RAID", nil, prio, callbackFn)
     end
 end
 
