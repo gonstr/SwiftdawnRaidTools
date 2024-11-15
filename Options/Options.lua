@@ -142,30 +142,56 @@ local mainOptions = {
                 }
             },
         },
-        separator01 = {
+        separator00 = {
             type = "description",
             name = " ",
             width = "full",
             order = 2,
+        },
+        openAssignmentExplorer = {
+            type = "execute",
+            name = "Assignment Explorer",
+            desc = "Open Assignment Explorer window.",
+            func = function()
+                SwiftdawnRaidTools.db.profile.assignmentexplorer.show = true
+                SwiftdawnRaidTools.assignmentExplorer:Update()
+            end,
+            order = 3,
+        },
+        openRosterBuilder = {
+            type = "execute",
+            name = "Roster Builder",
+            desc = "Open Roster Builder window.",
+            func = function()
+                SwiftdawnRaidTools.db.profile.rosterbuilder.show = true
+                SwiftdawnRaidTools.rosterBuilder:Update()
+            end,
+            order = 4,
+        },
+        separator01 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 12,
         },
         showEnableWindowsDescription = {
             type = "description",
             name = "Enable or Disable Windows",
             width = "full",
             fontSize = "large",
-            order = 3,
+            order = 13,
         },
         separator02 = {
             type = "description",
             name = " ",
             width = "full",
-            order = 4,
+            order = 14,
         },
         showOverviewDescription = {
             type = "description",
             name = "Show Overview",
             width = "normal",
-            order = 10,
+            order = 20,
         },
         showOverview = {
             name = " ",
@@ -177,13 +203,13 @@ local mainOptions = {
                 SwiftdawnRaidTools.overview:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.overview.show end,
-            order = 11,
+            order = 21,
         },
         lockOverviewDescription = {
             type = "description",
             name = "Lock Overview",
             width = "normal",
-            order = 12,
+            order = 22,
         },
         lockOverview = {
             name = " ",
@@ -195,13 +221,13 @@ local mainOptions = {
                 SwiftdawnRaidTools.overview:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.overview.locked end,
-            order = 13,
+            order = 23,
         },
         showDebugLogDescription = {
             type = "description",
             name = "Show Debug Log",
             width = "normal",
-            order = 20,
+            order = 30,
         },
         showDebugLog = {
             name = " ",
@@ -213,13 +239,13 @@ local mainOptions = {
                 SwiftdawnRaidTools.debugLog:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.show end,
-            order = 21,
+            order = 31,
         },
         lockDebugLogDescription = {
             type = "description",
             name = "Lock Debug Log",
             width = "normal",
-            order = 22,
+            order = 32,
         },
         lockDebugLog = {
             name = " ",
@@ -231,7 +257,7 @@ local mainOptions = {
                 SwiftdawnRaidTools.debugLog:Update()
             end,
             get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.locked end,
-            order = 23,
+            order = 33,
         }
     },
 }

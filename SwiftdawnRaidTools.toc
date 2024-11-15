@@ -43,6 +43,8 @@ UI\DebugLog.lua
 UI\Minimap.lua
 UI\Overview.lua
 UI\Notifications.lua
+UI\AssignmentExplorer.lua
+UI\RosterBuilder.lua
 Utils\FrameBuilder.lua
 Models\LogItem.lua
 Models\Spell.lua
