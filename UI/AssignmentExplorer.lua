@@ -168,9 +168,9 @@ function AssignmentExplorer:Update()
     SRTWindow.Update(self)
     self.encounter.selector.items = {}
     SwiftdawnRaidTools:BossEncountersInit()
-    for encounterID, name in pairs(SwiftdawnRaidTools:BossEncountersGetAll()) do
+    for encounterID, _ in pairs(SRTData.GetActiveEncounters()) do
         local item = {
-            name = name,
+            name = SwiftdawnRaidTools:BossEncounterByID(encounterID),
             encounterID = encounterID,
             onClick = function (row)
                 self.selectedEncounterID = row.item.encounterID
@@ -179,12 +179,12 @@ function AssignmentExplorer:Update()
         }
         table.insert(self.encounter.selector.items, item)
     end
-    self.encounter.selector.selectedName = self:GetEncounterName(self.selectedEncounterID)
+    self.encounter.selector.selectedName = SwiftdawnRaidTools:BossEncounterByID(self.selectedEncounterID)
     self.encounter.selector.Update()
 end
 
 function AssignmentExplorer:UpdateEncounterPane()
-    local encounterAssignments = self:GetEncounters()[self.selectedEncounterID]
+    local encounterAssignments = SRTData.GetActiveEncounters()[self.selectedEncounterID]
     if not encounterAssignments then
         return
     end
@@ -503,15 +503,6 @@ function AssignmentExplorer:CreateTriggerFrame(bossAbilityFrame)
     triggerFrame.text:SetFont(self:GetTitleFontType(), self:GetAppearance().titleFontSize)
     self:SetDefaultFontStyle(triggerFrame.text)
     return triggerFrame
-end
-
-function AssignmentExplorer:GetEncounters()
-    return SRT_Profile().data.encounters
-end
-
-function AssignmentExplorer:GetEncounterName(encounterID)
-    SwiftdawnRaidTools:BossEncountersInit()
-   return SwiftdawnRaidTools:BossEncountersGetAll()[encounterID]
 end
 
 function AssignmentExplorer:SetDefaultFontStyle(fontString)

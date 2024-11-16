@@ -932,13 +932,13 @@ local importOptions = {
 
                 SwiftdawnRaidTools.db.profile.options.import = val
 
-                SRTData.SetActiveRosterID(nil)
+                SRTData.SetActiveRosterID("none")
 
                 if val ~= nil and val ~= "" then
                     local _, result = SwiftdawnRaidTools:ImportYAML(val)
                     local encounters, encountersId = SwiftdawnRaidTools:ImportCreateEncountersData(result)
 
-                    SRTData.SetActiveRosterID(encountersId)
+                    SRTData.SetActiveRosterID(encountersId or "none")
                     SRTData.AddRoster(encountersId, encounters)
                 end
 

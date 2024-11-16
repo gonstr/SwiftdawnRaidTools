@@ -835,10 +835,11 @@ function SRTData.Initialize()
         pool = {},
         players = {},
         rosters = {},
-        defaultAssignments = defaultAssignments,
         activeRosterID = nil
     }
+    DevTool:AddData(SRT_Global().srt_data, "SRTData")
     -- Preseed our database with static information
+    SRT_Global().srt_data.defaultAssignments = defaultAssignments
     SRT_Global().srt_data.spells = {
         -- Death Knight
         IceboundFortitude = Spell:New(48792, "Icebound Fortitude", 60 * 3, 12),
@@ -1053,7 +1054,22 @@ function SRTData.GetClassColorBySpellID(spellID)
             end
         end
     end
-    return { r = 0, g = 0, b = 0, colorStr = "ffffffff" }
+    return { r = 0.8, g = 0.8, b = 0.8, colorStr = "ffcccccc" }
+end
+
+---comment
+---@param spellID number
+---@return Class?
+function SRTData.GetClassBySpellID(spellID)
+    local data = SRT_Global().srt_data
+    for _, class in pairs(data.classes) do
+        for _, spell in pairs(class.spells) do
+            if spell.id == spellID then
+                return class
+            end
+        end
+    end
+    return nil
 end
 
 function SRTData.GetActiveRosterID()
@@ -1062,7 +1078,7 @@ end
 
 function SRTData.SetActiveRosterID(rosterID)
     local data = SRT_Global().srt_data
-    data.activeRosterID = rosterID
+    data.activeRosterID = rosterID or "none"
 end
 
 function SRTData.AddRoster(rosterID, roster)
