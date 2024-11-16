@@ -154,9 +154,9 @@ function RosterBuilder:InitializeLoadOrCreateRoster()
     self.loadCreate.info.scroll:SetPoint("BOTTOMRIGHT", self.loadCreate.info.pane, "BOTTOMRIGHT", 0, 35)
 
     -- Create buttons
-    self.loadCreate.loadButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 95, 25, "Load", SRTColor.Gray, SRTColor.Gray)
+    self.loadCreate.loadButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 75, 25, "Edit", SRTColor.Gray, SRTColor.Gray)
     self.loadCreate.loadButton:SetPoint("BOTTOMRIGHT", self.loadCreate.load.pane, "BOTTOMRIGHT", -5, 5)
-    self.loadCreate.deleteButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 95, 25, "Delete", SRTColor.Gray, SRTColor.Gray)
+    self.loadCreate.deleteButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 75, 25, "Delete", SRTColor.Gray, SRTColor.Gray)
     self.loadCreate.deleteButton:SetPoint("RIGHT", self.loadCreate.loadButton, "LEFT", -10, 0)
     self.loadCreate.createButton = FrameBuilder.CreateButton(self.loadCreate.info.pane, 95, 25, "Create New", SRTColor.Green, SRTColor.GreenHighlight)
     self.loadCreate.createButton:SetPoint("BOTTOMRIGHT", self.loadCreate.info.pane, "BOTTOMRIGHT", -5, 5)
@@ -165,6 +165,9 @@ function RosterBuilder:InitializeLoadOrCreateRoster()
         self.state = State.ADD_OR_REMOVE_PLAYERS
         self:UpdateAppearance()
     end)
+    self.loadCreate.activateButton = FrameBuilder.CreateButton(self.loadCreate.info.pane, 95, 25, "Activate", SRTColor.Gray, SRTColor.Gray)
+    self.loadCreate.activateButton:SetPoint("RIGHT", self.loadCreate.createButton, "LEFT", -10, 0)
+    self.loadCreate.activateButton:SetScript("OnMouseDown", nil)
 end
 
 function RosterBuilder:InitializeAddOrRemovePlayers()
@@ -290,9 +293,12 @@ function RosterBuilder:InitializeCreateAssignments()
         self.state = State.ADD_OR_REMOVE_PLAYERS
         self:UpdateAppearance()
     end)
-    self.assignments.finishButton = FrameBuilder.CreateButton(self.assignments.encounter.pane, 95, 25, "Finish", SRTColor.Gray, SRTColor.Gray)
+    self.assignments.finishButton = FrameBuilder.CreateButton(self.assignments.encounter.pane, 95, 25, "Finish", SRTColor.Green, SRTColor.GreenHighlight)
     self.assignments.finishButton:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", -5, 5)
-    self.assignments.finishButton:SetScript("OnMouseDown", nil)
+    self.assignments.finishButton:SetScript("OnMouseDown", function (button)
+        self.state = State.LOAD_OR_CREATE_ROSTER
+        self:UpdateAppearance()
+    end)
 end
 
 function RosterBuilder:UpdateAppearance()
@@ -334,9 +340,9 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
         rosterFrame:SetScript("OnMouseDown", function ()
             self.selectedRoster = roster
 
-            -- FIXME: REMOVE ME! FOR TESTING ONLY!
-            self.selectedRoster.encounters = {}
-            -- FIXME: REMOVE ME! FOR TESTING ONLY!
+            -- -- FIXME: REMOVE ME! FOR TESTING ONLY!
+            -- self.selectedRoster.encounters = {}
+            -- -- FIXME: REMOVE ME! FOR TESTING ONLY!
 
             self:UpdateAppearance()
         end)
