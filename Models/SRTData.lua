@@ -667,7 +667,7 @@ function SRTData:Initialize()
     SRT_Global().srt_data = SRT_Global().srt_data or{
         pool = {},
         players = {},
-        rosters = {}, 
+        rosters = {},
         classes = {},
         specs = {},
         spells = {},
