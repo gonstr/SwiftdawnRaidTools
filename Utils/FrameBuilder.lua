@@ -84,7 +84,7 @@ function FrameBuilder.CreateRosterFrame(parentFrame, roster, width, height, font
 end
 
 ---@return table|BackdropTemplate|Frame
----@param parentFrame Frame
+---@param parentFrame table|BackdropTemplate|Frame
 ---@param height integer
 function FrameBuilder.CreateAssignmentGroupFrame(parentFrame, height)
     local groupFrame = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
