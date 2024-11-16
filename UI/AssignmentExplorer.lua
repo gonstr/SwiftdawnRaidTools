@@ -56,6 +56,12 @@ function AssignmentExplorer:Initialize()
     self.selectedPlayerPane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
     self.selectedPlayerPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
     self.selectedPlayerPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
+    self.selectedPlayerPane.scroll = FrameBuilder.CreateScrollArea(self.selectedPlayerPane, "AvailableSpells")
+    self.selectedPlayerPane.scroll:SetPoint("TOPLEFT", self.selectedPlayerPane, "TOPLEFT", 0, -28)
+    self.selectedPlayerPane.scroll:SetPoint("TOPRIGHT", self.selectedPlayerPane, "TOPRIGHT", 0, -28)
+    self.selectedPlayerPane.scroll:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 10, 35)
+    self.selectedPlayerPane.scroll:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 10, 35)
+
     self.player.name = self.player.name or self.selectedPlayerPane:CreateFontString("SRT_AssignmentExplorer_PlayerPane_Name", "OVERLAY", "GameFontNormalLarge")
     self.player.name:SetPoint("TOPLEFT", self.selectedPlayerPane, "TOPLEFT", 0, -5)
     self.player.name:SetTextColor(1, 1, 1, 0.8)
@@ -320,8 +326,9 @@ function AssignmentExplorer:UpdateSelectedPlayerPane()
         classSpells = self.selectedPlayer.class.spells
         selectedID = self.selectedPlayer.selectedID
     end
+    local scrollHeight = 0
     for _, spell in pairs(classSpells) do
-        local spellFrame = self.player.cooldowns[spell.id] or FrameBuilder.CreateLargeSpellFrame(self.selectedPlayerPane)
+        local spellFrame = self.player.cooldowns[spell.id] or FrameBuilder.CreateLargeSpellFrame(self.selectedPlayerPane.scroll.content)
         FrameBuilder.UpdateLargeSpellFrame(spellFrame, spell.id, self:GetPlayerFont(), self:GetAppearance().playerFontSize, iconSize)
         spellFrame:SetScript("OnEnter", function () spellFrame:SetBackdropColor(1, 1, 1, 0.4) end)
         spellFrame:SetScript("OnLeave", function (frame) if frame.spellID ~= selectedID then spellFrame:SetBackdropColor(0, 0, 0, 0) end end)
@@ -347,16 +354,17 @@ function AssignmentExplorer:UpdateSelectedPlayerPane()
             spellFrame:SetPoint("TOPLEFT", lastSpellFrame, "BOTTOMLEFT", 0, -7)
             spellFrame:SetPoint("TOPRIGHT", lastSpellFrame, "BOTTOMRIGHT", 0, -7)
         else
-            spellFrame:SetPoint("TOPLEFT", self.player.name, "BOTTOMLEFT", 5, -7)
-            spellFrame:SetPoint("TOPRIGHT", self.player.name, "BOTTOMLEFT", 280, -7)
+            spellFrame:SetPoint("TOPLEFT", self.selectedPlayerPane.scroll.content, "TOPLEFT", 0, -7)
+            spellFrame:SetPoint("TOPRIGHT", self.selectedPlayerPane.scroll.content, "TOPRIGHT", 0, -7)
         end
         if spell.id == selectedID then
             spellFrame:SetBackdropColor(1, 1, 1, 0.4)
         end
         self.player.cooldowns[spell.id] = spellFrame
+        scrollHeight = scrollHeight + spellFrame:GetHeight() + 7
         lastSpellFrame = spellFrame
     end
-    
+    self.selectedPlayerPane.scroll.content:SetHeight(scrollHeight)
 end
 
 function AssignmentExplorer:UpdateRosterPane()
