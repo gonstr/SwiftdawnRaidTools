@@ -1035,12 +1035,13 @@ function SRTData.GetClass(className)
 end
 
 ---Create new roster
----@return Roster
+---@return string, Roster
 function SRTData.CreateNewRoster()
     local data = SRTData.Get()
-    local newRoster = Roster:New()
-    data.rosters[newRoster.id] = newRoster
-    return newRoster
+    local rosterID = SwiftdawnRaidTools:GenerateUUID()
+    local roster = Roster:New()
+    data.rosters[rosterID] = roster
+    return rosterID, roster
 end
 
 function SRTData.RemoveRoster(rosterID)

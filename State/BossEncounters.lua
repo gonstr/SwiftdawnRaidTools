@@ -51,3 +51,7 @@ end
 function SwiftdawnRaidTools:BossEncountersGetAll()
     return bossEncounters
 end
+
+function SwiftdawnRaidTools:BossEncounterByID(encounterID)
+    return bossEncounters[encounterID]
+end
