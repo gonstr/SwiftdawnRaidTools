@@ -1,5 +1,3 @@
-local SwiftdawnRaidTools = SwiftdawnRaidTools
-
 ---@class Roster
 Roster = {}
 Roster.__index = Roster
@@ -42,4 +40,5 @@ end
 function Roster.Parse(raw)
     local roster = Roster:New()
     roster.encounters = raw
+    return roster
 end

@@ -81,7 +81,7 @@ SwiftdawnRaidTools.defaults = {
 }
 
 function SwiftdawnRaidTools:OnInitialize()
-    self:DBInit() 
+    self:DBInit()
     self:OptionsInit()
     self:MinimapInit()
 
@@ -139,10 +139,10 @@ end
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
         self:BossEncountersInit()
+        SRTData.Initialize()
         self:SyncSendStatus()
         self:SyncSchedule()
     end
-
     self.overview:Update()
     self.debugLog:Update()
 end

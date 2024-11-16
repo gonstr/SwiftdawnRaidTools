@@ -111,8 +111,8 @@ function SRTOverview:UpdateHeaderText()
     if encountersExists then
         self.headerText:SetText(SwiftdawnRaidTools:BossEncounterByID(self:GetProfile().selectedEncounterId))
     else
-        if SRT_Profile().data.encountersProgress then
-            self.headerText:SetText((SRT_Profile().data.encounterId and "Syncing" or "Loading").." Assignments... |cFFFFFFFF" .. string.format("%.1f", SRT_Profile().data.encountersProgress) .. "%|r")
+        if SwiftdawnRaidTools.encountersProgress then
+            self.headerText:SetText((SRTData.GetActiveRosterID() and "Syncing" or "Loading").." Assignments... |cFFFFFFFF" .. string.format("%.1f", SwiftdawnRaidTools.encountersProgress) .. "%|r")
         else
             self.headerText:SetText("SRT |cFFFFFFFF" .. tostring(SwiftdawnRaidTools.VERSION) .. "|r")
             self.headerText:SetAlpha(0.8)

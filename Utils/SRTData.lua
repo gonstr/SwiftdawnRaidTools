@@ -828,51 +828,16 @@ local testAssignments = {
 
 --- Database class for Swiftdawn Raid Tools
 ---@class SRTData
-SRTData = {
-    players = {},
-    rosters = {},
-    classes = {},
-    spells = {},
-    activeRosterID = nil
-}
-SRTData.__index = SRTData
+SRTData = {}
 
----@private
----@return SRTData
-function SRTData:New()
-    local obj = {}
-    setmetatable(obj, SRTData)
-    return obj
-end
-
----@class SRTData
-local srtDataSingleton
-
----@return SRTData
-function SRTData.Get()
-    if srtDataSingleton then
-        return srtDataSingleton
-    else
-        srtDataSingleton = SRTData:New()
-        srtDataSingleton:Initialize()
-        srtDataSingleton:LoadData()
-        DevTool:AddData(srtDataSingleton, "SRTData")
-        DevTool:AddData(SRT_Global().srt_data, "SRT_Global().srt_data")
-        return srtDataSingleton
-    end
-end
-
-function SRTData:Initialize()
+function SRTData.Initialize()
     SRT_Global().srt_data = SRT_Global().srt_data or {
         pool = {},
         players = {},
-        rosters = {}, 
-        classes = {},
-        specs = {},
-        spells = {},
-        buffs = {}
+        rosters = {},
+        defaultAssignments = defaultAssignments,
+        activeRosterID = nil
     }
-    
     -- Preseed our database with static information
     SRT_Global().srt_data.spells = {
         -- Death Knight
@@ -954,7 +919,7 @@ function SRTData:Initialize()
             SRT_Global().srt_data.spells.RallyingCry,
         })
     }
-    self.specs = {
+    SRT_Global().srt_data.specs = {
         Blood = Spec:New("Blood", SRT_Global().srt_data.classes.DeathKnight),
         FrostDK = Spec:New("Frost", SRT_Global().srt_data.classes.DeathKnight),
         Unholy = Spec:New("Unholy", SRT_Global().srt_data.classes.DeathKnight),
@@ -987,27 +952,13 @@ function SRTData:Initialize()
         Fury = Spec:New("Fury", SRT_Global().srt_data.classes.Warrior),
         ProtectionWarrior = Spec:New("Protection", SRT_Global().srt_data.classes.Warrior),
     }
-end
-
-function SRTData:LoadData()
-    local data = SRT_Global().srt_data
-    self.pool = data.pool
-    self.players = data.players
-    self.rosters = data.rosters
-    self.classes = data.classes
-    self.specs = data.specs
-    self.spells = data.spells
-    self.buffs = data.buffs
-    self.defaultAssignments = defaultAssignments
-    self.activeRosterID = data.activeRosterID
-
+    
     if SwiftdawnRaidTools.db.profile.data.encountersId then
-        data.activeRosterID = SwiftdawnRaidTools.db.profile.data.encountersId
-        self.activeRosterID = data.activeRosterID
+        SRT_Global().srt_data.activeRosterID = SwiftdawnRaidTools.db.profile.data.encountersId
         SwiftdawnRaidTools.db.profile.data.encountersId = nil
     end
     if #SwiftdawnRaidTools.db.profile.data.encounters > 0 then
-        self.rosters[self.activeRosterID] = { encounters = SwiftdawnRaidTools.db.profile.data.encounters }
+        SRT_Global().srt_data.rosters[SRT_Global().srt_data.activeRosterID] = { encounters = SwiftdawnRaidTools.db.profile.data.encounters }
         SwiftdawnRaidTools.db.profile.data.encounters = nil
     end
 end
@@ -1017,7 +968,7 @@ end
 ---@param class Class
 ---@param spec? Spec
 function SRTData.AddPlayerToPool(name, class, spec)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     if not data.players[name] then
         data.players[name] = Player:New(name, class, spec)
     end
@@ -1027,17 +978,17 @@ end
 ---@param name string
 ---@return Player?
 function SRTData.GetPlayerFromPool(name)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     return data.players[name]
 end
 
 function SRTData.GetRosters()
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     return data.rosters
 end
 
 function SRTData.GetClass(className)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     for name, class in pairs(data.classes) do
         if name == className or class.name == className or class.fileName == className then
             return class
@@ -1048,7 +999,7 @@ end
 ---Create new roster
 ---@return string, Roster
 function SRTData.CreateNewRoster()
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     local rosterID = SwiftdawnRaidTools:GenerateUUID()
     local roster = Roster:New()
     data.rosters[rosterID] = roster
@@ -1056,7 +1007,7 @@ function SRTData.CreateNewRoster()
 end
 
 function SRTData.RemoveRoster(rosterID)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     data.rosters[rosterID] = nil
 end
 
@@ -1064,7 +1015,7 @@ end
 ---@param name string
 ---@param spec Spec
 function SRTData.SetPlayerSpec(name, spec)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     if not data.players[name] then
         Log.info("Unable to set spec for "..name..". Player not in SRTData player pool yet!")
         return
@@ -1073,7 +1024,7 @@ function SRTData.SetPlayerSpec(name, spec)
 end
 
 function SRTData.GetAssignmentDefaults()
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     return SwiftdawnRaidTools:DeepClone(data.defaultAssignments)
 end
 
@@ -1081,7 +1032,7 @@ end
 ---@param spellID number
 ---@return Spell?
 function SRTData.GetSpellByID(spellID)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     for _, spell in pairs(data.spells) do
         if spell.id == spellID then
             return spell
@@ -1094,11 +1045,11 @@ end
 ---@param spellID number
 ---@return ColorMixin_RCC
 function SRTData.GetClassColorBySpellID(spellID)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     for _, class in pairs(data.classes) do
         for _, spell in pairs(class.spells) do
             if spell.id == spellID then
-                return class:GetColor()
+                return Class.GetColor(class)
             end
         end
     end
@@ -1106,28 +1057,30 @@ function SRTData.GetClassColorBySpellID(spellID)
 end
 
 function SRTData.GetActiveRosterID()
-    local data = SRTData.Get()
-    return data.activeRosterID
+    return SRT_Global().srt_data.activeRosterID
 end
 
 function SRTData.SetActiveRosterID(rosterID)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     data.activeRosterID = rosterID
 end
 
 function SRTData.AddRoster(rosterID, roster)
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
 
     -- FIXME: THIS IS ONLY ONE ROSTER FOR THIS VERSION, CLEANING UP TO AVOID BULKING UP!
+    Log.debug("Clearing rosters old...")
     data.rosters = {}
     -- FIXME: THIS IS ONLY ONE ROSTER FOR THIS VERSION, CLEANING UP TO AVOID BULKING UP!
-    
+
+    Log.debug("Adding new roster with ID: "..rosterID)
     data.rosters[rosterID] = roster
 end
 
 function SRTData.GetActiveRoster()
-    local data = SRTData.Get()
+    local data = SRT_Global().srt_data
     if not data.activeRosterID then
+        Log.debug("Cannot get active roster; no active roster ID set")
         return {}
     end
     return data.rosters[data.activeRosterID]
