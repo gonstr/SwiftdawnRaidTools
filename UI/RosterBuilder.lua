@@ -6,7 +6,8 @@ local WINDOW_WIDTH = 600
 local State = {
     LOAD_OR_CREATE_ROSTER = 1,
     ADD_OR_REMOVE_PLAYERS = 2,
-    CREATE_ASSIGNMENTS = 3
+    CREATE_ASSIGNMENTS = 3,
+    PICK_SPELL = 4,
 }
 
 --- Roster Builder window class object
@@ -18,6 +19,10 @@ RosterBuilder = setmetatable({
 
     ---@class Roster?
     selectedRoster = nil,
+
+    -- { incounterID, abilityIndex, groupIndex, assignmentIndex }
+    pickedAssignment = nil,
+    pickedPlayer = nil,
 
     roster = {},
     availablePlayers = {
@@ -258,6 +263,25 @@ function RosterBuilder:InitializeCreateAssignments()
     self.assignments.encounter.scroll:SetPoint("TOPRIGHT", 0, -5)
     self.assignments.encounter.scroll:SetPoint("BOTTOMLEFT", 0, 35)
     self.assignments.encounter.scroll:SetPoint("BOTTOMRIGHT", 0, 35)
+
+    self.assignments.pickspell = {}
+    self.assignments.pickspell.pane = CreateFrame("Frame", "SRTRoster_PickSpellPane", self.content)
+    self.assignments.pickspell.pane:SetClipsChildren(false)
+    self.assignments.pickspell.pane:SetScript("OnMouseDown", function ()
+        self.state = State.CREATE_ASSIGNMENTS
+        self:UpdateCreateAssignments()
+    end)
+    self:SetToRightSide(self.assignments.pickspell.pane, self.content)
+    self.assignments.pickspell.title = self.assignments.pickspell.pane:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    self.assignments.pickspell.title:SetFont(self:GetHeaderFontType(), 14)
+    self.assignments.pickspell.title:SetTextColor(0.8, 0.8, 0.8, 1)
+    self.assignments.pickspell.title:SetText("Pick Spell to Assign...")
+    self.assignments.pickspell.title:SetPoint("TOPLEFT", self.assignments.pickspell.pane, "TOPLEFT", 10, -8)
+    self.assignments.pickspell.scroll = FrameBuilder.CreateScrollArea(self.assignments.pickspell.pane, "Spells")
+    self.assignments.pickspell.scroll:SetPoint("TOPLEFT", 0, -28)
+    self.assignments.pickspell.scroll:SetPoint("TOPRIGHT", 0, -28)
+    self.assignments.pickspell.scroll:SetPoint("BOTTOMLEFT", 0, 35)
+    self.assignments.pickspell.scroll:SetPoint("BOTTOMRIGHT", 0, 35)
 
     -- Create buttons
     self.assignments.backButton = FrameBuilder.CreateButton(self.assignments.players.pane, 95, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
@@ -547,10 +571,18 @@ end
 function RosterBuilder:UpdateCreateAssignments()
     if self.state == State.CREATE_ASSIGNMENTS then
         self.assignments.players.pane:Show()
+        self.assignments.players.pane:SetAlpha(1)
         self.assignments.encounter.pane:Show()
+        self.assignments.pickspell.pane:Hide()
+    elseif self.state == State.PICK_SPELL then
+        self.assignments.players.pane:Show()
+        self.assignments.players.pane:SetAlpha(0.3)
+        self.assignments.encounter.pane:Hide()
+        self.assignments.pickspell.pane:Show()
     else
         self.assignments.players.pane:Hide()
         self.assignments.encounter.pane:Hide()
+        self.assignments.pickspell.pane:Hide()
         return
     end
 
@@ -602,48 +634,64 @@ function RosterBuilder:UpdateCreateAssignments()
                 for _, assignmentFrame in pairs(self.assignments.encounter.scroll.items) do
                     if assignmentFrame.IsMouseOverFrame() then
                         assignmentFrame:SetBackdropColor(0, 0, 0, 0)
-                        for _, groupFrame in pairs(assignmentFrame.groups) do
-                            if groupFrame.IsMouseOverFrame() then
-                                groupFrame:SetBackdropColor(0, 0, 0, 0)
-
-                                -- TODO Add to assignment group
-                                self.selectedRoster.encounters = self.selectedRoster.encounters or {}
-                                self.selectedRoster.encounters[self.selectedEncounterID] = self.selectedRoster.encounters[self.selectedEncounterID] or SRTData.GetAssignmentDefaults()[self.selectedEncounterID]
-                                self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex] = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex] or {}
-                                self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments or {}
-                                self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index] = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index] or {}
-
-                                local assignmentsInGroup = #self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index]
-                                if assignmentsInGroup == 2 then
-                                    -- Group is already full; add new group
-                                    break
-                                end
-                                -- TODO: Add spell select pane (similar to assignment explorer)
-                                local classSpells = SRTData.GetClass(playerFrame.info.classFileName).spells
-                                local spell = #classSpells > 0 and classSpells[math.random(#classSpells)] or nil
-                                table.insert(self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index], {
-                                    ["spell_id"] = spell and spell.id or nil,
-                                    ["type"] = "SPELL",
-                                    ["player"] = name,
-                                })
-                                self:UpdateCreateAssignments()
-                                return
-                            end
-                        end
                         self.selectedRoster.encounters = self.selectedRoster.encounters or {}
                         self.selectedRoster.encounters[self.selectedEncounterID] = self.selectedRoster.encounters[self.selectedEncounterID] or SRTData.GetAssignmentDefaults()[self.selectedEncounterID]
                         self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex] = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex] or {}
                         self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments or {}
-                        -- TODO: Add spell select pane (similar to assignment explorer)
-                        local classSpells = SRTData.GetClass(playerFrame.info.classFileName).spells
-                        local spell = #classSpells > 0 and classSpells[math.random(#classSpells)] or nil
-                        table.insert(self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments, {
-                            [1] = {
-                                ["spell_id"] = spell and spell.id or nil,
-                                ["type"] = "SPELL",
-                                ["player"] = name,
-                            }
-                        })
+                        for _, groupFrame in pairs(assignmentFrame.groups) do
+                            if groupFrame.IsMouseOverFrame() then
+                                groupFrame:SetBackdropColor(0, 0, 0, 0)
+                                self.pickedPlayer = playerFrame.info
+                                self.pickedAssignment = {
+                                    encounterID = self.selectedEncounterID,
+                                    abilityIndex = assignmentFrame.abilityIndex,
+                                    groupIndex = groupFrame.index
+                                }
+                                self.state = State.PICK_SPELL
+
+                                -- -- TODO Add to assignment group
+
+                                -- local assignmentsInGroup = #self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index]
+                                -- if assignmentsInGroup == 2 then
+                                --     -- Group is already full; add new group
+                                --     break
+                                -- end
+                                
+                                -- self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index] = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index] or {}
+                                
+                                -- -- TODO: Add spell select pane (similar to assignment explorer)
+                                
+                                -- local classSpells = SRTData.GetClass(playerFrame.info.classFileName).spells
+                                -- local spell = #classSpells > 0 and classSpells[math.random(#classSpells)] or nil
+                                -- table.insert(self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index], {
+                                --     ["spell_id"] = nil,
+                                --     ["type"] = "SPELL",
+                                --     ["player"] = name,
+                                -- })
+                                self:UpdateCreateAssignments()
+                                return
+                            end
+                        end
+
+                        self.pickedPlayer = playerFrame.info
+                        self.pickedAssignment = {
+                            encounterID = self.selectedEncounterID,
+                            abilityIndex = assignmentFrame.abilityIndex,
+                            groupIndex = #self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments + 1,
+                        }
+                        self.state = State.PICK_SPELL
+
+                        -- -- TODO: Add spell select pane (similar to assignment explorer)
+
+                        -- local classSpells = SRTData.GetClass(playerFrame.info.classFileName).spells
+                        -- local spell = #classSpells > 0 and classSpells[math.random(#classSpells)] or nil
+                        -- table.insert(self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments, {
+                        --     [1] = {
+                        --         ["spell_id"] = nil,
+                        --         ["type"] = "SPELL",
+                        --         ["player"] = name,
+                        --     }
+                        -- })
                         self:UpdateCreateAssignments()
                         return
                     end
@@ -656,77 +704,185 @@ function RosterBuilder:UpdateCreateAssignments()
     end
     self.assignments.players.scroll.content:SetHeight(23 * visiblePlayers)
 
-    if self.selectedEncounterID == nil then
-        return
-    elseif SRTData.GetAssignmentDefaults()[self.selectedEncounterID] == nil then
-        self.assignments.encounter.title:SetText("No defaults available yet...")
-        self.assignments.encounter.scroll:Hide()
-        return
-    else
-        self.assignments.encounter.title:SetText("")
-        self.assignments.encounter.scroll:Show()
-    end
-    
-    self.selectedRoster.encounters = self.selectedRoster.encounters or {}
-    local encounterAssignments = self.selectedRoster.encounters[self.selectedEncounterID] or SRTData.GetAssignmentDefaults()[self.selectedEncounterID]
-    for _, item in pairs(self.assignments.encounter.scroll.items) do item:Hide() end
-    DevTool:AddData(encounterAssignments, "encounterAssignments")
-    local lastAbilityFrame = nil
-    for bossAbilityIndex, bossAbility in ipairs(encounterAssignments) do
-        -- Create frame for boss ability assignment groups
-        local abilityFrameID = string.format("%d-%d", self.selectedEncounterID, bossAbilityIndex)
-        local abilityFrame = self.assignments.encounter.scroll.items[abilityFrameID] or FrameBuilder.CreateBossAbilityAssignmentsFrame(self.assignments.encounter.scroll.content, bossAbility.metadata.name, bossAbilityIndex, 260, self:GetPlayerFont(), 14)
-        if lastAbilityFrame then
-            abilityFrame:SetPoint("TOPLEFT", lastAbilityFrame, "BOTTOMLEFT", 0, -3)
+    if self.state == State.CREATE_ASSIGNMENTS then
+        if self.selectedEncounterID == nil then
+            return
+        elseif SRTData.GetAssignmentDefaults()[self.selectedEncounterID] == nil then
+            self.assignments.encounter.title:SetText("No defaults available yet...")
+            self.assignments.encounter.scroll:Hide()
+            return
         else
-            abilityFrame:SetPoint("TOPLEFT", self.assignments.encounter.scroll.content, "TOPLEFT", 5, 0)
+            self.assignments.encounter.title:SetText("")
+            self.assignments.encounter.scroll:Show()
         end
-        abilityFrame:Show()
-
-        -- Create known frames for current assignment groups and inner assignments
-        for _, group in pairs(abilityFrame.groups) do group:Hide() end
-        abilityFrame.groups = {}
-        local previousGroup = nil
-        for groupIndex, group in ipairs(encounterAssignments[bossAbilityIndex].assignments) do
-            local groupFrame = FrameBuilder.CreateAssignmentGroupFrame(abilityFrame, self:GetAssignmentGroupHeight() + 3)
-            FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, "uuid-empty", groupIndex, self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
-            
-            groupFrame:ClearAllPoints()
-            if previousGroup then
-                groupFrame:SetPoint("TOPLEFT", previousGroup, "BOTTOMLEFT", 0, 0)
-                groupFrame:SetPoint("TOPRIGHT", previousGroup, "BOTTOMRIGHT", 0, 0)
+        
+        self.selectedRoster.encounters = self.selectedRoster.encounters or {}
+        local encounterAssignments = self.selectedRoster.encounters[self.selectedEncounterID] or SRTData.GetAssignmentDefaults()[self.selectedEncounterID]
+        for _, item in pairs(self.assignments.encounter.scroll.items) do
+            item:Hide()
+        end
+        local lastAbilityFrame = nil
+        for bossAbilityIndex, bossAbility in ipairs(encounterAssignments) do
+            -- Create frame for boss ability assignment groups
+            local abilityFrameID = string.format("%d-%d", self.selectedEncounterID, bossAbilityIndex)
+            local abilityFrame = self.assignments.encounter.scroll.items[abilityFrameID] or FrameBuilder.CreateBossAbilityAssignmentsFrame(self.assignments.encounter.scroll.content, bossAbility.metadata.name, bossAbilityIndex, 260, self:GetPlayerFont(), 14)
+            if lastAbilityFrame then
+                abilityFrame:SetPoint("TOPLEFT", lastAbilityFrame, "BOTTOMLEFT", 0, -3)
             else
-                groupFrame:SetPoint("TOPLEFT", abilityFrame, "TOPLEFT", 0, -16)
-                groupFrame:SetPoint("TOPRIGHT", abilityFrame, "TOPRIGHT", 0, -16)
+                abilityFrame:SetPoint("TOPLEFT", self.assignments.encounter.scroll.content, "TOPLEFT", 5, 0)
             end
+            abilityFrame:Show()
 
-            for _, cd in pairs(groupFrame.assignments) do
-                cd:Hide()
-            end
-            for assignmentIndex, assignment in ipairs(group) do
-                local assignmentFrame = groupFrame.assignments[assignmentIndex] or FrameBuilder.CreateAssignmentFrame(groupFrame, assignmentIndex, self:GetPlayerFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
-                FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment)
+            -- Create known frames for current assignment groups and inner assignments
+            for _, group in pairs(abilityFrame.groups) do group:Hide() end
+            abilityFrame.groups = {}
+            local previousGroup = nil
+            for groupIndex, group in ipairs(encounterAssignments[bossAbilityIndex].assignments) do
+                local groupFrame = abilityFrame.groups[groupIndex] or FrameBuilder.CreateAssignmentGroupFrame(abilityFrame, self:GetAssignmentGroupHeight() + 3)
+                FrameBuilder.UpdateAssignmentGroupFrame(groupFrame, "uuid-empty", groupIndex, self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
                 
-                assignmentFrame:ClearAllPoints()
-                if assignmentIndex > 1 then
-                    assignmentFrame:SetPoint("BOTTOMLEFT", groupFrame, "BOTTOM")
-                    assignmentFrame:SetPoint("TOPRIGHT", -10, 0)
+                groupFrame:ClearAllPoints()
+                if previousGroup then
+                    groupFrame:SetPoint("TOPLEFT", previousGroup, "BOTTOMLEFT", 0, 0)
+                    groupFrame:SetPoint("TOPRIGHT", previousGroup, "BOTTOMRIGHT", 0, 0)
                 else
-                    assignmentFrame:SetPoint("BOTTOMLEFT", 10, 0)
-                    assignmentFrame:SetPoint("TOPRIGHT", groupFrame, "TOP", 0, 0)
+                    groupFrame:SetPoint("TOPLEFT", abilityFrame, "TOPLEFT", 0, -16)
+                    groupFrame:SetPoint("TOPRIGHT", abilityFrame, "TOPRIGHT", 0, -16)
                 end
 
-                assignmentFrame.groupIndex = groupIndex
-                groupFrame.assignments[assignmentIndex] = assignmentFrame
+                for _, cd in pairs(groupFrame.assignments) do
+                    cd:Hide()
+                end
+                local previousAssignmentFrame = nil
+                for assignmentIndex, assignment in ipairs(group) do
+                    local assignmentFrame = groupFrame.assignments[assignmentIndex] or FrameBuilder.CreateAssignmentFrame(groupFrame, assignmentIndex, self:GetPlayerFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize)
+                    FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment)
+                    
+                    assignmentFrame:ClearAllPoints()
+                    if previousAssignmentFrame then
+                        assignmentFrame:SetPoint("TOPLEFT", groupFrame, "TOP", 0, 0)
+                        assignmentFrame:SetPoint("BOTTOMRIGHT", groupFrame, "BOTTOMRIGHT", -10, 0)
+                    else
+                        assignmentFrame:SetPoint("TOPLEFT", groupFrame, "TOPLEFT", 10, 0)
+                        assignmentFrame:SetPoint("BOTTOMRIGHT", groupFrame, "BOTTOM", 0, 0)
+                    end
+
+                    assignmentFrame:SetScript("OnMouseDown", function (af, button)
+                        if button == "RightButton" then
+                            af:Hide()
+                            if af.index == 1 and #encounterAssignments[bossAbilityIndex].assignments[groupIndex] > 1 then
+                                encounterAssignments[bossAbilityIndex].assignments[groupIndex][af.index] = encounterAssignments[bossAbilityIndex].assignments[groupIndex][af.index + 1]
+                                encounterAssignments[bossAbilityIndex].assignments[groupIndex][af.index + 1] = nil
+                                encounterAssignments[bossAbilityIndex].assignments[groupIndex][af.index].index = 1
+                            else
+                                encounterAssignments[bossAbilityIndex].assignments[groupIndex][af.index] = nil
+                            end
+                            if #encounterAssignments[bossAbilityIndex].assignments[groupIndex] == 0 then
+                                groupFrame:Hide()
+                                for i = groupIndex, #encounterAssignments[bossAbilityIndex].assignments, 1 do
+                                    if i == #abilityFrame.groups then
+                                        abilityFrame.groups[i] = nil
+                                        encounterAssignments[bossAbilityIndex].assignments[i] = nil
+                                    else
+                                        abilityFrame.groups[i] = abilityFrame.groups[i+1]
+                                        abilityFrame.groups[i].index = abilityFrame.groups[i].index - 1
+                                        encounterAssignments[bossAbilityIndex].assignments[i] = encounterAssignments[bossAbilityIndex].assignments[i+1]
+                                    end
+                                end
+                            end
+                            self:UpdateCreateAssignments()
+                        end
+                    end)
+
+                    assignmentFrame.groupIndex = groupIndex
+                    groupFrame.assignments[assignmentIndex] = assignmentFrame
+                    previousAssignmentFrame = assignmentFrame
+                end
+
+                abilityFrame.groups[groupIndex] = groupFrame
+                previousGroup = groupFrame
             end
+            abilityFrame.Update()
 
-            abilityFrame.groups[groupIndex] = groupFrame
-            previousGroup = groupFrame
+            self.assignments.encounter.scroll.items[abilityFrameID] = abilityFrame
+            lastAbilityFrame = abilityFrame
         end
-        abilityFrame.Update()
+    end
 
-        self.assignments.encounter.scroll.items[abilityFrameID] = abilityFrame
-        lastAbilityFrame = abilityFrame
+    if self.state == State.PICK_SPELL then
+        if self.pickedPlayer == nil then
+            print("Unable to open spell picker, no player selected")
+            self.state = State.CREATE_ASSIGNMENTS
+            return
+        end
+        local class = SRTData.GetClass(self.pickedPlayer.classFileName)
+
+        for _, spellFrame in pairs(self.assignments.pickspell.scroll.items) do
+            spellFrame:Hide()
+        end
+
+        local scrollHeight = 0
+        local previousSpellFrame = nil
+        for _, spell in pairs(class.spells) do
+            local spellFrame = self.assignments.pickspell.scroll.items[spell.id] or FrameBuilder.CreateLargeSpellFrame(self.assignments.pickspell.scroll.content)
+            FrameBuilder.UpdateLargeSpellFrame(spellFrame, spell.id, self:GetPlayerFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize * 3)
+            spellFrame.spellID = spell.id
+            spellFrame:SetWidth(280)
+            spellFrame:SetScript("OnEnter", function () spellFrame:SetBackdropColor(1, 1, 1, 0.4) end)
+            spellFrame:SetScript("OnLeave", function () spellFrame:SetBackdropColor(0, 0, 0, 0) end)
+            spellFrame:SetScript("OnMouseDown", function (sf, button)
+                if button == "LeftButton" then
+                    local encounterID = self.pickedAssignment.encounterID
+                    local abilityIndex = self.pickedAssignment.abilityIndex
+                    local groupIndex = self.pickedAssignment.groupIndex
+
+                    self.selectedRoster.encounters = self.selectedRoster.encounters or {}
+                    self.selectedRoster.encounters[encounterID] = self.selectedRoster.encounters[encounterID] or SRTData.GetAssignmentDefaults()[encounterID]
+                    self.selectedRoster.encounters[encounterID][abilityIndex] = self.selectedRoster.encounters[encounterID][abilityIndex] or {}
+                    self.selectedRoster.encounters[encounterID][abilityIndex].assignments = self.selectedRoster.encounters[encounterID][abilityIndex].assignments or {}
+
+                    local numberOfGroups = #self.selectedRoster.encounters[encounterID][abilityIndex].assignments
+
+                    if groupIndex == 0 then
+                        self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1] = {}
+                        table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1], {
+                            ["spell_id"] = sf.spellID,
+                            ["type"] = "SPELL",
+                            ["player"] = self.pickedPlayer.name,
+                        })
+                    elseif not self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] or #self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] < 2 then
+                        self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] = self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] or {}
+                        table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex], {
+                            ["spell_id"] = sf.spellID,
+                            ["type"] = "SPELL",
+                            ["player"] = self.pickedPlayer.name,
+                        })
+                    elseif #self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] >= 2 then
+                        self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1] = {}
+                        table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1], {
+                            ["spell_id"] = sf.spellID,
+                            ["type"] = "SPELL",
+                            ["player"] = self.pickedPlayer.name,
+                        })
+                    end
+
+                    DevTool:AddData(self.selectedRoster.encounters, "self.selectedRoster.encounters")
+
+                    self.state = State.CREATE_ASSIGNMENTS
+                    self:UpdateCreateAssignments()
+                end
+            end)
+            if previousSpellFrame then
+                spellFrame:SetPoint("TOPLEFT", previousSpellFrame, "BOTTOMLEFT", 0, -7)
+            else
+                spellFrame:SetPoint("TOPLEFT", self.assignments.pickspell.scroll.content, "TOPLEFT", 10, 0)
+            end
+            spellFrame:Show()
+            self.assignments.pickspell.scroll.items[spell.id] = spellFrame
+            previousSpellFrame = spellFrame
+            scrollHeight = scrollHeight + spellFrame:GetHeight() + 7
+        end
+        self.assignments.pickspell.scroll.content:SetHeight(scrollHeight)
     end
 end
 
@@ -754,31 +910,6 @@ function RosterBuilder:Update()
     end
     self.assignments.bossSelector.selectedName = self.selectedEncounterID and SwiftdawnRaidTools:BossEncountersGetAll()[self.selectedEncounterID] or "Select encounter..."
     self.assignments.bossSelector.Update()
-
-    if self.selectedRoster then
-        DevTool:AddData(self.assignments.bossSelector, "self.assignments.bossSelector")
-        DevTool:AddData(self.selectedRoster.encounters, "self.selectedRoster.encounters")
-        for index, item in pairs(self.assignments.bossSelector.items) do
-            DevTool:AddData({index, item}, "index, item")
-            local encounter = self.selectedRoster.encounters[item.encounterID]
-            if encounter then
-                local hasAssignments = false
-                for _, ability in pairs(encounter) do
-                    DevTool:AddData(ability, "ability")
-                    DevTool:AddData(#ability.assignments > 0, "hasAssignments")
-                    if #ability.assignments > 0 then
-                        hasAssignments = true
-                        break
-                    end
-                end
-                if hasAssignments then
-                    self.assignments.bossSelector.dropdown.rows[index].text:SetTextColor(0.8, 0.8, 0.8, 1)
-                else
-                    self.assignments.bossSelector.dropdown.rows[index].text:SetTextColor(1, 0.8235, 0, 1)
-                end
-            end
-        end
-    end
 end
 
 local lastUpdatedGuildMembers = 0
