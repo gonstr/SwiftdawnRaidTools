@@ -15,6 +15,7 @@ function Roster:New()
     ---@class Roster
     local obj = setmetatable({}, self)
     self.__index = self
+    obj.id = SwiftdawnRaidTools:GenerateUUID()
     obj.name = nil
     obj.timestamp = timestamp()
     obj.players = {}
@@ -23,11 +24,10 @@ function Roster:New()
 end
 
 function Roster.GetName(roster)
-    if roster.name then
-        return roster.name
-    else
-        return "Roster"
+    if not roster.name then
+        roster.name = "Roster ".."  -  "..Roster.GetTimestamp(roster)
     end
+    return roster.name
 end
 
 function Roster.GetTimestamp(roster)

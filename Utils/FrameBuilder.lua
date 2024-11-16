@@ -61,26 +61,36 @@ end
 
 ---@return table|BackdropTemplate|Frame
 ---@param parentFrame Frame
----@param roster Roster
-function FrameBuilder.CreateRosterFrame(parentFrame, roster, width, height, font, fontSize)
-    local rosterFrame = CreateFrame("Frame", parentFrame:GetName() .. "_" .. Roster.GetName(roster), parentFrame, "BackdropTemplate")
+function FrameBuilder.CreateRosterFrame(parentFrame, id, name, width, height, font, fontSize)
+    local rosterFrame = CreateFrame("Frame", parentFrame:GetName() .. "_Roster" .. id, parentFrame, "BackdropTemplate")
+    rosterFrame.id = id
+    rosterFrame.width = width
+    rosterFrame.height = height
     rosterFrame:EnableMouse(true)
-    rosterFrame:SetSize(width, height)
+    rosterFrame.name = name
+    rosterFrame.text = rosterFrame.text or rosterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    rosterFrame.text:EnableMouse(false)
+    rosterFrame.text:SetPoint("LEFT", rosterFrame, "LEFT", 5, 0)
+    rosterFrame.text:SetFont(font, fontSize)
+    rosterFrame.text:SetTextColor(0.8, 0.8, 0.8, 1)
+    rosterFrame:SetScript("OnEnter", function () rosterFrame:SetBackdropColor(1, 1, 1, 0.4) end)
+    rosterFrame:SetScript("OnLeave", function () rosterFrame:SetBackdropColor(0, 0, 0, 0) end)
+    rosterFrame.Update = function ()
+        FrameBuilder.UpdateRosterFrame(rosterFrame)
+    end
+    rosterFrame.Update()
+    return rosterFrame
+end
+
+function FrameBuilder.UpdateRosterFrame(rosterFrame)
+    rosterFrame:SetSize(rosterFrame.width, rosterFrame.height)
     rosterFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
-        tileSize = 16,
+        tileSize = rosterFrame.height,
     })
     rosterFrame:SetBackdropColor(0, 0, 0, 0)
-    rosterFrame.name = rosterFrame.name or rosterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    rosterFrame.name:EnableMouse(false)
-    rosterFrame.name:SetPoint("LEFT", rosterFrame, "LEFT", 5, 0)
-    rosterFrame.name:SetFont(font, fontSize)
-    rosterFrame.name:SetText(Roster.GetName(roster) .. "  -  " .. Roster.GetTimestamp(roster))
-    rosterFrame.name:SetTextColor(0.8, 0.8, 0.8, 1)
-    rosterFrame:SetScript("OnEnter", function () rosterFrame:SetBackdropColor(1, 1, 1, 0.4) end)
-    rosterFrame:SetScript("OnLeave", function () rosterFrame:SetBackdropColor(0, 0, 0, 0) end)
-    return rosterFrame
+    rosterFrame.text:SetText(rosterFrame.name)
 end
 
 ---@return table|BackdropTemplate|Frame
