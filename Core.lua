@@ -199,7 +199,7 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
             Log.debug("Received message SYNC_PROG:", sender, payload.d.progress)
             self.encountersProgress = payload.d.progress
-            SRTData.SetActiveRosterID(nil)
+            SRTData.SetActiveRosterID("none")
             self.overview:Update()
         end
     elseif payload.e == "SYNC" then

@@ -835,10 +835,10 @@ function SRTData.Initialize()
         pool = {},
         players = {},
         rosters = {},
-        defaultAssignments = defaultAssignments,
         activeRosterID = nil
     }
     -- Preseed our database with static information
+    SRT_Global().srt_data.defaultAssignments = defaultAssignments
     SRT_Global().srt_data.spells = {
         -- Death Knight
         IceboundFortitude = Spell:New(48792, "Icebound Fortitude", 60 * 3, 12),
