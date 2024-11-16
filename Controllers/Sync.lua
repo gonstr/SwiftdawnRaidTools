@@ -41,7 +41,7 @@ function SwiftdawnRaidTools:SyncSchedule()
                 encountersId = data.encountersId,
                 progress = sent / total * 100,
             }
-
+            self.db.profile.data.encountersProgress = progressData.progress
             SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, self.PREFIX_SYNC_PROGRESS)
         end)
     end)
