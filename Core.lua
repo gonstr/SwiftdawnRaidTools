@@ -25,6 +25,7 @@ SwiftdawnRaidTools.defaults = {
         notifications = {
             showOnlyOwnNotifications = false,
             locked = true,
+            show = false,
             mute = false,
             anchorX = GetScreenWidth()/2,
             anchorY = -(GetScreenHeight()/2) + 200,
