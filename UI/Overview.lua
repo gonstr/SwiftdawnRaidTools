@@ -80,7 +80,7 @@ end
 function SRTOverview:Update()
     SRTWindow.Update(self)
 
-    local encounters = SwiftdawnRaidTools:GetEncounters()
+    local encounters = SRTData.GetActiveEncounters()
     if encounters[self:GetProfile().selectedEncounterId] == nil then
         local encounterIndexes = {}
         for encounterId in pairs(encounters) do
@@ -97,7 +97,7 @@ function SRTOverview:Update()
 end
 
 function SRTOverview:UpdateHeaderText()
-    local encounters = SwiftdawnRaidTools:GetEncounters()
+    local encounters = SRTData.GetActiveEncounters()
 
     local encountersExists = false
 
@@ -131,7 +131,7 @@ function SRTOverview:UpdatePopupMenu()
     end
     local menuItems = {}
     local encounterIndexes = {}
-    for encounterId in pairs(SwiftdawnRaidTools:GetEncounters()) do
+    for encounterId in pairs(SRTData.GetActiveEncounters()) do
         table.insert(encounterIndexes, encounterId)
     end
     table.sort(encounterIndexes)
@@ -185,7 +185,7 @@ function SRTOverview:UpdateMain()
     end
 
     local selectedEncounterId = self:GetProfile().selectedEncounterId
-    local encounter = SwiftdawnRaidTools:GetEncounters()[selectedEncounterId]
+    local encounter = SRTData.GetActiveEncounters()[selectedEncounterId]
 
     if encounter then
 
@@ -236,9 +236,9 @@ function SRTOverview:UpdateMain()
                     assignmentFrame:ClearAllPoints()
                     if assignmentIndex > 1 then
                         assignmentFrame:SetPoint("BOTTOMLEFT", groupFrame, "BOTTOM")
-                        assignmentFrame:SetPoint("TOPRIGHT", -10, 0)
+                        assignmentFrame:SetPoint("TOPRIGHT", -5, 0)
                     else
-                        assignmentFrame:SetPoint("BOTTOMLEFT", 10, 0)
+                        assignmentFrame:SetPoint("BOTTOMLEFT", 5, 0)
                         assignmentFrame:SetPoint("TOPRIGHT", groupFrame, "TOP", 0, 0)
                     end
 
@@ -269,7 +269,7 @@ function SRTOverview:UpdateActiveGroups()
     for _, ability in pairs(self.bossAbilities) do
         for _, group in pairs(ability.groups) do
             local selectedEncounterId = self:GetProfile().selectedEncounterId
-            local encounter = SwiftdawnRaidTools:GetEncounters()[selectedEncounterId]
+            local encounter = SRTData.GetActiveEncounters()[selectedEncounterId]
 
             if encounter then
                 for _, part in ipairs(encounter) do

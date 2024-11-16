@@ -38,7 +38,6 @@ do
             end
 
             local ok, result = SwiftdawnRaidTools:ImportYAML(text)
-
             if not ok then
                 self.errorLabel:SetText(result)
                 return false
@@ -907,15 +906,14 @@ local importOptions = {
 
                 SwiftdawnRaidTools.db.profile.options.import = val
 
-                SwiftdawnRaidTools.db.profile.data.encounters = {}
-                SwiftdawnRaidTools.db.profile.data.encountersId = nil
+                SRTData.SetActiveRosterID(nil)
 
                 if val ~= nil and val ~= "" then
                     local _, result = SwiftdawnRaidTools:ImportYAML(val)
                     local encounters, encountersId = SwiftdawnRaidTools:ImportCreateEncountersData(result)
 
-                    SwiftdawnRaidTools.db.profile.data.encountersId = encountersId
-                    SwiftdawnRaidTools.db.profile.data.encounters = encounters
+                    SRTData.SetActiveRosterID(encountersId)
+                    SRTData.AddRoster(encountersId, encounters)
                 end
 
                 SwiftdawnRaidTools:SyncSchedule()

@@ -78,7 +78,7 @@ local function validateEncounter(import, bossEncounters)
     return true
 end
 
-local function validateRaidAssignments(import, spells)
+local function validateRaidAssignments(import)
     if import.type == "RAID_ASSIGNMENTS" then
         if not import.assignments then
             return false, "Import with type RAID_ASSIGNMENTS is missing a assignments field."
@@ -157,7 +157,7 @@ local function validateRaidAssignments(import, spells)
                 if type(assignment.spell_id) ~= "number" or assignment.spell_id ~= math.floor(assignment.spell_id) then
                     return false, "Import has an unknown spell_id value: " .. stringSafe(assignment.spell_id) .. "."
                 end
-                if not spells[assignment.spell_id] then
+                if not SRTData.GetSpellByID(assignment.spell_id) then
                     return false, "Import has a spell_id that's not supported: " .. stringSafe(assignment.spell_id) .. "."
                 end
             end
@@ -386,7 +386,6 @@ local function validateUntriggers(import)
 end
 
 function SwiftdawnRaidTools:ValidationValidateImport(import)
-    local spells = self:SpellsGetAll()
     local bossEncounters = self:BossEncountersGetAll()
 
     local ok, err = validateRequiredFields(import)
@@ -404,7 +403,7 @@ function SwiftdawnRaidTools:ValidationValidateImport(import)
     ok, err = validateUntriggers(import)
     if not ok then return false, err end
 
-    ok, err = validateRaidAssignments(import, spells)
+    ok, err = validateRaidAssignments(import)
     if not ok then return false, err end
     
     return true

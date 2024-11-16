@@ -999,6 +999,17 @@ function SRTData:LoadData()
     self.spells = data.spells
     self.buffs = data.buffs
     self.defaultAssignments = defaultAssignments
+    self.activeRosterID = data.activeRosterID
+
+    if SwiftdawnRaidTools.db.profile.data.encountersId then
+        data.activeRosterID = SwiftdawnRaidTools.db.profile.data.encountersId
+        self.activeRosterID = data.activeRosterID
+        SwiftdawnRaidTools.db.profile.data.encountersId = nil
+    end
+    if #SwiftdawnRaidTools.db.profile.data.encounters > 0 then
+        self.rosters[self.activeRosterID] = { encounters = SwiftdawnRaidTools.db.profile.data.encounters }
+        SwiftdawnRaidTools.db.profile.data.encounters = nil
+    end
 end
 
 ---Add player to pool; will not overwrite!
@@ -1055,7 +1066,7 @@ end
 function SRTData.SetPlayerSpec(name, spec)
     local data = SRTData.Get()
     if not data.players[name] then
-        print("Unable to set spec for "..name..". Player not in SRTData player pool yet!")
+        Log.info("Unable to set spec for "..name..". Player not in SRTData player pool yet!")
         return
     end
     data.players[name].spec = spec
@@ -1092,4 +1103,46 @@ function SRTData.GetClassColorBySpellID(spellID)
         end
     end
     return { r = 0, g = 0, b = 0, colorStr = "ffffffff" }
+end
+
+function SRTData.GetActiveRosterID()
+    local data = SRTData.Get()
+    return data.activeRosterID
+end
+
+function SRTData.SetActiveRosterID(rosterID)
+    local data = SRTData.Get()
+    data.activeRosterID = rosterID
+end
+
+function SRTData.AddRoster(rosterID, roster)
+    local data = SRTData.Get()
+
+    -- FIXME: THIS IS ONLY ONE ROSTER FOR THIS VERSION, CLEANING UP TO AVOID BULKING UP!
+    data.rosters = {}
+    -- FIXME: THIS IS ONLY ONE ROSTER FOR THIS VERSION, CLEANING UP TO AVOID BULKING UP!
+    
+    data.rosters[rosterID] = roster
+end
+
+function SRTData.GetActiveRoster()
+    local data = SRTData.Get()
+    if not data.activeRosterID then
+        return {}
+    end
+    return data.rosters[data.activeRosterID]
+end
+
+function SRTData.GetActiveEncounters()
+    if SwiftdawnRaidTools.TEST then
+        return testAssignments
+    end
+    local activeRoster = SRTData.GetActiveRoster()
+    if not activeRoster then
+        return {}
+    end
+    if not activeRoster.encounters then
+        return {}
+    end
+    return activeRoster.encounters
 end

@@ -305,7 +305,7 @@ end
 
 function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay, countdown)
     local selectedEncounterId = self.db.profile.overview.selectedEncounterId
-    local encounter = self:GetEncounters()[selectedEncounterId]
+    local encounter = SRTData.GetActiveEncounters()[selectedEncounterId]
 
     if not self.TEST then
         if self.db.profile.notifications.showOnlyOwnNotifications then

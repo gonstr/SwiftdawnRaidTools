@@ -38,3 +38,8 @@ end
 function Roster.AddPlayer(roster, player)
     roster.players[player.name] = player
 end
+
+function Roster.Parse(raw)
+    local roster = Roster:New()
+    roster.encounters = raw
+end

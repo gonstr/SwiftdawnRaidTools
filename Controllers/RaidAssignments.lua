@@ -82,7 +82,7 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId, encounter
         return
     end
 
-    activeEncounter = self:GetEncounters()[encounterId]
+    activeEncounter = SRTData.GetActiveEncounters()[encounterId]
 
     if not activeEncounter then
         Log.debug("No active encounter found!")

@@ -132,7 +132,7 @@ function SwiftdawnRaidTools:IsPlayerRaidLeader()
 end
 
 function SwiftdawnRaidTools:GetRaidAssignmentPart(uuid)
-    local encounters = self:GetEncounters()
+    local encounters = SRTData.GetActiveEncounters()
 
     if encounters then
         for _, encounter in pairs(encounters) do
@@ -331,7 +331,7 @@ function orderedNext(t, state)
     -- table being iterated.
 
     local key = nil
-    --print("orderedNext: state = "..tostring(state) )
+    --Log.info("orderedNext: state = "..tostring(state) )
     if state == nil then
         -- the first time, generate the index
         t.__orderedIndex = __genOrderedIndex( t )
@@ -366,7 +366,7 @@ GuildRoster()
 -- Function to get the name of a guild rank by index
 function GetGuildRankNameByIndex(rankIndex)
     if rankIndex < 0 or rankIndex >= GuildControlGetNumRanks() then
-        print("Invalid rank index")
+        Log.info("Invalid rank index")
         return nil
     end
     

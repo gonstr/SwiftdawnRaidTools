@@ -12,8 +12,8 @@ local clientVersions = {}
 
 local function PerformSync()
     local data = {
-        encountersId = SwiftdawnRaidTools.db.profile.data.encountersId,
-        encounters = SwiftdawnRaidTools.db.profile.data.encounters
+        encountersId = SRTData.GetActiveRosterID(),
+        encounters = SRTData.GetActiveRoster().encounters
     }
     Log.debug("Sending raid sync")
     SwiftdawnRaidTools:SendRaidMessage("SYNC", data, SwiftdawnRaidTools.PREFIX_SYNC, "BULK", function(_, sent, total)
@@ -21,7 +21,7 @@ local function PerformSync()
             encountersId = data.encountersId,
             progress = sent / total * 100,
         }
-        SwiftdawnRaidTools.db.profile.data.encountersProgress = progressData.progress
+        SwiftdawnRaidTools.encountersProgress = progressData.progress
         SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS)
     end)
 end
@@ -69,7 +69,7 @@ function SwiftdawnRaidTools:SyncSendStatus()
     end
 
     local data = {
-        encountersId = self.db.profile.data.encountersId,
+        encountersId = SRTData.GetActiveRosterID(),
     }
 
     self:SendRaidMessage("SYNC_STATUS", data, self.PREFIX_SYNC)
@@ -80,7 +80,7 @@ function SwiftdawnRaidTools:SyncHandleStatus(data)
         return
     end
 
-    if self.db.profile.data.encountersId ~= data.encountersId then
+    if SRTData.GetActiveRosterID() ~= data.encountersId then
         self:SyncSchedule()
     end
 end

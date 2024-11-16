@@ -196,18 +196,17 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         Log.debug("Received message SYNC_STATUS:", sender)
         self:SyncHandleStatus(payload.d)
     elseif payload.e == "SYNC_PROG" then
-        if payload.d.encountersId ~= self.db.profile.data.encountersId then
+        if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
             Log.debug("Received message SYNC_PROG:", sender, payload.d.progress)
-            self.db.profile.data.encountersProgress = payload.d.progress
-            self.db.profile.data.encountersId = nil
-            self.db.profile.data.encounters = {}
+            self.encountersProgress = payload.d.progress
+            SRTData.SetActiveRosterID(nil)
             self.overview:Update()
         end
     elseif payload.e == "SYNC" then
         Log.debug("Received message SYNC")
-        self.db.profile.data.encountersProgress = nil
-        self.db.profile.data.encountersId = payload.d.encountersId
-        self.db.profile.data.encounters = payload.d.encounters
+        self.encountersProgress = nil
+        SRTData.SetActiveRosterID(payload.d.encountersId)
+        SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters))
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         Log.debug("Received message ACT_GRPS")
