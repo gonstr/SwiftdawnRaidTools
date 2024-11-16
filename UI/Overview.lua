@@ -68,23 +68,9 @@ function SRTOverview:UpdateAppearance()
 end
 
 function SRTOverview:Resize()
-    local encounters = SwiftdawnRaidTools:GetEncounters()
-    local totalHeight = 0
-    for _, encounter in pairs(encounters) do
-        local height = self.header:GetHeight()
-        if encounter then
-            for _, part in ipairs(encounter) do
-                if part.type == "RAID_ASSIGNMENTS" then
-                    height = height + 30
-                    for _ in ipairs(part.assignments) do
-                        height = height + self:GetAssignmentGroupHeight() + 3
-                    end
-                end
-            end
-        end
-        if height > totalHeight then
-            totalHeight = height
-        end
+    local totalHeight = 16
+    for _, bossAbilityFrame in pairs(self.bossAbilities) do
+        totalHeight = totalHeight + bossAbilityFrame:GetHeight() + 7
     end
     self.container:SetHeight(math.max(MIN_HEIGHT, totalHeight))
 end
