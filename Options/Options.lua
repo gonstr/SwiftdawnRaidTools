@@ -145,7 +145,7 @@ local mainOptions = {
                     name = "Force Sync",
                     desc = "Synchronize raid assignments with Raid.",
                     func = function()
-                        SwiftdawnRaidTools:SyncSchedule()
+                        SwiftdawnRaidTools:SyncNow()
                     end,
                     order = 5,
                 },
