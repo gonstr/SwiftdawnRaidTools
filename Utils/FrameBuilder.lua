@@ -61,30 +61,40 @@ end
 
 ---@return table|BackdropTemplate|Frame
 ---@param parentFrame Frame
----@param roster Roster
-function FrameBuilder.CreateRosterFrame(parentFrame, roster, width, height, font, fontSize)
-    local rosterFrame = CreateFrame("Frame", parentFrame:GetName() .. "_" .. Roster.GetName(roster), parentFrame, "BackdropTemplate")
+function FrameBuilder.CreateRosterFrame(parentFrame, id, name, width, height, font, fontSize)
+    local rosterFrame = CreateFrame("Frame", parentFrame:GetName() .. "_Roster" .. id, parentFrame, "BackdropTemplate")
+    rosterFrame.id = id
+    rosterFrame.width = width
+    rosterFrame.height = height
     rosterFrame:EnableMouse(true)
-    rosterFrame:SetSize(width, height)
-    rosterFrame:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 16,
-    })
-    rosterFrame:SetBackdropColor(0, 0, 0, 0)
-    rosterFrame.name = rosterFrame.name or rosterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    rosterFrame.name:EnableMouse(false)
-    rosterFrame.name:SetPoint("LEFT", rosterFrame, "LEFT", 5, 0)
-    rosterFrame.name:SetFont(font, fontSize)
-    rosterFrame.name:SetText(Roster.GetName(roster) .. "  -  " .. Roster.GetTimestamp(roster))
-    rosterFrame.name:SetTextColor(0.8, 0.8, 0.8, 1)
+    rosterFrame.name = name
+    rosterFrame.text = rosterFrame.text or rosterFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    rosterFrame.text:EnableMouse(false)
+    rosterFrame.text:SetPoint("LEFT", rosterFrame, "LEFT", 5, 0)
+    rosterFrame.text:SetFont(font, fontSize)
+    rosterFrame.text:SetTextColor(0.8, 0.8, 0.8, 1)
     rosterFrame:SetScript("OnEnter", function () rosterFrame:SetBackdropColor(1, 1, 1, 0.4) end)
     rosterFrame:SetScript("OnLeave", function () rosterFrame:SetBackdropColor(0, 0, 0, 0) end)
+    rosterFrame.Update = function ()
+        FrameBuilder.UpdateRosterFrame(rosterFrame)
+    end
+    rosterFrame.Update()
     return rosterFrame
 end
 
+function FrameBuilder.UpdateRosterFrame(rosterFrame)
+    rosterFrame:SetSize(rosterFrame.width, rosterFrame.height)
+    rosterFrame:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = rosterFrame.height,
+    })
+    rosterFrame:SetBackdropColor(0, 0, 0, 0)
+    rosterFrame.text:SetText(rosterFrame.name)
+end
+
 ---@return table|BackdropTemplate|Frame
----@param parentFrame Frame
+---@param parentFrame table|BackdropTemplate|Frame
 ---@param height integer
 function FrameBuilder.CreateAssignmentGroupFrame(parentFrame, height)
     local groupFrame = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
@@ -103,7 +113,6 @@ function FrameBuilder.CreateAssignmentGroupFrame(parentFrame, height)
 end
 
 ---@param groupFrame table|BackdropTemplate|Frame
----@param group table
 ---@param uuid string
 ---@param index integer
 ---@param fontSize integer
@@ -129,6 +138,7 @@ end
 ---@param iconSize integer
 function FrameBuilder.CreateAssignmentFrame(parentFrame, index, font, fontSize, iconSize)
     local assignmentFrame = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
+    assignmentFrame:SetClipsChildren(true)
     assignmentFrame.index = index
     assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
     assignmentFrame:SetBackdrop({
