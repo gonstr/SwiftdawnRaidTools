@@ -70,7 +70,9 @@ end
 function SRTOverview:Resize()
     local totalHeight = 16
     for _, bossAbilityFrame in pairs(self.bossAbilities) do
-        totalHeight = totalHeight + bossAbilityFrame:GetHeight() + 7
+        if bossAbilityFrame:IsShown() then
+            totalHeight = totalHeight + bossAbilityFrame:GetHeight() + 7
+        end
     end
     self.container:SetHeight(math.max(MIN_HEIGHT, totalHeight))
 end
