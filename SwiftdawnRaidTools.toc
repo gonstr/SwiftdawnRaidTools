@@ -45,6 +45,7 @@ UI\Overview.lua
 UI\Notifications.lua
 Utils\FrameBuilder.lua
 Utils\SRTData.lua
+Utils\Log.lua
 Models\LogItem.lua
 Models\Spell.lua
 Models\Spec.lua

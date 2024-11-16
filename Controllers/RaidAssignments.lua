@@ -85,11 +85,11 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId, encounter
     activeEncounter = self:GetEncounters()[encounterId]
 
     if not activeEncounter then
-        if self.DEBUG then self:Print("No active encounter found!") end
+        Log.debug("No active encounter found!")
         return
     end
 
-    if self.DEBUG then self:Print("Encounter starting") end
+    Log.debug("Encounter starting")
 
     self:RaidAssignmentsUpdateGroups()
 
@@ -192,7 +192,7 @@ function SwiftdawnRaidTools:RaidAssignmentsEndEncounter()
         return
     end
 
-    if self.DEBUG then self:Print("Encounter ended") end
+    Log.debug("Encounter ended")
 
     resetState()
     self:GroupsReset()
@@ -236,7 +236,7 @@ function SwiftdawnRaidTools:RaidAssignmentsUpdateGroups()
         return
     end
 
-    if self.DEBUG then self:Print("Update groups start") end
+    Log.debug("Update groups start")
 
     local groupsUpdated = false
 
@@ -265,7 +265,7 @@ function SwiftdawnRaidTools:RaidAssignmentsUpdateGroups()
                 local selectedGroups = self:RaidAssignmentsSelectGroup(part.assignments)
 
                 if not self:RaidAssignmentsIsGroupsEqual(activeGroups, selectedGroups) then
-                    if self.DEBUG then self:Print("Updated groups for", part.uuid, self:StringJoin(selectedGroups)) end
+                    Log.debug("Updated groups for", part.uuid, self:StringJoin(selectedGroups))
 
                     groupsUpdated = true
                     self:GroupsSetActive(part.uuid, selectedGroups)
@@ -274,7 +274,7 @@ function SwiftdawnRaidTools:RaidAssignmentsUpdateGroups()
         end
     end
 
-    if self.DEBUG then self:Print("Update groups done. Changed:", groupsUpdated) end
+    Log.debug("Update groups done. Changed:", groupsUpdated) 
 
     if groupsUpdated then
         self:SendRaidMessage("ACT_GRPS", self:GroupsGetAllActive())
@@ -392,17 +392,17 @@ local function triggerConditionsTrue(conditions)
 end
 
 function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown, ignoreTriggerDelay)
-    if self.DEBUG then self:Print("Sending TRIGGER start") end
+    Log.debug("Sending TRIGGER start")
 
     if trigger.throttle then
         if trigger.lastTriggerTime and GetTime() < trigger.lastTriggerTime + trigger.throttle then
-            if self.DEBUG then self:Print("TRIGGER throttled") end
+            Log.debug("TRIGGER throttled")
             return
         end
     end
 
     if not triggerConditionsTrue(trigger.conditions) then
-        if self.DEBUG then self:Print("TRIGGER conditions did not pass") end
+        Log.debug("TRIGGER conditions did not pass")
         return
     end
 
@@ -424,7 +424,7 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown, 
             context = context
         }
 
-        if self.DEBUG then self:Print("Sending TRIGGER found groups") end
+        Log.debug("Sending TRIGGER found groups")
 
         if not ignoreTriggerDelay and (trigger.delay and trigger.delay > 0) then
             if not delayTimers[trigger.uuid] then
@@ -443,7 +443,7 @@ function SwiftdawnRaidTools:RaidAssignmentsTrigger(trigger, context, countdown, 
 end
 
 local function cancelDelayTimers(uuid)
-    if SwiftdawnRaidTools.DEBUG then SwiftdawnRaidTools:Print("Cancelling timers for", uuid) end
+    Log.debug("Cancelling timers for", uuid)
 
     if delayTimers[uuid] then
         for _, timer in ipairs(delayTimers[uuid]) do
@@ -633,12 +633,12 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
         return
     end
 
-    if self.DEBUG then self:Print("Handling raid boss emote", text) end
+    Log.debug("Handling raid boss emote", text)
 
     for _, triggers in pairs(raidBossEmoteTriggersCache) do
         for _, trigger in ipairs(triggers) do
             if text:match(trigger.text) ~= nil then
-                if self.DEBUG then self:Print("Found raid boss emote TRIGGER match") end
+                Log.debug("Found raid boss emote TRIGGER match")
                 self:RaidAssignmentsTrigger(trigger, { text = text })
             end
         end
@@ -647,7 +647,7 @@ function SwiftdawnRaidTools:RaidAssignmentsHandleRaidBossEmote(text)
     for _, untriggers in pairs(raidBossEmoteUntriggersCache) do
         for _, untrigger in ipairs(untriggers) do
             if text:match(untrigger.text) ~= nil then
-                if self.DEBUG then self:Print("Found raid boss emote UNTRIGGER match") end
+                Log.debug("Found raid boss emote UNTRIGGER match")
                 cancelDelayTimers(untrigger.uuid)
             end
         end
