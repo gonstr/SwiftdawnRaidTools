@@ -113,7 +113,6 @@ function FrameBuilder.CreateAssignmentGroupFrame(parentFrame, height)
 end
 
 ---@param groupFrame table|BackdropTemplate|Frame
----@param group table
 ---@param uuid string
 ---@param index integer
 ---@param fontSize integer
@@ -139,6 +138,7 @@ end
 ---@param iconSize integer
 function FrameBuilder.CreateAssignmentFrame(parentFrame, index, font, fontSize, iconSize)
     local assignmentFrame = CreateFrame("Frame", nil, parentFrame, "BackdropTemplate")
+    assignmentFrame:SetClipsChildren(true)
     assignmentFrame.index = index
     assignmentFrame.iconFrame = CreateFrame("Frame", nil, assignmentFrame, "BackdropTemplate")
     assignmentFrame:SetBackdrop({

@@ -10,41 +10,50 @@ local syncTimer = nil
 
 local clientVersions = {}
 
+local function PerformSync()
+    local data = {
+        encountersId = SRTData.GetActiveRosterID(),
+        encounters = SRTData.GetActiveRoster().encounters
+    }
+    Log.debug("Sending raid sync")
+    SwiftdawnRaidTools:SendRaidMessage("SYNC", data, SwiftdawnRaidTools.PREFIX_SYNC, "BULK", function(_, sent, total)
+        local progressData = {
+            encountersId = data.encountersId,
+            progress = sent / total * 100,
+        }
+        SwiftdawnRaidTools.encountersProgress = progressData.progress
+        SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS)
+    end)
+end
+
 function SwiftdawnRaidTools:SyncSchedule()
     if IsEncounterInProgress() or not self:IsPlayerRaidLeader() then
+        Log.info("Not syncing, you are not the raid leader, or encounter is in progress")
         return
     end
-
     if syncTimer then
         syncTimer:Cancel()
         syncTimer = nil
     end
-
     local timeSinceLastSync = GetTime() - lastSyncTime
     local waitTime = math.max(0, SYNC_WAIT_TIME - timeSinceLastSync)
-
-    if self.DEBUG then self:Print("Scheduling raid sync in", waitTime, "seconds") end
-
+    Log.debug("Scheduling raid sync in", waitTime, "seconds")
     syncTimer = C_Timer.NewTimer(waitTime, function()
         lastSyncTime = GetTime()
-
-        local data = {
-
-            encountersId = self.db.profile.data.encountersId,
-            encounters = self.db.profile.data.encounters
-        }
-
-        if self.DEBUG then self:Print("Sending raid sync") end
-
-        SwiftdawnRaidTools:SendRaidMessage("SYNC", data, self.PREFIX_SYNC, "BULK", function(_, sent, total)
-            local progressData = {
-                encountersId = data.encountersId,
-                progress = sent / total * 100,
-            }
-            self.db.profile.data.encountersProgress = progressData.progress
-            SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, self.PREFIX_SYNC_PROGRESS)
-        end)
+        PerformSync()
     end)
+end
+
+function SwiftdawnRaidTools:SyncNow()
+    if IsEncounterInProgress() or not self:IsPlayerRaidLeader() then
+        Log.info("Not syncing, you are not the raid leader, or encounter is in progress")
+        return
+    end
+    if syncTimer then
+        syncTimer:Cancel()
+        syncTimer = nil
+    end
+    PerformSync()
 end
 
 function SwiftdawnRaidTools:SyncReqVersions()
@@ -62,7 +71,7 @@ function SwiftdawnRaidTools:SyncSendStatus()
     end
 
     local data = {
-        encountersId = self.db.profile.data.encountersId,
+        encountersId = SRTData.GetActiveRosterID(),
     }
 
     self:SendRaidMessage("SYNC_STATUS", data, self.PREFIX_SYNC)
@@ -73,7 +82,7 @@ function SwiftdawnRaidTools:SyncHandleStatus(data)
         return
     end
 
-    if self.db.profile.data.encountersId ~= data.encountersId then
+    if SRTData.GetActiveRosterID() ~= data.encountersId then
         self:SyncSchedule()
     end
 end

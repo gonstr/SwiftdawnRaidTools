@@ -1,5 +1,3 @@
-local SwiftdawnRaidTools = SwiftdawnRaidTools
-
 ---@class Roster
 Roster = {}
 Roster.__index = Roster
@@ -37,4 +35,10 @@ end
 ---@param player Player
 function Roster.AddPlayer(roster, player)
     roster.players[player.name] = player
+end
+
+function Roster.Parse(raw)
+    local roster = Roster:New()
+    roster.encounters = raw
+    return roster
 end

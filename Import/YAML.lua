@@ -50,7 +50,7 @@ table_print_value = function(value, indent, done)
 end
 
 local table_print = function(tt)
-  print('return '..table_print_value(tt))
+  Log.info('return '..table_print_value(tt))
 end
 
 local table_clone = function(t)

@@ -25,6 +25,7 @@ SwiftdawnRaidTools.defaults = {
         notifications = {
             showOnlyOwnNotifications = false,
             locked = true,
+            show = false,
             mute = false,
             anchorX = GetScreenWidth()/2,
             anchorY = -(GetScreenHeight()/2) + 200,
@@ -116,7 +117,7 @@ SwiftdawnRaidTools.defaults = {
 }
 
 function SwiftdawnRaidTools:OnInitialize()
-    self:DBInit() 
+    self:DBInit()
     self:OptionsInit()
     self:MinimapInit()
 
@@ -180,10 +181,10 @@ end
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
         self:BossEncountersInit()
+        SRTData.Initialize()
         self:SyncSendStatus()
         self:SyncSchedule()
     end
-
     self.overview:Update()
     self.debugLog:Update()
     self.assignmentExplorer:Update()
@@ -191,7 +192,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
-    if self.DEBUG then self:Print("Sending RAID message") end
+    Log.debug("Sending RAID message")
 
     local payload = {
         v = self.VERSION,
@@ -233,31 +234,30 @@ end
 
 function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
     if payload.e == "SYNC_REQ_VERSIONS" then
-        if self.DEBUG then self:Print("Received message SYNC_REQ_VERSIONS:", sender) end
+        Log.debug("Received message SYNC_REQ_VERSIONS:", sender)
         self:SyncSendVersion()
     elseif payload.e == "SYNC_STATUS" then
-        if self.DEBUG then self:Print("Received message SYNC_STATUS:", sender) end
+        Log.debug("Received message SYNC_STATUS:", sender)
         self:SyncHandleStatus(payload.d)
     elseif payload.e == "SYNC_PROG" then
-        if payload.d.encountersId ~= self.db.profile.data.encountersId then
-            if self.DEBUG then self:Print("Received message SYNC_PROG:", sender, payload.d.progress) end
-            self.db.profile.data.encountersProgress = payload.d.progress
-            self.db.profile.data.encountersId = nil
-            self.db.profile.data.encounters = {}
+        if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
+            Log.debug("Received message SYNC_PROG:", sender, payload.d.progress)
+            self.encountersProgress = payload.d.progress
+            SRTData.SetActiveRosterID(nil)
             self.overview:Update()
         end
     elseif payload.e == "SYNC" then
-        if self.DEBUG then self:Print("Received message SYNC") end
-        self.db.profile.data.encountersProgress = nil
-        self.db.profile.data.encountersId = payload.d.encountersId
-        self.db.profile.data.encounters = payload.d.encounters
+        Log.debug("Received message SYNC")
+        self.encountersProgress = nil
+        SRTData.SetActiveRosterID(payload.d.encountersId)
+        SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters))
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
-        if self.DEBUG then self:Print("Received message ACT_GRPS") end
+        Log.debug("Received message ACT_GRPS")
         self:GroupsSetAllActive(payload.d)
         self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
-        if self.DEBUG then self:Print("Received message TRIGGER") end
+        Log.debug("Received message TRIGGER")
         self.debugLog:AddItem(LogItem:New(payload.d))
         self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
         self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
@@ -297,7 +297,7 @@ function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
     local guid = UnitGUID(unitId)
 
     if self:UnitsIsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
-        if self.DEBUG then self:Print("Handling cached unit coming back to life") end
+        Log.debug("Handling cached unit coming back to life")
         self:UnitsClearDead(guid)
         self:RaidAssignmentsUpdateGroups()
         self.overview:UpdateSpells()
