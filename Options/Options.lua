@@ -138,8 +138,17 @@ local mainOptions = {
                         SwiftdawnRaidTools:NotificationsUpdateAppearance()
                         SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
+                    order = 4,
+                },
+                forceSync = {
+                    type = "execute",
+                    name = "Force Sync",
+                    desc = "Synchronize raid assignments with Raid.",
+                    func = function()
+                        SwiftdawnRaidTools:SyncSchedule()
+                    end,
                     order = 5,
-                }
+                },
             },
         },
         separator00 = {

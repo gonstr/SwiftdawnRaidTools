@@ -46,11 +46,11 @@ UI\Notifications.lua
 UI\AssignmentExplorer.lua
 UI\RosterBuilder.lua
 Utils\FrameBuilder.lua
+Utils\SRTData.lua
 Models\LogItem.lua
 Models\Spell.lua
 Models\Spec.lua
 Models\Class.lua
 Models\Player.lua
 Models\Roster.lua
-Models\SRTData.lua
 Models\SRTColor.lua

@@ -7,7 +7,7 @@ Roster.__index = Roster
 local function timestamp()
     local currentTimestamp = time()
     ---@class string
-    return date("%H:%M:%S %d-%m-%Y", currentTimestamp)
+    return date("%d-%m-%Y %H:%M:%S", currentTimestamp)
 end
 
 ---@return Roster
@@ -15,7 +15,6 @@ function Roster:New()
     ---@class Roster
     local obj = setmetatable({}, self)
     self.__index = self
-    obj.id = SwiftdawnRaidTools:GenerateUUID()
     obj.name = nil
     obj.timestamp = timestamp()
     obj.players = {}

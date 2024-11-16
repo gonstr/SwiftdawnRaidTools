@@ -628,6 +628,203 @@ local defaultAssignments = {
         }, -- [1]
     },
 }
+local testAssignments = {
+    [42001] = {
+        {
+            ["assignments"] = {
+                {
+                    {
+                        ["spell_id"] = 740,
+                        ["type"] = "SPELL",
+                        ["player"] = "Aeolyne",
+                    }, -- [1]
+                    {
+                        ["spell_id"] = 62618,
+                        ["type"] = "SPELL",
+                        ["player"] = "Kondec",
+                    }, -- [2]
+                }, -- [1]
+            },
+            ["type"] = "RAID_ASSIGNMENTS",
+            ["version"] = 1,
+            ["encounter"] = 42001,
+            ["triggers"] = {
+                {
+                    ["spell_id"] = 81572,
+                    ["type"] = "SPELL_AURA",
+                }, -- [1]
+                {
+                    ['type'] = "ENCOUNTER_START",
+                    ['delay'] = 5,
+                    ['countdown'] = 3
+                }
+            },
+            ["uuid"] = "437efe45-3fe2-4dd2-85a9-0e0b51689f69",
+            ["metadata"] = {
+                ["name"] = "Spell Aura Trigger",
+            },
+        }, -- [1]  Spell Aura Phase
+        {
+            ["assignments"] = {
+                {
+                    {
+                        ["spell_id"] = 31821,
+                        ["type"] = "SPELL",
+                        ["player"] = "Anticipâte",
+                    }, -- [1]
+                }, -- [1]
+            },
+            ["type"] = "RAID_ASSIGNMENTS",
+            ["version"] = 1,
+            ["untriggers"] = {
+                {
+                    ["type"] = "RAID_BOSS_EMOTE",
+                    ["text"] = "I will spill water on you!",
+                }, -- [1]
+            },
+            ["encounter"] = 42001,
+            ["triggers"] = {
+                {
+                    ["countdown"] = 3,
+                    ["type"] = "RAID_BOSS_EMOTE",
+                    ["delay"] = 1,
+                    ["text"] = "I will breathe fire on you!",
+                }, -- [1]
+            },
+            ["uuid"] = "5450a7eb-cb42-4719-ba6d-e8a7ecca8f98",
+            ["metadata"] = {
+                ["name"] = "Raid Boss Emote",
+            },
+        }, -- [2]  Raid Boss Emote Phase
+        {
+            ["assignments"] = {
+                {
+                    {
+                        ["spell_id"] = 740,
+                        ["type"] = "SPELL",
+                        ["player"] = "Clutex",
+                    }, -- [1]
+                    {
+                        ["spell_id"] = 31821,
+                        ["type"] = "SPELL",
+                        ["player"] = "Elí",
+                    }, -- [2]
+                }, -- [1]
+                {
+                    {
+                        ["spell_id"] = 64843,
+                        ["type"] = "SPELL",
+                        ["player"] = "Managobrr",
+                    }, -- [1]
+                    {
+                        ["spell_id"] = 31821,
+                        ["type"] = "SPELL",
+                        ["player"] = "Anticipâte",
+                    }, -- [2]
+                }, -- [2]
+            },
+            ["type"] = "RAID_ASSIGNMENTS",
+            ["version"] = 1,
+            ["encounter"] = 1023,
+            ["triggers"] = {
+                {
+                    ["spell_id"] = 88853,
+                    ["type"] = "SPELL_CAST",
+                }, -- [1]
+            },
+            ["uuid"] = "e8b42653-abbe-418d-b675-6d323d8d78c8",
+            ["metadata"] = {
+                ["name"] = "Spell Cast",
+            },
+        }, -- [3]  Spell Cast Phase
+        --{
+        --    ["assignments"] = {
+        --        {
+        --            {
+        --                ["spell_id"] = 64843,
+        --                ["type"] = "SPELL",
+        --                ["player"] = "Kondec",
+        --            }, -- [1]
+        --            {
+        --                ["spell_id"] = 98008,
+        --                ["type"] = "SPELL",
+        --                ["player"] = "Venmir",
+        --            }, -- [2]
+        --        }, -- [1]
+        --        {
+        --            {
+        --                ["spell_id"] = 740,
+        --                ["type"] = "SPELL",
+        --                ["player"] = "Aeolyne",
+        --            }, -- [1]
+        --            {
+        --                ["spell_id"] = 740,
+        --                ["type"] = "SPELL",
+        --                ["player"] = "Crawlern",
+        --            }, -- [2]
+        --        }, -- [2]
+        --    },
+        --    ["type"] = "RAID_ASSIGNMENTS",
+        --    ["version"] = 1,
+        --    ["encounter"] = 1023,
+        --    ["triggers"] = {
+        --        {
+        --            ["spell_id"] = 82848,
+        --            ["type"] = "SPELL_CAST",
+        --            ["conditions"] = {
+        --                {
+        --                    ["pct_lt"] = 25,
+        --                    ["type"] = "UNIT_HEALTH",
+        --                    ["unit"] = "boss1",
+        --                }, -- [1]
+        --            },
+        --        }, -- [1]
+        --    },
+        --    ["uuid"] = "765b0f4c-141a-4286-b97f-24390a8001c5",
+        --    ["metadata"] = {
+        --        ["name"] = "Conditional Spell Cast Test",
+        --    },
+        --}, -- [4]  Conditional Spell Cast Phase
+        --{
+        --    ["assignments"] = {
+        --        {
+        --            {
+        --                ["spell_id"] = 64843,
+        --                ["type"] = "SPELL",
+        --                ["player"] = "Kondec",
+        --            }, -- [1]
+        --        }, -- [1]
+        --        {
+        --            {
+        --                ["spell_id"] = 740,
+        --                ["type"] = "SPELL",
+        --                ["player"] = "Aeolyne",
+        --            }, -- [1]
+        --        }, -- [2]
+        --    },
+        --    ["type"] = "RAID_ASSIGNMENTS",
+        --    ["version"] = 1,
+        --    ["encounter"] = 42001,
+        --    ["triggers"] = {
+        --        {
+        --            ["pct_lt"] = 70,
+        --            ["type"] = "UNIT_HEALTH",
+        --            ["unit"] = "boss1",
+        --        }, -- [1]
+        --        {
+        --            ["pct_lt"] = 70,
+        --            ["type"] = "UNIT_HEALTH",
+        --            ["delay"] = 10,
+        --            ["unit"] = "boss1",
+        --        }, -- [2]
+        --    },
+        --    ["uuid"] = "b5aeb9ec-9f2a-4f03-b5bf-764ac5cec091",
+        --    ["metadata"] = {
+        --        ["name"] = "Unit Health Test",
+        --    },
+        --}, -- [5]  Unit Health Phase
+    }
+}
 
 --- Database class for Swiftdawn Raid Tools
 ---@class SRTData
@@ -635,7 +832,8 @@ SRTData = {
     players = {},
     rosters = {},
     classes = {},
-    spells = {}
+    spells = {},
+    activeRosterID = nil
 }
 SRTData.__index = SRTData
 
@@ -659,12 +857,13 @@ function SRTData.Get()
         srtDataSingleton:Initialize()
         srtDataSingleton:LoadData()
         DevTool:AddData(srtDataSingleton, "SRTData")
+        DevTool:AddData(SRT_Global().srt_data, "SRT_Global().srt_data")
         return srtDataSingleton
     end
 end
 
 function SRTData:Initialize()
-    SRT_Global().srt_data = SRT_Global().srt_data or{
+    SRT_Global().srt_data = SRT_Global().srt_data or {
         pool = {},
         players = {},
         rosters = {},
@@ -673,8 +872,9 @@ function SRTData:Initialize()
         spells = {},
         buffs = {}
     }
+    
     -- Preseed our database with static information
-    self.spells = {
+    SRT_Global().srt_data.spells = {
         -- Death Knight
         IceboundFortitude = Spell:New(48792, "Icebound Fortitude", 60 * 3, 12),
         VampiricBlood = Spell:New(55233, "Vampiric Blood", 60 * 1, 10),
@@ -709,90 +909,95 @@ function SRTData:Initialize()
         EnragedRegeneration = Spell:New(55694, "Enraged Regeneration", 60 * 3, 10),
         RallyingCry = Spell:New(97462, "Rallying Cry", 60 * 3, 10),
     }
-    self.classes = {
+    SRT_Global().srt_data.classes = {
         DeathKnight = Class:New("Death Knight", "DEATHKNIGHT", {
-            self.spells.IceboundFortitude,
-            self.spells.VampiricBlood,
-            self.spells.AntiMagicZone,
+            SRT_Global().srt_data.spells.IceboundFortitude,
+            SRT_Global().srt_data.spells.VampiricBlood,
+            SRT_Global().srt_data.spells.AntiMagicZone,
         }),
         Druid = Class:New("Druid", "DRUID", {
-            self.spells.Innervate,
-            self.spells.Barkskin,
-            self.spells.SurvivalInstincts,
-            self.spells.FrenziedRegeneration,
-            self.spells.Tranquility,
-            self.spells.StampedingRoar,
+            SRT_Global().srt_data.spells.Innervate,
+            SRT_Global().srt_data.spells.Barkskin,
+            SRT_Global().srt_data.spells.SurvivalInstincts,
+            SRT_Global().srt_data.spells.FrenziedRegeneration,
+            SRT_Global().srt_data.spells.Tranquility,
+            SRT_Global().srt_data.spells.StampedingRoar,
         }),
         Hunter = Class:New("Hunter", "HUNTER", {}),
         Mage = Class:New("Mage", "MAGE", {}),
         Paladin = Class:New("Paladin", "PALADIN", {
-            self.spells.DivineProtection,
-            self.spells.GuardianOfAncientKings,
-            self.spells.ArdentDefender,
-            self.spells.HandOfSalvation,
-            self.spells.HandOfProtection,
-            self.spells.AuraMastery,
-            self.spells.HandOfSacrifice,
-            self.spells.DivineGuardian,
+            SRT_Global().srt_data.spells.DivineProtection,
+            SRT_Global().srt_data.spells.GuardianOfAncientKings,
+            SRT_Global().srt_data.spells.ArdentDefender,
+            SRT_Global().srt_data.spells.HandOfSalvation,
+            SRT_Global().srt_data.spells.HandOfProtection,
+            SRT_Global().srt_data.spells.AuraMastery,
+            SRT_Global().srt_data.spells.HandOfSacrifice,
+            SRT_Global().srt_data.spells.DivineGuardian,
         }),
         Priest = Class:New("Priest", "PRIEST", {
-            self.spells.HymnOfHope,
-            self.spells.DivineHymn,
-            self.spells.PainSuppression,
-            self.spells.PowerWordBarrier,
+            SRT_Global().srt_data.spells.HymnOfHope,
+            SRT_Global().srt_data.spells.DivineHymn,
+            SRT_Global().srt_data.spells.PainSuppression,
+            SRT_Global().srt_data.spells.PowerWordBarrier,
         }),
         Rogue = Class:New("Rogue", "ROGUE", {}),
         Shaman = Class:New("Shaman", "SHAMAN", {
-            self.spells.ManaTideTotem,
-            self.spells.SpiritLinkTotem,
+            SRT_Global().srt_data.spells.ManaTideTotem,
+            SRT_Global().srt_data.spells.SpiritLinkTotem,
         }),
         Warlock = Class:New("Warlock", "WARLOCK", {}),
         Warrior = Class:New("Warrior", "WARRIOR", {
-            self.spells.ShieldWall,
-            self.spells.LastStand,
-            self.spells.EnragedRegeneration,
-            self.spells.RallyingCry,
+            SRT_Global().srt_data.spells.ShieldWall,
+            SRT_Global().srt_data.spells.LastStand,
+            SRT_Global().srt_data.spells.EnragedRegeneration,
+            SRT_Global().srt_data.spells.RallyingCry,
         })
     }
     self.specs = {
-        Blood = Spec:New("Blood", self.classes.DeathKnight),
-        FrostDK = Spec:New("Frost", self.classes.DeathKnight),
-        Unholy = Spec:New("Unholy", self.classes.DeathKnight),
-        Balance = Spec:New("Balance", self.classes.Druid),
-        Feral = Spec:New("Feral", self.classes.Druid),
-        Guardian = Spec:New("Guardian", self.classes.Druid),
-        RestorationDruid = Spec:New("Restoration", self.classes.Druid),
-        BeastMaster = Spec:New("Beast Master", self.classes.Hunter),
-        Marksmanship = Spec:New("Marksmanship", self.classes.Hunter),
-        Survival = Spec:New("Survival", self.classes.Hunter),
-        Arcane = Spec:New("Arcane", self.classes.Mage),
-        FrostMage = Spec:New("Frost", self.classes.Mage),
-        Fire = Spec:New("Fire", self.classes.Mage),
-        HolyPaladin = Spec:New("HolyPaladin", self.classes.Paladin),
-        ProtectionPaladin = Spec:New("Protection", self.classes.Paladin),
-        Retribution = Spec:New("Retribution", self.classes.Paladin),
-        Discipline = Spec:New("Discipline", self.classes.Priest),
-        HolyPriest = Spec:New("Holy", self.classes.Priest),
-        Shadow = Spec:New("Shadow", self.classes.Priest),
-        Assassin = Spec:New("Assassin", self.classes.Rogue),
-        Combat = Spec:New("Combat", self.classes.Rogue),
-        Subtility = Spec:New("Subtility", self.classes.Rogue),
-        Elemental = Spec:New("Elemental", self.classes.Shaman),
-        Enhancement = Spec:New("Enhancement", self.classes.Shaman),
-        RestorationShaman = Spec:New("Restoration", self.classes.Shaman),
-        Affliction = Spec:New("Affliction", self.classes.Warlock),
-        Demonology = Spec:New("Demonology", self.classes.Warlock),
-        Destruction = Spec:New("Destruction", self.classes.Warlock),
-        Arms = Spec:New("Arms", self.classes.Warrior),
-        Fury = Spec:New("Fury", self.classes.Warrior),
-        ProtectionWarrior = Spec:New("Protection", self.classes.Warrior),
+        Blood = Spec:New("Blood", SRT_Global().srt_data.classes.DeathKnight),
+        FrostDK = Spec:New("Frost", SRT_Global().srt_data.classes.DeathKnight),
+        Unholy = Spec:New("Unholy", SRT_Global().srt_data.classes.DeathKnight),
+        Balance = Spec:New("Balance", SRT_Global().srt_data.classes.Druid),
+        Feral = Spec:New("Feral", SRT_Global().srt_data.classes.Druid),
+        Guardian = Spec:New("Guardian", SRT_Global().srt_data.classes.Druid),
+        RestorationDruid = Spec:New("Restoration", SRT_Global().srt_data.classes.Druid),
+        BeastMaster = Spec:New("Beast Master", SRT_Global().srt_data.classes.Hunter),
+        Marksmanship = Spec:New("Marksmanship", SRT_Global().srt_data.classes.Hunter),
+        Survival = Spec:New("Survival", SRT_Global().srt_data.classes.Hunter),
+        Arcane = Spec:New("Arcane", SRT_Global().srt_data.classes.Mage),
+        FrostMage = Spec:New("Frost", SRT_Global().srt_data.classes.Mage),
+        Fire = Spec:New("Fire", SRT_Global().srt_data.classes.Mage),
+        HolyPaladin = Spec:New("HolyPaladin", SRT_Global().srt_data.classes.Paladin),
+        ProtectionPaladin = Spec:New("Protection", SRT_Global().srt_data.classes.Paladin),
+        Retribution = Spec:New("Retribution", SRT_Global().srt_data.classes.Paladin),
+        Discipline = Spec:New("Discipline", SRT_Global().srt_data.classes.Priest),
+        HolyPriest = Spec:New("Holy", SRT_Global().srt_data.classes.Priest),
+        Shadow = Spec:New("Shadow", SRT_Global().srt_data.classes.Priest),
+        Assassin = Spec:New("Assassin", SRT_Global().srt_data.classes.Rogue),
+        Combat = Spec:New("Combat", SRT_Global().srt_data.classes.Rogue),
+        Subtility = Spec:New("Subtility", SRT_Global().srt_data.classes.Rogue),
+        Elemental = Spec:New("Elemental", SRT_Global().srt_data.classes.Shaman),
+        Enhancement = Spec:New("Enhancement", SRT_Global().srt_data.classes.Shaman),
+        RestorationShaman = Spec:New("Restoration", SRT_Global().srt_data.classes.Shaman),
+        Affliction = Spec:New("Affliction", SRT_Global().srt_data.classes.Warlock),
+        Demonology = Spec:New("Demonology", SRT_Global().srt_data.classes.Warlock),
+        Destruction = Spec:New("Destruction", SRT_Global().srt_data.classes.Warlock),
+        Arms = Spec:New("Arms", SRT_Global().srt_data.classes.Warrior),
+        Fury = Spec:New("Fury", SRT_Global().srt_data.classes.Warrior),
+        ProtectionWarrior = Spec:New("Protection", SRT_Global().srt_data.classes.Warrior),
     }
 end
 
 function SRTData:LoadData()
     local data = SRT_Global().srt_data
+    self.pool = data.pool
     self.players = data.players
     self.rosters = data.rosters
+    self.classes = data.classes
+    self.specs = data.specs
+    self.spells = data.spells
+    self.buffs = data.buffs
     self.defaultAssignments = defaultAssignments
 end
 
@@ -830,12 +1035,13 @@ function SRTData.GetClass(className)
 end
 
 ---Create new roster
----@return Roster
+---@return string, Roster
 function SRTData.CreateNewRoster()
     local data = SRTData.Get()
-    local newRoster = Roster:New()
-    data.rosters[newRoster.id] = newRoster
-    return newRoster
+    local rosterID = SwiftdawnRaidTools:GenerateUUID()
+    local roster = Roster:New()
+    data.rosters[rosterID] = roster
+    return rosterID, roster
 end
 
 function SRTData.RemoveRoster(rosterID)
