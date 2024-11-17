@@ -521,11 +521,11 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
                 -- Remove from roster
                 self.selectedRoster.players[rosteredPlayer.name] = nil
                 self.addRemove.roster.scroll.items[rosteredPlayer.name] = nil
-                self:UpdateAddOrRemovePlayers()
                 playerFrame:Hide()
             else
                 self.addRemove.roster.scroll.ConnectItem(rosteredPlayer.name, playerFrame)
             end
+            self:UpdateAddOrRemovePlayers()
         end)
 
         self.addRemove.roster.scroll.items[rosteredPlayer.name] = playerFrame
@@ -581,11 +581,10 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
                     self.selectedRoster.players[playerInfo.name] = self.selectedRoster.players[playerInfo.name] or Player:New(playerInfo.name, SRTData.GetClass(playerInfo.classFileName))
                     self.selectedRoster.players[playerInfo.name].info = playerInfo
                     playerFrame:Hide()
-                    self:UpdateAddOrRemovePlayers()
                 else
                     self.addRemove.available.scroll.ConnectItem(name, playerFrame)
                 end
-
+                self:UpdateAddOrRemovePlayers()
             end)
             playerFrame:Show()
             visiblePlayers = visiblePlayers + 1
@@ -656,13 +655,12 @@ function RosterBuilder:UpdateCreateAssignments()
                     local mouseOverFound = false
                     for _, assignmentFrame in pairs(self.assignments.encounter.scroll.items) do
                         assignmentFrame:SetBackdropColor(0, 0, 0, 0)
-                        if assignmentFrame.IsMouseOverFrame() then
+                        if assignmentFrame:IsShown() and assignmentFrame.IsMouseOverFrame() then
                             for _, groupFrame in pairs(assignmentFrame.groups) do
-                                if groupFrame.IsMouseOverFrame() then
+                                groupFrame:SetBackdropColor(0, 0, 0, 0)
+                                if groupFrame:IsShown() and groupFrame.IsMouseOverFrame() then
                                     groupFrame:SetBackdropColor(1, 1, 1, 0.4)
                                     mouseOverFound = true
-                                else
-                                    groupFrame:SetBackdropColor(0, 0, 0, 0)
                                 end
                             end
                             if mouseOverFound == false then
@@ -678,14 +676,14 @@ function RosterBuilder:UpdateCreateAssignments()
                 self.assignments.players.scroll.ConnectItem(name, playerFrame)
                 playerFrame:SetScript("OnUpdate", nil)
                 for _, assignmentFrame in pairs(self.assignments.encounter.scroll.items) do
-                    if assignmentFrame.IsMouseOverFrame() then
+                    if assignmentFrame:IsShown() and assignmentFrame.IsMouseOverFrame() then
                         assignmentFrame:SetBackdropColor(0, 0, 0, 0)
                         self.selectedRoster.encounters = self.selectedRoster.encounters or {}
                         self.selectedRoster.encounters[self.selectedEncounterID] = self.selectedRoster.encounters[self.selectedEncounterID] or SRTData.GetAssignmentDefaults()[self.selectedEncounterID]
                         self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex] = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex] or {}
                         self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments = self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments or {}
                         for _, groupFrame in pairs(assignmentFrame.groups) do
-                            if groupFrame.IsMouseOverFrame() then
+                            if groupFrame:IsShown() and groupFrame.IsMouseOverFrame() then
                                 groupFrame:SetBackdropColor(0, 0, 0, 0)
                                 self.pickedPlayer = playerFrame.info
                                 self.pickedAssignment = {
@@ -710,6 +708,7 @@ function RosterBuilder:UpdateCreateAssignments()
                         return
                     end
                 end
+                self:UpdateCreateAssignments()
             end)
             lastPlayerFrame = playerFrame
             self.assignments.players.scroll.items[name] = playerFrame
@@ -729,11 +728,16 @@ function RosterBuilder:UpdateCreateAssignments()
             self.assignments.encounter.title:SetText("")
             self.assignments.encounter.scroll:Show()
         end
-        
+        for _, abilityFrame in pairs(self.assignments.encounter.scroll.items) do
+            abilityFrame:SetBackdropColor(0, 0, 0, 0)
+            for _, groupFrame in pairs(abilityFrame.groups) do
+                groupFrame:SetBackdropColor(0, 0, 0, 0)
+            end
+        end
         self.selectedRoster.encounters = self.selectedRoster.encounters or {}
         local encounterAssignments = self.selectedRoster.encounters[self.selectedEncounterID] or SRTData.GetAssignmentDefaults()[self.selectedEncounterID]
-        for _, item in pairs(self.assignments.encounter.scroll.items) do
-            item:Hide()
+        for _, abilityFrame in pairs(self.assignments.encounter.scroll.items) do
+            abilityFrame:Hide()
         end
         local lastAbilityFrame = nil
         for bossAbilityIndex, bossAbility in ipairs(encounterAssignments) do
@@ -745,7 +749,6 @@ function RosterBuilder:UpdateCreateAssignments()
             else
                 abilityFrame:SetPoint("TOPLEFT", self.assignments.encounter.scroll.content, "TOPLEFT", 5, 0)
             end
-            abilityFrame:Show()
 
             -- Create known frames for current assignment groups and inner assignments
             for _, group in pairs(abilityFrame.groups) do group:Hide() end
@@ -827,6 +830,7 @@ function RosterBuilder:UpdateCreateAssignments()
                 previousGroup = groupFrame
             end
             abilityFrame.Update()
+            abilityFrame:Show()
 
             self.assignments.encounter.scroll.items[abilityFrameID] = abilityFrame
             lastAbilityFrame = abilityFrame
