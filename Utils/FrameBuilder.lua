@@ -608,19 +608,21 @@ function FrameBuilder.CreateScrollArea(parentFrame, areaName)
     return scrollFrame
 end
 
+---@param frame Frame
 ---@return boolean
 function FrameBuilder.IsMouseOverFrame(frame)
-    local x, y = GetCursorPosition()
-    local scale = UIParent:GetScale()
-    local left = frame:GetLeft() * scale
-    local right = frame:GetRight() * scale
-    local top = frame:GetTop() * scale
-    local bottom = frame:GetBottom() * scale
-    if left < x and right > x and top > y and bottom < y then
-        return true
-    else
-        return false
-    end
+    return frame:IsMouseOver()
+    -- local x, y = GetCursorPosition()
+    -- local scale = UIParent:GetScale()
+    -- local left = frame:GetLeft() * scale
+    -- local right = frame:GetRight() * scale
+    -- local top = frame:GetTop() * scale
+    -- local bottom = frame:GetBottom() * scale
+    -- if left < x and right > x and top > y and bottom < y then
+    --     return true
+    -- else
+    --     return false
+    -- end
 end
 
 ---@return table|Frame|BackdropTemplate
