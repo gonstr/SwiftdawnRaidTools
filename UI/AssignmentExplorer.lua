@@ -76,7 +76,7 @@ function AssignmentExplorer:Initialize()
             self.viewRosterPlayer = false
             self.selectedRosterPlayer.selectedID = nil
             self.applyBuffChangesButton.color = SRTColor.Gray
-            self.applyBuffChangesButton.colorHightlight = SRTColor.Gray
+            self.applyBuffChangesButton.colorHighlight = SRTColor.Gray
             self.applyBuffChangesButton:SetScript("OnMouseUp", nil)
             FrameBuilder.UpdateButton(self.applyBuffChangesButton)
             self:UpdateAppearance()
@@ -337,7 +337,7 @@ function AssignmentExplorer:UpdateSelectedPlayerPane()
                 if self.viewRosterPlayer then
                     self.selectedRosterPlayer.selectedID = sf.spellID
                     self.applyBuffChangesButton.color = SRTColor.Green
-                    self.applyBuffChangesButton.colorHightlight = SRTColor.GreenHighlight
+                    self.applyBuffChangesButton.colorHighlight = SRTColor.GreenHighlight
                     self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, b)
                         if b == "LeftButton" then
                             self.lastState = State.SHOW_ROSTER

@@ -242,19 +242,13 @@ function FrameBuilder.UpdateLargeSpellFrame(spellFrame, spellID, font, fontSize,
 end
 
 ---@return table|BackdropTemplate|Frame
-function FrameBuilder.CreateButton(parentFrame, width, height, text, color, colorHightlight)
+function FrameBuilder.CreateButton(parentFrame, width, height, text, color, colorHighlight)
     local button = CreateFrame("Frame", parentFrame:GetName().."_Button_"..string.gsub(text, " ", ""), parentFrame, "BackdropTemplate")
     button.width = width
     button.height = height
     button.displayText = text
     button.color = color
-    button.colorHightlight = colorHightlight
-    button:SetBackdrop({
-        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
-        tile = true,
-        tileSize = 25,
-    })
-    button:SetScript("OnLeave", function(b) b:SetBackdropColor(button.color.r, button.color.g, button.color.b, button.color.a) end)
+    button.colorHighlight = colorHighlight
     button.text = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     button.text:SetAllPoints()
     button.text:SetTextColor(1, 1, 1, 1)
@@ -263,7 +257,13 @@ function FrameBuilder.CreateButton(parentFrame, width, height, text, color, colo
 end
 
 function FrameBuilder.UpdateButton(button)
-    button:SetScript("OnEnter", function(b) b:SetBackdropColor(button.colorHightlight.r, button.colorHightlight.g, button.colorHightlight.b, button.colorHightlight.a) end)
+    button:SetScript("OnEnter", function(b) b:SetBackdropColor(button.colorHighlight.r, button.colorHighlight.g, button.colorHighlight.b, button.colorHighlight.a) end)
+    button:SetScript("OnLeave", function(b) b:SetBackdropColor(button.color.r, button.color.g, button.color.b, button.color.a) end)
+    button:SetBackdrop({
+        bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
+        tile = true,
+        tileSize = button.height,
+    })
     button:SetBackdropColor(button.color.r, button.color.g, button.color.b, button.color.a)
     button:SetWidth(button.width)
     button:SetHeight(button.height)
@@ -349,11 +349,19 @@ function FrameBuilder.UpdateSelector(selector)
         row:SetBackdropColor(0, 0, 0, 0)
         row:SetScript("OnEnter", function(r)
             r:SetBackdropColor(1, 0.8235, 0, 1)
-            r.text:SetTextColor(0.2, 0.2, 0.2, 1)
+            if item.highlight then
+                r.text:SetTextColor(0.2, 0.5, 0.2, 1)
+            else
+                r.text:SetTextColor(0.2, 0.2, 0.2, 1)
+            end
         end)
         row:SetScript("OnLeave", function(r)
             r:SetBackdropColor(0, 0, 0, 0)
-            r.text:SetTextColor(0.8, 0.8, 0.8, 1)
+            if item.highlight then
+                r.text:SetTextColor(0.3, 0.8, 0.3, 1)
+            else
+                r.text:SetTextColor(0.8, 0.8, 0.8, 1)
+            end
         end)
         row:SetScript("OnMouseDown", function (r)
             selector.dropdown:Hide()
@@ -370,7 +378,11 @@ function FrameBuilder.UpdateSelector(selector)
         else
             row.text:SetText("[empty]")
         end
-        row.text:SetTextColor(0.8, 0.8, 0.8, 1)
+        if item.highlight then
+            row.text:SetTextColor(0.3, 0.8, 0.3, 1)
+        else
+            row.text:SetTextColor(0.8, 0.8, 0.8, 1)
+        end
         row.text:SetJustifyH("LEFT")
         selector.dropdown.rows[rowIndex] = row
         lastRow = row

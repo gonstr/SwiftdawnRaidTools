@@ -150,15 +150,17 @@ function RosterBuilder:InitializeLoadOrCreateRoster()
     self.loadCreate.info.scroll:SetPoint("BOTTOMRIGHT", self.loadCreate.info.pane, "BOTTOMRIGHT", 0, 35)
 
     -- Create buttons
-    self.loadCreate.editButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 75, 25, "Edit", SRTColor.Gray, SRTColor.Gray)
-    self.loadCreate.editButton:SetPoint("BOTTOMRIGHT", self.loadCreate.load.pane, "BOTTOMRIGHT", -5, 5)
-    self.loadCreate.deleteButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 75, 25, "Delete", SRTColor.Gray, SRTColor.Gray)
-    self.loadCreate.deleteButton:SetPoint("RIGHT", self.loadCreate.editButton, "LEFT", -10, 0)
-    self.loadCreate.activateButton = FrameBuilder.CreateButton(self.loadCreate.info.pane, 75, 25, "Activate", SRTColor.Gray, SRTColor.Gray)
-    self.loadCreate.activateButton:SetPoint("RIGHT", self.loadCreate.deleteButton, "LEFT", -10, 0)
+    self.loadCreate.activateButton = FrameBuilder.CreateButton(self.loadCreate.info.pane, 70, 25, "Activate", SRTColor.Gray, SRTColor.Gray)
+    self.loadCreate.activateButton:SetPoint("BOTTOMLEFT", self.loadCreate.load.pane, "BOTTOMLEFT", 0, 5)
     self.loadCreate.activateButton:SetScript("OnMouseDown", nil)
+    self.loadCreate.editButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 70, 25, "Edit", SRTColor.Gray, SRTColor.Gray)
+    self.loadCreate.editButton:SetPoint("LEFT", self.loadCreate.activateButton, "RIGHT", 10, 0)
+
+    self.loadCreate.deleteButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 70, 25, "Delete", SRTColor.Gray, SRTColor.Gray)
+    self.loadCreate.deleteButton:SetPoint("BOTTOMRIGHT", self.loadCreate.load.pane, "BOTTOMRIGHT", 0, 5)
+
     self.loadCreate.createButton = FrameBuilder.CreateButton(self.loadCreate.info.pane, 95, 25, "Create New", SRTColor.Green, SRTColor.GreenHighlight)
-    self.loadCreate.createButton:SetPoint("BOTTOMRIGHT", self.loadCreate.info.pane, "BOTTOMRIGHT", -5, 5)
+    self.loadCreate.createButton:SetPoint("BOTTOMRIGHT", self.loadCreate.info.pane, "BOTTOMRIGHT", 0, 5)
     self.loadCreate.createButton:SetScript("OnMouseDown", function ()
         self.selectedRoster = SRTData.CreateNewRoster()
         self.state = State.ADD_OR_REMOVE_PLAYERS
@@ -211,15 +213,15 @@ function RosterBuilder:InitializeAddOrRemovePlayers()
     self.addRemove.available.scroll:SetPoint("BOTTOMRIGHT", self.addRemove.available.pane, "BOTTOMRIGHT", 0, 35)
 
     -- Create buttons
-    self.addRemove.backButton = FrameBuilder.CreateButton(self.addRemove.roster.pane, 95, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
-    self.addRemove.backButton:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 5, 5)
+    self.addRemove.backButton = FrameBuilder.CreateButton(self.addRemove.roster.pane, 70, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
+    self.addRemove.backButton:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 0, 5)
     self.addRemove.backButton:SetScript("OnMouseDown", function (button)
         self.state = State.LOAD_OR_CREATE_ROSTER
         self.selectedRoster = nil
         self:UpdateAppearance()
     end)
     self.addRemove.assignmentsButton = FrameBuilder.CreateButton(self.addRemove.available.pane, 95, 25, "Assignments", SRTColor.Green, SRTColor.GreenHighlight)
-    self.addRemove.assignmentsButton:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", -5, 5)
+    self.addRemove.assignmentsButton:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", 0, 5)
     self.addRemove.assignmentsButton:SetScript("OnMouseDown", function (button)
         self.state = State.CREATE_ASSIGNMENTS
         self:UpdateAppearance()
@@ -279,14 +281,14 @@ function RosterBuilder:InitializeCreateAssignments()
     self.assignments.pickspell.scroll:SetPoint("BOTTOMRIGHT", 0, 35)
 
     -- Create buttons
-    self.assignments.backButton = FrameBuilder.CreateButton(self.assignments.players.pane, 95, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
-    self.assignments.backButton:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 5, 5)
+    self.assignments.backButton = FrameBuilder.CreateButton(self.assignments.players.pane, 70, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
+    self.assignments.backButton:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 0, 5)
     self.assignments.backButton:SetScript("OnMouseDown", function (button)
         self.state = State.ADD_OR_REMOVE_PLAYERS
         self:UpdateAppearance()
     end)
-    self.assignments.finishButton = FrameBuilder.CreateButton(self.assignments.encounter.pane, 95, 25, "Finish", SRTColor.Green, SRTColor.GreenHighlight)
-    self.assignments.finishButton:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", -5, 5)
+    self.assignments.finishButton = FrameBuilder.CreateButton(self.assignments.encounter.pane, 95, 25, "Finish Edit", SRTColor.Green, SRTColor.GreenHighlight)
+    self.assignments.finishButton:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", 0, 5)
     self.assignments.finishButton:SetScript("OnMouseDown", function (button)
         self.state = State.LOAD_OR_CREATE_ROSTER
         self:UpdateAppearance()
@@ -302,6 +304,19 @@ function RosterBuilder:UpdateAppearance()
 end
 
 local rosterInfo = {}
+
+function RosterBuilder:EncounterIDsWithFilledAssignments()
+    local ids = {}
+    for encounterID, encounter in pairs(self.selectedRoster.encounters) do
+        for _, abilityFrame in pairs(encounter) do
+            if #abilityFrame.assignments > 0 then
+                table.insert(ids, encounterID)
+                break
+            end
+        end
+    end
+    return ids
+end
 
 --- Update left side of Load or Create state
 function RosterBuilder:UpdateLoadOrCreateRoster()
@@ -326,8 +341,8 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
     end
     for id, roster in pairs(SRTData.GetRosters()) do
         roster.id = id  --Fix legacy issue
-        local rosterFrame = self.availableRosters[id] or FrameBuilder.CreateRosterFrame(self.loadCreate.load.scroll.content, id, Roster.GetName(roster), 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize)
-        rosterFrame.name = Roster.GetName(roster)
+        local rosterFrame = self.availableRosters[id] or FrameBuilder.CreateRosterFrame(self.loadCreate.load.scroll.content, id, Roster.GetName(roster).." - "..Roster.GetTimestamp(roster), 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize)
+        rosterFrame.name = Roster.GetName(roster).." - "..Roster.GetTimestamp(roster)
         rosterFrame.Update()
 
         if previousFrame then
@@ -371,16 +386,17 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
             self:UpdateAppearance()
         end)
         self.loadCreate.editButton.color = SRTColor.Green
-        self.loadCreate.editButton.colorHightlight = SRTColor.GreenHighlight
+        self.loadCreate.editButton.colorHighlight = SRTColor.GreenHighlight
         FrameBuilder.UpdateButton(self.loadCreate.editButton)
         self.loadCreate.editButton:SetScript("OnMouseDown", function (button)
             self.state = State.ADD_OR_REMOVE_PLAYERS
             self:UpdateAppearance()
         end)
-        self.loadCreate.activateButton.color = SRTColor.Green
-        self.loadCreate.activateButton.colorHightlight = SRTColor.GreenHighlight
+        self.loadCreate.activateButton.color = SRTColor.Blue
+        self.loadCreate.activateButton.colorHighlight = SRTColor.BlueHighlight
         self.loadCreate.activateButton:SetScript("OnMouseDown", function (button)
             SRTData.SetActiveRosterID(self.selectedRoster.id)
+            SwiftdawnRaidTools:SyncNow()
             SwiftdawnRaidTools.overview:Update()
             SwiftdawnRaidTools.assignmentExplorer:Update()
         end)
@@ -415,21 +431,9 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
         rosterInfo.encounters = rosterInfo.encounters or self.loadCreate.info.scroll.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         rosterInfo.encounters:SetFont(self:GetPlayerFont(), self:GetAppearance().playerFontSize)
         
-        -- self.selectedRoster.encounters[self.selectedEncounterID][assignmentFrame.abilityIndex].assignments[groupFrame.index]
-        local encounterIDsWithFilledAssignments = function ()
-            local ids = {}
-            for encounterID, encounter in pairs(self.selectedRoster.encounters) do
-                for _, abilityFrame in pairs(encounter) do
-                    if #abilityFrame.assignments > 0 then
-                        table.insert(ids, encounterID)
-                        break
-                    end
-                end
-            end
-            return ids
-        end
+        
         local encounters = nil
-        for _, encounterID in pairs(encounterIDsWithFilledAssignments()) do
+        for _, encounterID in pairs(self:EncounterIDsWithFilledAssignments()) do
             if encounters then
                 encounters = string.format("%s, %s", encounters, SwiftdawnRaidTools:BossEncounterByID(encounterID))
             else
@@ -452,11 +456,11 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
         FrameBuilder.UpdateButton(self.loadCreate.deleteButton)
         self.loadCreate.deleteButton:SetScript("OnMouseDown", nil)
         self.loadCreate.editButton.color = SRTColor.Gray
-        self.loadCreate.editButton.colorHightlight = SRTColor.Gray
+        self.loadCreate.editButton.colorHighlight = SRTColor.Gray
         FrameBuilder.UpdateButton(self.loadCreate.editButton)
         self.loadCreate.editButton:SetScript("OnMouseDown", nil)
         self.loadCreate.activateButton.color = SRTColor.Gray
-        self.loadCreate.activateButton.colorHightlight = SRTColor.Gray
+        self.loadCreate.activateButton.colorHighlight = SRTColor.Gray
         FrameBuilder.UpdateButton(self.loadCreate.activateButton)
         self.loadCreate.activateButton:SetScript("OnMouseDown", nil)
         if rosterInfo.timestamp then
@@ -615,11 +619,28 @@ function RosterBuilder:UpdateCreateAssignments()
         return true
     end
 
+    local filledIDs = self:EncounterIDsWithFilledAssignments()
+    for _, item in pairs(self.assignments.bossSelector.items) do
+        item.highlight = false
+    end
+    for _, id in pairs(filledIDs) do
+        for _, item in pairs(self.assignments.bossSelector.items) do
+            if item.encounterID == id then
+                item.highlight = true
+            end
+        end
+    end
+    self.assignments.bossSelector.Update()
+
+    for _, playerFrame in pairs(self.assignments.players.scroll.items) do
+        playerFrame:Hide()
+    end
     local visiblePlayers = 0
     local lastPlayerFrame = nil
     for name, player in pairs(self.selectedRoster.players) do
         if shouldShowPlayer(player) then
             local playerFrame = self.assignments.players.scroll.items[name] or FrameBuilder.CreatePlayerFrame(self.assignments.players.scroll.content, name, player.class.fileName, 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize, 14, true)
+            playerFrame:Show()
             playerFrame.info = player.info
             if lastPlayerFrame then
                 playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -3)
@@ -700,7 +721,7 @@ function RosterBuilder:UpdateCreateAssignments()
     if self.state == State.CREATE_ASSIGNMENTS then
         if self.selectedEncounterID == nil then
             return
-        elseif SRTData.GetAssignmentDefaults()[self.selectedEncounterID] == nil and self.selectedRoster and self.selectedRoster.encounters and self.selectedRoster.encounters[self.selectedEncounterID] then
+        elseif SRTData.GetAssignmentDefaults()[self.selectedEncounterID] == nil and self.selectedRoster and self.selectedRoster.encounters and not self.selectedRoster.encounters[self.selectedEncounterID] then
             self.assignments.encounter.title:SetText("No defaults available yet...")
             self.assignments.encounter.scroll:Hide()
             return
@@ -761,7 +782,17 @@ function RosterBuilder:UpdateCreateAssignments()
                     end
 
                     assignmentFrame:SetScript("OnMouseDown", function (af, button)
-                        if button == "RightButton" then
+                        if button == "LeftButton" then
+                            self.pickedPlayer = { name = assignmentFrame.player, classFileName = SRTData.GetClassBySpellID(assignmentFrame.spellId).fileName }
+                            self.pickedAssignment = {
+                                encounterID = self.selectedEncounterID,
+                                abilityIndex = bossAbilityIndex,
+                                groupIndex = groupIndex,
+                                assignmentIndex = assignmentIndex
+                            }
+                            self.state = State.PICK_SPELL
+                            self:UpdateCreateAssignments()
+                        elseif button == "RightButton" then
                             af:Hide()
                             if af.index == 1 and #encounterAssignments[bossAbilityIndex].assignments[groupIndex] > 1 then
                                 encounterAssignments[bossAbilityIndex].assignments[groupIndex][af.index] = encounterAssignments[bossAbilityIndex].assignments[groupIndex][af.index + 1]
@@ -836,7 +867,14 @@ function RosterBuilder:UpdateCreateAssignments()
 
                     local numberOfGroups = #self.selectedRoster.encounters[encounterID][abilityIndex].assignments
 
-                    if groupIndex == 0 then
+                    if self.pickedAssignment.assignmentIndex then
+                        local assignmentIndex = self.pickedAssignment.assignmentIndex
+                        self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex][assignmentIndex] = {
+                            ["spell_id"] = sf.spellID,
+                            ["type"] = "SPELL",
+                            ["player"] = self.pickedPlayer.name,
+                        }
+                    elseif groupIndex == 0 then
                         self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1] = {}
                         table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1], {
                             ["spell_id"] = sf.spellID,
