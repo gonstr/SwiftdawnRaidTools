@@ -34,6 +34,56 @@ local defaultAssignments = {
             },
         },
     },
+    [1200] = {
+        {
+            ["assignments"] = {},
+            ["triggers"] = {
+                {
+                    ["delay"] = 40,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 80,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 120,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 160,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 200,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 240,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 280,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 320,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 360,
+                    ["type"] = "ENCOUNTER_START",
+                },
+                {
+                    ["delay"] = 400,
+                    ["type"] = "ENCOUNTER_START",
+                },
+            },
+            ["metadata"] = {
+                ["name"] = "Mana Return...",
+            },
+        },
+    },
     [1204] = {
         [1] = {
             ["assignments"] = {},
