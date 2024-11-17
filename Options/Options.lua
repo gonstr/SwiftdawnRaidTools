@@ -937,9 +937,8 @@ local importOptions = {
                 if val ~= nil and val ~= "" then
                     local _, result = SwiftdawnRaidTools:ImportYAML(val)
                     local encounters, encountersId = SwiftdawnRaidTools:ImportCreateEncountersData(result)
-
                     SRTData.SetActiveRosterID(encountersId or "none")
-                    SRTData.AddRoster(encountersId, encounters)
+                    SRTData.AddRoster(encountersId, Roster.Parse(encounters, "Imported Roster"))
                 end
 
                 SwiftdawnRaidTools:SyncSchedule()

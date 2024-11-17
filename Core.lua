@@ -250,7 +250,7 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         Log.debug("Received message SYNC")
         self.encountersProgress = nil
         SRTData.SetActiveRosterID(payload.d.encountersId)
-        SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters))
+        SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster"))
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         Log.debug("Received message ACT_GRPS")

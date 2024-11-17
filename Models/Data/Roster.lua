@@ -25,12 +25,15 @@ end
 
 function Roster.GetName(roster)
     if not roster.name then
-        roster.name = "Roster ".."  -  "..Roster.GetTimestamp(roster)
+        roster.name = "Roster"
     end
     return roster.name
 end
 
 function Roster.GetTimestamp(roster)
+    if not roster.timestamp then
+        roster.timestamp = timestamp()
+    end
     return roster.timestamp
 end
 
@@ -39,10 +42,13 @@ function Roster.AddPlayer(roster, player)
     roster.players[player.name] = player
 end
 
-function Roster.Parse(raw)
-    DevTool:AddData(raw, "raw")
+function Roster.Parse(raw, name)
     local roster = Roster:New()
+    if name then
+        roster.name = name
+    end
     roster.encounters = raw
+    roster.timestamp = timestamp()
     for _, encounter in pairs(roster.encounters) do
         for _, ability in pairs(encounter) do
             for _, group in pairs(ability.assignments) do
