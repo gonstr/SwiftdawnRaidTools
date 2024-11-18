@@ -48,7 +48,7 @@ local availablePlayerFilterDefaults = {
     },
     ["Guild Rank"] = {
         _function = function (key)
-            local name = GetGuildRankNameByIndex(key + 1)
+            local name = Utils:GetGuildRankNameByIndex(key + 1)
             return name ~= nil and name or "Rank "..key
         end,
     },

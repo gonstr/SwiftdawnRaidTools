@@ -1131,12 +1131,6 @@ end
 
 function SRTData.AddRoster(rosterID, roster)
     local data = SRT_Global().srt_data
-
-    -- FIXME: THIS IS ONLY ONE ROSTER FOR THIS VERSION, CLEANING UP TO AVOID BULKING UP!
-    Log.debug("Clearing rosters old...")
-    data.rosters = {}
-    -- FIXME: THIS IS ONLY ONE ROSTER FOR THIS VERSION, CLEANING UP TO AVOID BULKING UP!
-
     Log.debug("Adding new roster with ID: "..rosterID)
     data.rosters[rosterID] = roster
 end

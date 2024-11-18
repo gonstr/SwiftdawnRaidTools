@@ -48,7 +48,7 @@ Utils\FrameBuilder.lua
 Utils\SRTData.lua
 Utils\Log.lua
 Utils\Utils.lua
-Models\Frame\Conditions\Condition.lua
+Models\Conditions\Condition.lua
 Models\Conditions\UnitHealthCondition.lua
 Models\Conditions\SpellCastCountCondition.lua
 Models\Data\BossAbility.lua
@@ -56,7 +56,7 @@ Models\Data\Class.lua
 Models\Data\Encounter.lua
 Models\Data\Player.lua
 Models\Data\Roster.lua
-Models\Enum\Spec.lua
+Models\Data\Spec.lua
 Models\Data\Spell.lua
 Models\Enum\Comparison.lua
 Models\Enum\SRTColor.lua
