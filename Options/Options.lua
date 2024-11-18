@@ -992,16 +992,14 @@ local troubleshootOptions = {
     name = "Troubleshooting Options",
     type = "group",
     args = {
-        notificationsPositionDescription = {
+        activeRosterIDDescription = {
             type = "description",
             name = "Active Roster ID",
             width = "normal",
             order = 1,
         },
-        notificationsPositionInputX = {
+        activeRosterIDInput = {
             type = "input",
-            name = "X",
-            desc = "Type in some text here",
             width = "double",
             get = function(info)
                 return SRTData.GetActiveRosterID()
@@ -1012,7 +1010,7 @@ local troubleshootOptions = {
             validate = function(info, value)
                 return Utils:ValidateUUID(value)
             end,
-            order = 11,
+            order = 2,
         }
     }
 }
