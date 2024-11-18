@@ -1,16 +1,16 @@
-local insert = table.insert
-
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 
 -- seconds
 local SYNC_WAIT_TIME = 60
 
-local lastSyncTime = 0
-local syncTimer = nil
+SyncController = {
+    lastSyncTime = 0,
+    ---@class FunctionContainer
+    syncTimer = nil,
+    clientVersions = {}
+}
 
-local clientVersions = {}
-
-local function PerformSync()
+local function performSync()
     local data = {
         encountersId = SRTData.GetActiveRosterID(),
         encounters = SRTData.GetActiveRoster().encounters
@@ -26,81 +26,76 @@ local function PerformSync()
     end)
 end
 
-function SwiftdawnRaidTools:SyncSchedule()
+function SyncController:ScheduleAssignmentsSync()
     if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
         Log.info("Not syncing, you are not the raid leader, or encounter is in progress")
         return
     end
-    if syncTimer then
-        syncTimer:Cancel()
-        syncTimer = nil
+    if SyncController.syncTimer then
+        SyncController.syncTimer:Cancel()
+        SyncController.syncTimer = nil
     end
-    local timeSinceLastSync = GetTime() - lastSyncTime
+    local timeSinceLastSync = GetTime() - SyncController.lastSyncTime
     local waitTime = math.max(0, SYNC_WAIT_TIME - timeSinceLastSync)
     Log.debug("Scheduling raid sync in", waitTime, "seconds")
-    syncTimer = C_Timer.NewTimer(waitTime, function()
-        lastSyncTime = GetTime()
-        PerformSync()
+    SyncController.syncTimer = C_Timer.NewTimer(waitTime, function()
+        SyncController.lastSyncTime = GetTime()
+        performSync()
     end)
 end
 
-function SwiftdawnRaidTools:SyncNow()
+function SyncController:SyncAssignmentsNow()
     if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
         Log.info("Not syncing, you are not the raid leader, or encounter is in progress")
         return
     end
-    if syncTimer then
-        syncTimer:Cancel()
-        syncTimer = nil
+    if SyncController.syncTimer then
+        SyncController.syncTimer:Cancel()
+        SyncController.syncTimer = nil
     end
-    PerformSync()
+    performSync()
 end
 
-function SwiftdawnRaidTools:SyncReqVersions()
-    self:SendRaidMessage("SYNC_REQ_VERSIONS", self.PREFIX_SYNC)
+function SyncController:RequestVersions()
+    SwiftdawnRaidTools:SendRaidMessage("SYNC_REQ_VERSIONS", SwiftdawnRaidTools.PREFIX_SYNC)
 end
 
-function SwiftdawnRaidTools:SyncSendVersion()
-    -- Send empty message
-    self:SendRaidMessage()
+function SyncController:SendVersion()
+    -- Send empty message; the version field will be filled
+    SwiftdawnRaidTools:SendRaidMessage()
 end
 
-function SwiftdawnRaidTools:SyncSendStatus()
+function SyncController:SendStatus()
     if IsEncounterInProgress() or not IsInRaid() or Utils:IsPlayerRaidLeader() then
         return
     end
-
     local data = {
         encountersId = SRTData.GetActiveRosterID(),
     }
-
-    self:SendRaidMessage("SYNC_STATUS", data, self.PREFIX_SYNC)
+    SwiftdawnRaidTools:SendRaidMessage("SYNC_STATUS", data, SwiftdawnRaidTools.PREFIX_SYNC)
 end
 
-function SwiftdawnRaidTools:SyncHandleStatus(data)
+function SyncController:HandleStatus(data)
     if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
         return
     end
-
     if SRTData.GetActiveRosterID() ~= data.encountersId then
-        self:SyncSchedule()
+        SyncController:ScheduleAssignmentsSync()
     end
 end
 
-function SwiftdawnRaidTools:SyncSetClientVersion(player, version)
-    clientVersions[player] = version
+function SyncController:SetClientVersion(player, version)
+    SyncController.clientVersions[player] = version
 end
 
-function SwiftdawnRaidTools:SyncGetClientVersions()
+function SyncController:GetClientVersions()
     local versions = {}
-
-    for player, version in pairs(clientVersions) do
+    for player, version in pairs(SyncController.clientVersions) do
         if not versions[version] then
             versions[version] = {}
         end
 
-        insert(versions[version], player)
+        table.insert(versions[version], player)
     end
-
     return versions
 end

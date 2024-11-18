@@ -385,8 +385,10 @@ local function validateUntriggers(import)
     return true
 end
 
-function SwiftdawnRaidTools:ValidationValidateImport(import)
-    local bossEncounters = self:BossEncountersGetAll()
+Validation = {}
+
+function Validation:ValidateImport(import)
+    local bossEncounters = BossEncounters:BossEncountersGetAll()
 
     local ok, err = validateRequiredFields(import)
     if not ok then return false, err end

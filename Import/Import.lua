@@ -19,7 +19,7 @@ function SwiftdawnRaidTools:ImportYAML(str)
     end
 
     for i, part in ipairs(result) do
-        local ok, result = SwiftdawnRaidTools:ValidationValidateImport(part)
+        local ok, result = Validation:ValidateImport(part)
 
         if not ok then
             return false, "Error in document " .. i .. ": " .. result

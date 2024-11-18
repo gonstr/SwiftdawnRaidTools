@@ -18,7 +18,7 @@ end
 function SRTOverview:Initialize()
     SRTWindow.Initialize(self)
     self.menuButton:SetScript("OnClick", function()
-        if not SRT_IsTesting() and (InCombatLockdown() or SwiftdawnRaidTools:RaidAssignmentsInEncounter()) then
+        if not SRT_IsTesting() and (InCombatLockdown() or AssignmentsController:IsInEncounter()) then
             return
         end
         self:UpdatePopupMenu()
@@ -109,7 +109,7 @@ function SRTOverview:UpdateHeaderText()
     self.headerText:SetAlpha(1)
 
     if encountersExists then
-        self.headerText:SetText(SwiftdawnRaidTools:BossEncounterByID(self:GetProfile().selectedEncounterId))
+        self.headerText:SetText(BossEncounters:GetNameByID(self:GetProfile().selectedEncounterId))
     else
         if SwiftdawnRaidTools.encountersProgress then
             self.headerText:SetText((SRTData.GetActiveRosterID() == "none" and "Loading" or "Syncing").." Assignments... |cFFFFFFFF" .. string.format("%.1f", SwiftdawnRaidTools.encountersProgress) .. "%|r")
@@ -136,7 +136,7 @@ function SRTOverview:UpdatePopupMenu()
     end
     table.sort(encounterIndexes)
     for index, encounterId in ipairs(encounterIndexes) do
-        menuItems[index] = { name = SwiftdawnRaidTools:BossEncounterByID(encounterId), onClick = function() self:SelectEncounter(encounterId) end }
+        menuItems[index] = { name = BossEncounters:GetNameByID(encounterId), onClick = function() self:SelectEncounter(encounterId) end }
     end
     if #encounterIndexes > 0 then
         table.insert(menuItems, {})

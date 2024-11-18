@@ -274,13 +274,13 @@ local function updateExtraInfo(frame, prevFrame, assignments, activeGroups)
 
     local assignmentsClone = Utils:ShallowClone(assignments)
 
-    local bestMatchIndex = SwiftdawnRaidTools:RaidAssignmentsSelectBestMatchIndex(assignmentsClone)
+    local bestMatchIndex = AssignmentsController:SelectBestMatchIndex(assignmentsClone)
     if bestMatchIndex then assignmentsClone[bestMatchIndex] = nil end
 
     while bestMatchIndex do
         insert(groups, bestMatchIndex)
 
-        bestMatchIndex = SwiftdawnRaidTools:RaidAssignmentsSelectBestMatchIndex(assignmentsClone)
+        bestMatchIndex = AssignmentsController:SelectBestMatchIndex(assignmentsClone)
         if bestMatchIndex then assignmentsClone[bestMatchIndex] = nil end
     end
 
