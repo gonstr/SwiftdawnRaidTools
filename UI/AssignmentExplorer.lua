@@ -173,10 +173,10 @@ end
 function AssignmentExplorer:Update()
     SRTWindow.Update(self)
     self.encounter.selector.items = {}
-    SwiftdawnRaidTools:BossEncountersInit()
+    BossEncounters:Initialize()
     for encounterID, _ in pairs(SRTData.GetActiveEncounters()) do
         local item = {
-            name = SwiftdawnRaidTools:BossEncounterByID(encounterID),
+            name = BossEncounters:GetNameByID(encounterID),
             encounterID = encounterID,
             onClick = function (row)
                 self.selectedEncounterID = row.item.encounterID
@@ -185,7 +185,7 @@ function AssignmentExplorer:Update()
         }
         table.insert(self.encounter.selector.items, item)
     end
-    self.encounter.selector.selectedName = SwiftdawnRaidTools:BossEncounterByID(self.selectedEncounterID)
+    self.encounter.selector.selectedName = BossEncounters:GetNameByID(self.selectedEncounterID)
     self.encounter.selector.Update()
 end
 

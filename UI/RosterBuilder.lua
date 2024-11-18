@@ -396,7 +396,7 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
         self.loadCreate.activateButton.colorHighlight = SRTColor.BlueHighlight
         self.loadCreate.activateButton:SetScript("OnMouseDown", function (button)
             SRTData.SetActiveRosterID(self.selectedRoster.id)
-            SwiftdawnRaidTools:SyncNow()
+            SyncController:SyncAssignmentsNow()
             SwiftdawnRaidTools.overview:Update()
             SwiftdawnRaidTools.assignmentExplorer:Update()
         end)
@@ -435,9 +435,9 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
         local encounters = nil
         for _, encounterID in pairs(self:EncounterIDsWithFilledAssignments()) do
             if encounters then
-                encounters = string.format("%s, %s", encounters, SwiftdawnRaidTools:BossEncounterByID(encounterID))
+                encounters = string.format("%s, %s", encounters, BossEncounters:GetNameByID(encounterID))
             else
-                encounters = string.format("\nEncounters: \n\n%s", SwiftdawnRaidTools:BossEncounterByID(encounterID))
+                encounters = string.format("\nEncounters: \n\n%s", BossEncounters:GetNameByID(encounterID))
             end
         end
         rosterInfo.encounters:SetText(encounters)
@@ -685,7 +685,7 @@ function RosterBuilder:UpdateCreateAssignments()
                         for _, groupFrame in pairs(assignmentFrame.groups) do
                             if groupFrame:IsShown() and groupFrame.IsMouseOverFrame() then
                                 groupFrame:SetBackdropColor(0, 0, 0, 0)
-                                self.pickedPlayer = playerFrame.info
+                                self.pickedPlayer = { name = player.name, classFileName = player.class.fileName }
                                 self.pickedAssignment = {
                                     encounterID = self.selectedEncounterID,
                                     abilityIndex = assignmentFrame.abilityIndex,
@@ -697,7 +697,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             end
                         end
 
-                        self.pickedPlayer = playerFrame.info
+                        self.pickedPlayer = { name = player.name, classFileName = player.class.fileName }
                         self.pickedAssignment = {
                             encounterID = self.selectedEncounterID,
                             abilityIndex = assignmentFrame.abilityIndex,
@@ -843,6 +843,7 @@ function RosterBuilder:UpdateCreateAssignments()
             self.state = State.CREATE_ASSIGNMENTS
             return
         end
+        DevTool:AddData(self.pickedPlayer, "self.pickedPlayer")
         local class = SRTData.GetClass(self.pickedPlayer.classFileName)
 
         for _, spellFrame in pairs(self.assignments.pickspell.scroll.items) do
@@ -928,8 +929,7 @@ function RosterBuilder:Update()
     SRTWindow.Update(self)
 
     self.assignments.bossSelector.items = {}
-    SwiftdawnRaidTools:BossEncountersInit()
-    for encounterID, name in pairs(SwiftdawnRaidTools:BossEncountersGetAll()) do
+    for encounterID, name in pairs(BossEncounters:BossEncountersGetAll()) do
         local item = {
             name = name,
             encounterID = encounterID,
@@ -940,7 +940,7 @@ function RosterBuilder:Update()
         }
         table.insert(self.assignments.bossSelector.items, item)
     end
-    self.assignments.bossSelector.selectedName = self.selectedEncounterID and SwiftdawnRaidTools:BossEncountersGetAll()[self.selectedEncounterID] or "Select encounter..."
+    self.assignments.bossSelector.selectedName = self.selectedEncounterID and BossEncounters:BossEncountersGetAll()[self.selectedEncounterID] or "Select encounter..."
     self.assignments.bossSelector.Update()
 end
 
