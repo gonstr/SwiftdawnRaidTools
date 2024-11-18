@@ -136,8 +136,8 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
     if isInitialLogin or isReloadingUi then
         self:BossEncountersInit()
         SRTData.Initialize()
-        self:SyncSendStatus()
-        self:SyncSchedule()
+        SyncController:SendStatus()
+        SyncController:ScheduleAssignmentsSync()
     end
     self.overview:Update()
     self.debugLog:Update()
@@ -178,7 +178,7 @@ function SwiftdawnRaidTools:OnCommReceived(prefix, message, _, sender)
         local ok, payload = self:Deserialize(message)
 
         if ok then
-            self:SyncSetClientVersion(sender, payload.v)
+            SyncController:SetClientVersion(sender, payload.v)
             self:HandleMessagePayload(payload, sender)
         end
     end
@@ -187,10 +187,10 @@ end
 function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
     if payload.e == "SYNC_REQ_VERSIONS" then
         Log.debug("Received message SYNC_REQ_VERSIONS:", sender)
-        self:SyncSendVersion()
+        SyncController:SendVersion()
     elseif payload.e == "SYNC_STATUS" then
         Log.debug("Received message SYNC_STATUS:", sender)
-        self:SyncHandleStatus(payload.d)
+        SyncController:HandleStatus(payload.d)
     elseif payload.e == "SYNC_PROG" then
         if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
             Log.debug("Received message SYNC_PROG:", sender, payload.d.progress)
@@ -220,18 +220,18 @@ end
 function SwiftdawnRaidTools:SRT_WA_EVENT(_, event, ...)
     if event == "WA_NUMEN_TIMER" then
         local key, countdown = ...
-        self:RaidAssignmentsHandleFojjiNumenTimer(key, countdown)
+        AssignmentsController:HandleFojjiNumenTimer(key, countdown)
     end
 end
 
 function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, encounterName, ...)
     self:TestModeEnd()
     self.overview:SelectEncounter(encounterID)
-    self:RaidAssignmentsStartEncounter(encounterID, encounterName)
+    AssignmentsController:StartEncounter(encounterID, encounterName)
 end
 
 function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
-    self:RaidAssignmentsEndEncounter()
+    AssignmentsController:EndEncounter()
     self:SpellsResetCache()
     self:UnitsResetDeadCache()
     self.overview:UpdateSpells()
@@ -240,7 +240,7 @@ end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
     self:TestModeEnd()
-    self:RaidAssignmentsEndEncounter()
+    AssignmentsController:EndEncounter()
     self.overview:UpdateSpells()
     self:NotificationsUpdateSpells()
 end
@@ -251,12 +251,12 @@ function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
     if self:UnitsIsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
         Log.debug("Handling cached unit coming back to life")
         self:UnitsClearDead(guid)
-        self:RaidAssignmentsUpdateGroups()
+        AssignmentsController:UpdateGroups()
         self.overview:UpdateSpells()
         self:NotificationsUpdateSpells()
     end
 
-    self:RaidAssignmentsHandleUnitHealth(unitId)
+    AssignmentsController:HandleUnitHealth(unitId)
 end
 
 function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
@@ -265,7 +265,7 @@ function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
 
     if IsInRaid() and not self.sentRaidSync then
         self.sentRaidSync = true
-        self:SyncSendStatus()
+        SyncController:SendStatus()
     else
         self.sentRaidSync = false
     end
@@ -277,33 +277,33 @@ function SwiftdawnRaidTools:COMBAT_LOG_EVENT_UNFILTERED()
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text)
-    self:RaidAssignmentsHandleRaidBossEmote(text)
+    AssignmentsController:HandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_MONSTER_EMOTE(_, text, ...)
-    self:RaidAssignmentsHandleRaidBossEmote(text)
+    AssignmentsController:HandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(_, text, ...)
-    self:RaidAssignmentsHandleRaidBossEmote(text)
+    AssignmentsController:HandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
     if subEvent == "SPELL_CAST_START" then
-        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
+        AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
         self:SpellsCacheCast(sourceName, spellId, function()
-            self:RaidAssignmentsUpdateGroups()
+            AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
             self:NotificationsUpdateSpells()
         end)
-        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
+        AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_AURA_APPLIED" or subEvent =="SPELL_AURA_REMOVED" then
-        self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
+        AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
         if Utils:IsFriendlyRaidMemberOrPlayer(destGUID) then
             self:UnitsSetDead(destGUID)
-            self:RaidAssignmentsUpdateGroups()
+            AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
             self:NotificationsUpdateSpells()
         end

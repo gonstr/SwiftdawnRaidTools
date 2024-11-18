@@ -15,13 +15,13 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
             self.overview:Update()
         elseif trimmed == "versions" then
             if not reqVersionsTimer then
-                self:SyncReqVersions()
+                SyncController:RequestVersions()
 
                 Log.info("Requesting versions...")
                 reqVersionsTimer = C_Timer.NewTimer(10, function()
                     reqVersionsTimer = nil
 
-                    for version, players in pairs(self:SyncGetClientVersions()) do
+                    for version, players in pairs(SyncController:GetClientVersions()) do
                         if not version then
                             version = "Unknown"
                         end

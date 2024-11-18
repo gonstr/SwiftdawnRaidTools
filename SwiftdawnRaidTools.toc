@@ -35,8 +35,8 @@ State\Spells.lua
 State\BossEncounters.lua
 State\Groups.lua
 State\Units.lua
-Controllers\RaidAssignments.lua
-Controllers\Sync.lua
+Controllers\AssignmentsController.lua
+Controllers\SyncController.lua
 UI\SRTWindow.lua
 UI\DebugLog.lua
 UI\Minimap.lua

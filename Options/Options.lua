@@ -144,7 +144,7 @@ local mainOptions = {
                     name = "Force Sync",
                     desc = "Synchronize raid assignments with Raid.",
                     func = function()
-                        SwiftdawnRaidTools:SyncNow()
+                        SyncController:SyncAssignmentsNow()
                     end,
                     order = 5,
                 },
@@ -956,7 +956,7 @@ local importOptions = {
                     SRTData.AddRoster(encountersId, Roster.Parse(encounters, "Imported Roster"))
                 end
 
-                SwiftdawnRaidTools:SyncSchedule()
+                SyncController:ScheduleAssignmentsSync()
                 SwiftdawnRaidTools.overview:Update()
             end,
         },
@@ -967,26 +967,49 @@ local troubleshootOptions = {
     name = "Troubleshooting Options",
     type = "group",
     args = {
-        activeRosterIDDescription = {
+        activeRosterIDInputDescription = {
             type = "description",
             name = "Active Roster ID",
             width = "normal",
-            order = 1,
+            order = 1
         },
         activeRosterIDInput = {
             type = "input",
+            name = "Active Roster ID Input",
             width = "double",
-            get = function(info)
+            get = function(_)
                 return SRTData.GetActiveRosterID()
             end,
-            set = function(info, value)
+            set = function(_, value)
                 SRTData.SetActiveRosterID(value)
+                SwiftdawnRaidTools.overview:Update()
             end,
-            validate = function(info, value)
-                return Utils:ValidateUUID(value)
+            order = 2
+        },
+        activeRosterIDSelectDescription = {
+            type = "description",
+            name = "Active Roster ID",
+            width = "normal",
+            order = 11
+        },
+        activeRosterIDSelect = {
+            type = "select",
+            name = "Active Roster ID Select",
+            width = "double",
+            values = function ()
+                local v = {}
+                for id, _ in pairs(SRTData.GetRosters()) do
+                    v[id] = id
+                end
+                return v
             end,
-            order = 2,
-        }
+            get = function() return tostring(SRTData.GetActiveRosterID()) end,
+            set = function(_, key)
+                SRTData.SetActiveRosterID(key)
+                SwiftdawnRaidTools.overview:Update()
+            end,
+            order = 12
+        },
     }
 }
 
