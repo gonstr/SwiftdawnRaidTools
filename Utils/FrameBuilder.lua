@@ -596,6 +596,7 @@ function FrameBuilder.CreateScrollArea(parentFrame, areaName)
     return scrollFrame
 end
 
+---@param frame table|BackdropTemplate|Frame
 ---@return boolean
 function FrameBuilder.IsMouseOverFrame(frame)
     local x, y = GetCursorPosition()
