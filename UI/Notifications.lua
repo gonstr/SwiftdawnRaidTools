@@ -4,20 +4,51 @@ local SwiftdawnRaidTools = SwiftdawnRaidTools
 
 local SONAR_SOUND_FILE = "Interface\\AddOns\\SwiftdawnRaidTools\\Media\\PowerAuras_Sounds_Sonar.mp3"
 
+-- Function to get scaled relative coordinates
+local function GetScaledRelativeCoords(frame)
+    local uiScale = UIParent:GetEffectiveScale()
+    local frameScale = frame:GetEffectiveScale()
+
+    -- Get the center of the screen in unscaled coordinates
+    local screenCenterX, screenCenterY = UIParent:GetCenter()
+    screenCenterX = screenCenterX * uiScale
+    screenCenterY = screenCenterY * uiScale
+
+    -- Get the frame's center in unscaled coordinates
+    local frameCenterX, frameCenterY = frame:GetCenter()
+    frameCenterX = frameCenterX * frameScale
+    frameCenterY = frameCenterY * frameScale
+
+    -- Calculate relative coordinates, already scaled properly
+    local relativeX = frameCenterX - screenCenterX
+    local relativeY = frameCenterY - screenCenterY
+
+    return relativeX, relativeY -- Return coordinates in UIParent's scale
+end
+
+-- Function to re-anchor the frame at the calculated relative position
+local function ReAnchorFrame(frame)
+    local relativeX, relativeY = GetScaledRelativeCoords(frame)
+    local weirdScale = Utils:GetWeirdScale()
+    frame:ClearAllPoints()
+    frame:SetPoint("CENTER", UIParent, "CENTER", relativeX / weirdScale, relativeY / weirdScale)
+end
+
 function SwiftdawnRaidTools:NotificationsInit()
+    self.db.profile.notifications.locked = true
+
     -- The base frame that dictates the size of the notification
     local container = CreateFrame("Frame", "SwiftdawnRaidToolsNotification", UIParent, "BackdropTemplate")
-    container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+    container:SetPoint("CENTER", UIParent, "CENTER", 0, 200) -- self.db.profile.notifications.anchorX, self.db.profile.notifications.anchorY)
     container:SetFrameStrata("HIGH")
     container:SetMovable(true)
-    container:SetUserPlaced(true)
-    container:SetClampedToScreen(true)
     container:RegisterForDrag("LeftButton")
-    container:SetScript("OnDragStart", function(self)
-        self:StartMoving()
+    container:SetScript("OnDragStart", function()
+        container:StartMoving()
     end)
-    container:SetScript("OnDragStop", function(self)
-        self:StopMovingOrSizing()
+    container:SetScript("OnDragStop", function()
+        container:StopMovingOrSizing()
+        ReAnchorFrame(container) -- Re-anchor after dragging
     end)
     container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
@@ -29,9 +60,14 @@ function SwiftdawnRaidTools:NotificationsInit()
     -- The unlocked frame anchor; only visible if anchors are unlocked
     container.frameLockText = container:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     container.frameLockText:SetTextColor(1, 1, 1, 0.4)
-    container.frameLockText:SetAllPoints()
+    container.frameLockText:SetPoint("TOP", container, "TOP", 0, -15)
     container.frameLockText:SetText("SRT Notifications Anchor")
     container.frameLockText:Hide()
+    container.frameLockPositionText = container:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    container.frameLockPositionText:SetTextColor(1, 1, 1, 0.4)
+    container.frameLockPositionText:SetPoint("BOTTOM", container, "BOTTOM", 0, 15)
+    container.frameLockPositionText:SetText("X, Y")
+    container.frameLockPositionText:Hide()
 
     -- The notification itself
     local content = CreateFrame("Frame", "SwiftdawnRaidToolsNotificationContent", container, "BackdropTemplate")
@@ -69,7 +105,7 @@ function SwiftdawnRaidTools:NotificationsInit()
 
     extraInfo:Hide()
 
-    self.notificationFrameFadeOut = SwiftdawnRaidTools:CreateFadeOut(content, function()
+    self.notificationFrameFadeOut = Utils:CreateFadeOut(content, function()
         SwiftdawnRaidTools.notificationContentFrame:Hide()
     end)
 
@@ -112,11 +148,24 @@ function SwiftdawnRaidTools:NotificationsToggleFrameLock(lock)
         self.notificationFrame:EnableMouse(false)
         self.notificationFrame:SetBackdropColor(0, 0, 0, 0)
         self.notificationFrame.frameLockText:Hide()
+        self.notificationFrame.frameLockPositionText:Hide()
+        self.notificationFrame:SetScript("OnUpdate", nil)
     else
+        self.notificationFrame:ClearAllPoints()
+        self.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
         self.notificationFrame:EnableMouse(true)
         self.notificationFrame:SetBackdropColor(0, 0, 0, 0.6)
         self.notificationFrame.frameLockText:Show()
+        self.notificationFrame.frameLockPositionText:Show()
         self.notificationContentFrame:Hide()
+        self.notificationFrame:SetScript("OnUpdate", function (frame)
+            local relativeX, relativeY = GetScaledRelativeCoords(frame)
+            -- Save to profile
+            self.db.profile.notifications.anchorX = relativeX
+            self.db.profile.notifications.anchorY = relativeY
+            -- Set X, Y text
+            self.notificationFrame.frameLockPositionText:SetText(string.format("%.1f, %.1f", relativeX, relativeY))
+        end)
     end
 end
 
@@ -125,7 +174,7 @@ function SwiftdawnRaidTools:NotificationsIsFrameLocked()
 end
 
 function SwiftdawnRaidTools:NotificationsUpdateHeader(text)
-    self.notificationContentFrame.bossAbilityText:SetText(self:StringEllipsis(text, 32))
+    self.notificationContentFrame.bossAbilityText:SetText(Utils:StringEllipsis(text, 32))
 end
 
 local function createNotificationGroup(contentFrame, assignmentCount)
@@ -223,7 +272,7 @@ local function updateExtraInfo(frame, prevFrame, assignments, activeGroups)
     -- estimation we can do.
     local groups = {}
 
-    local assignmentsClone = SwiftdawnRaidTools:ShallowClone(assignments)
+    local assignmentsClone = Utils:ShallowClone(assignments)
 
     local bestMatchIndex = SwiftdawnRaidTools:RaidAssignmentsSelectBestMatchIndex(assignmentsClone)
     if bestMatchIndex then assignmentsClone[bestMatchIndex] = nil end
@@ -267,7 +316,7 @@ local function updateExtraInfo(frame, prevFrame, assignments, activeGroups)
         frame:Show()
         frame:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", 0, 0)
         frame:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 0, 0)
-        frame.text:SetText("→ " .. SwiftdawnRaidTools:StringJoin(players) .. " follow up.")
+        frame.text:SetText("→ " .. Utils:StringJoin(players) .. " follow up.")
         frame:SetHeight(frame.text:GetStringHeight() + 10)
     end
 end
@@ -309,9 +358,9 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
 
     if not self.TEST then
         if self.db.profile.notifications.showOnlyOwnNotifications then
-            local part = self:GetRaidAssignmentPart(uuid)
+            local part = Utils:GetRaidAssignmentPart(uuid)
 
-            if part and not self:IsPlayerInActiveGroup(part) then
+            if part and not Utils:IsPlayerInActiveGroup(part) then
                 return
             end
         end
@@ -346,7 +395,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
                 local headerText = part.metadata.name
 
                 if part.metadata.notification then
-                    local ok, result = self:StringInterpolate(part.metadata.notification, context)
+                    local ok, result = Utils:StringInterpolate(part.metadata.notification, context)
                     if ok then
                         headerText = result
                     end
@@ -360,7 +409,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
                     self.notificationContentFrame:SetScript("OnUpdate", updateCountdown)
                 end
 
-                local showId = self:GenerateUUID()
+                local showId = Utils:GenerateUUID()
                 self.notificationShowId = showId
 
                 C_Timer.After(8 + countdown, function()

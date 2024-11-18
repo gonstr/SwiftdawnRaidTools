@@ -460,6 +460,46 @@ local appearanceOptions = {
             name = "Notifications",
             order = 2,
             args = {
+                notificationsPositionDescription = {
+                    type = "description",
+                    name = "Position",
+                    width = "normal",
+                    order = 10,
+                },
+                notificationsPositionInputX = {
+                    type = "input",
+                    name = "X",
+                    desc = "Type in some text here",
+                    get = function(info)
+                        return string.format("%.1f", SwiftdawnRaidTools.db.profile.notifications.anchorX)
+                    end,
+                    set = function(info, value)
+                        SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(value)
+                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / SwiftdawnRaidTools.Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / SwiftdawnRaidTools.Utils:GetWeirdScale())
+                    end,
+                    validate = function(info, value)
+                        -- Check if the value is a valid floating-point number
+                        return tonumber(value) ~= nil or "Please enter a valid number."
+                    end,
+                    order = 11,
+                },
+                notificationsPositionInputY = {
+                    type = "input",
+                    name = "Y",
+                    desc = "Type in some text here",
+                    get = function(info)
+                        return string.format("%.1f", SwiftdawnRaidTools.db.profile.notifications.anchorY)
+                    end,
+                    set = function(info, value)
+                        SwiftdawnRaidTools.db.profile.notifications.anchorY = tonumber(value)
+                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / SwiftdawnRaidTools.Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / SwiftdawnRaidTools.Utils:GetWeirdScale())
+                    end,
+                    validate = function(info, value)
+                        -- Check if the value is a valid floating-point number
+                        return tonumber(value) ~= nil or "Please enter a valid number."
+                    end,
+                    order = 11,
+                },
                 notificationsScaleDescription = {
                     type = "description",
                     name = "Scale",
@@ -913,7 +953,7 @@ local importOptions = {
                     local encounters, encountersId = SwiftdawnRaidTools:ImportCreateEncountersData(result)
 
                     SRTData.SetActiveRosterID(encountersId)
-                    SRTData.AddRoster(encountersId, encounters)
+                    SRTData.AddRoster(encountersId, Roster.Parse(encounters, "Imported Roster"))
                 end
 
                 SwiftdawnRaidTools:SyncSchedule()

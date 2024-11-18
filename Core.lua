@@ -1,6 +1,6 @@
 SwiftdawnRaidTools = LibStub("AceAddon-3.0"):NewAddon("SwiftdawnRaidTools", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
 
-SwiftdawnRaidTools.DEBUG = false
+SwiftdawnRaidTools.DEBUG = true
 SwiftdawnRaidTools.TEST = false
 
 SwiftdawnRaidTools.PREFIX_SYNC = "SRT-S"
@@ -11,7 +11,7 @@ SwiftdawnRaidTools.VERSION = C_AddOns.GetAddOnMetadata("SwiftdawnRaidTools", "Ve
 SwiftdawnRaidTools.IS_DEV = SwiftdawnRaidTools.VERSION == '\@project-version\@'
 
 -- AceDB defaults
-SwiftdawnRaidTools.defaults = {
+SwiftdawnRaidTools.DEFAULTS = {
     profile = {
         options = {
             import = "",
@@ -27,8 +27,8 @@ SwiftdawnRaidTools.defaults = {
             locked = true,
             show = false,
             mute = false,
-            anchorX = GetScreenWidth()/2,
-            anchorY = -(GetScreenHeight()/2) + 200,
+            anchorX = 0,
+            anchorY = 200,
             appearance = {
                 scale = 1.2,
                 headerFontType = "Friz Quadrata TT",
@@ -42,8 +42,6 @@ SwiftdawnRaidTools.defaults = {
             }
         },
         overview = {
-            anchorX = 0,
-            anchorY = 0,
             selectedEncounterId = nil,
             locked = false,
             show = true,
@@ -61,8 +59,6 @@ SwiftdawnRaidTools.defaults = {
             }
         },
         debuglog = {
-            anchorX = 0,
-            anchorY = -(GetScreenHeight()/2),
             locked = false,
             show = false,
             scrollToBottom = true,
@@ -81,7 +77,8 @@ SwiftdawnRaidTools.defaults = {
 }
 
 function SwiftdawnRaidTools:OnInitialize()
-    self:DBInit()
+    self.db = LibStub("AceDB-3.0"):New("SwiftdawnRaidTools", self.DEFAULTS)
+
     self:OptionsInit()
     self:MinimapInit()
 
@@ -133,7 +130,6 @@ function SwiftdawnRaidTools:OnDisable()
 end
 
 function SwiftdawnRaidTools:DBInit()
-    self.db = LibStub("AceDB-3.0"):New("SwiftdawnRaidTools", self.defaults)
 end
 
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
@@ -196,17 +192,17 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         Log.debug("Received message SYNC_STATUS:", sender)
         self:SyncHandleStatus(payload.d)
     elseif payload.e == "SYNC_PROG" then
-        if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
+        if payload.d.encountersId ~= SwiftdawnRaidTools.Data.GetActiveRosterID() then
             Log.debug("Received message SYNC_PROG:", sender, payload.d.progress)
             self.encountersProgress = payload.d.progress
-            SRTData.SetActiveRosterID("none")
+            SwiftdawnRaidTools.Data.SetActiveRosterID("none")
             self.overview:Update()
         end
     elseif payload.e == "SYNC" then
         Log.debug("Received message SYNC")
         self.encountersProgress = nil
-        SRTData.SetActiveRosterID(payload.d.encountersId)
-        SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters))
+        SwiftdawnRaidTools.Data.SetActiveRosterID(payload.d.encountersId)
+        SwiftdawnRaidTools.Data.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster"))
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         Log.debug("Received message ACT_GRPS")
@@ -305,7 +301,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
     elseif subEvent == "SPELL_AURA_APPLIED" or subEvent =="SPELL_AURA_REMOVED" then
         self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
-        if self:IsFriendlyRaidMemberOrPlayer(destGUID) then
+        if SwiftdawnRaidTools.Utils:IsFriendlyRaidMemberOrPlayer(destGUID) then
             self:UnitsSetDead(destGUID)
             self:RaidAssignmentsUpdateGroups()
             self.overview:UpdateSpells()

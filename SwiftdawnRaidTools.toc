@@ -25,7 +25,6 @@ Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
 Core.lua
 Test.lua
-Utils.lua
 Options\Chat.lua
 Options\WeakAuras.lua
 Options\Options.lua
@@ -46,10 +45,11 @@ UI\Notifications.lua
 Utils\FrameBuilder.lua
 Utils\SRTData.lua
 Utils\Log.lua
-Models\LogItem.lua
-Models\Spell.lua
-Models\Spec.lua
-Models\Class.lua
-Models\Player.lua
-Models\Roster.lua
-Models\SRTColor.lua
+Utils\Utils.lua
+Models\Frame\LogItem.lua
+Models\Data\Spell.lua
+Models\Data\Spec.lua
+Models\Data\Class.lua
+Models\Data\Player.lua
+Models\Data\Roster.lua
+Models\Enum\SRTColor.lua

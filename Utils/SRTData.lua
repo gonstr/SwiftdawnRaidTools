@@ -837,42 +837,43 @@ function SRTData.Initialize()
         rosters = {},
         activeRosterID = nil
     }
+    DevTool:AddData(SRT_Global().srt_data, "SRTData")
     -- Preseed our database with static information
     SRT_Global().srt_data.defaultAssignments = defaultAssignments
     SRT_Global().srt_data.spells = {
         -- Death Knight
-        IceboundFortitude = Spell:New(48792, "Icebound Fortitude", 60 * 3, 12),
-        VampiricBlood = Spell:New(55233, "Vampiric Blood", 60 * 1, 10),
-        AntiMagicZone = Spell:New(51052, "Anti-Magic Zone", 60 * 2, 10),
+        IceboundFortitude = SRTSpell:New(48792, "Icebound Fortitude", 60 * 3, 12),
+        VampiricBlood = SRTSpell:New(55233, "Vampiric Blood", 60 * 1, 10),
+        AntiMagicZone = SRTSpell:New(51052, "Anti-Magic Zone", 60 * 2, 10),
         -- Druid
-        Innervate = Spell:New(29166, "Innervate", 60 * 3, 10),
-        Barkskin = Spell:New(22812, "Barkskin", 60 * 1, 12),
-        SurvivalInstincts = Spell:New(61336, "Survival Instincts", 60 * 3, 12),
-        FrenziedRegeneration = Spell:New(22842, "Frenzied Regeneration", 60 * 3, 20),
-        Tranquility = Spell:New(740, "Tranquility", 60 * 8, 8),
-        StampedingRoar = Spell:New(77764, "Stampeding Roar", 60 * 2, 8),
+        Innervate = SRTSpell:New(29166, "Innervate", 60 * 3, 10),
+        Barkskin = SRTSpell:New(22812, "Barkskin", 60 * 1, 12),
+        SurvivalInstincts = SRTSpell:New(61336, "Survival Instincts", 60 * 3, 12),
+        FrenziedRegeneration = SRTSpell:New(22842, "Frenzied Regeneration", 60 * 3, 20),
+        Tranquility = SRTSpell:New(740, "Tranquility", 60 * 8, 8),
+        StampedingRoar = SRTSpell:New(77764, "Stampeding Roar", 60 * 2, 8),
         -- Paladin
-        DivineProtection = Spell:New(498, "Divine Protection", 60 * 1, 10),
-        GuardianOfAncientKings = Spell:New(86659, "Guardian of Ancient Kings", 0, 12),
-        ArdentDefender = Spell:New(31850, "Ardent Defender", 60 * 3, 10),
-        HandOfSalvation = Spell:New(1038, "Hand of Salvation", 60 * 2, 10),
-        HandOfProtection = Spell:New(1022, "Hand of Protection", 60 * 5, 10),
-        AuraMastery = Spell:New(31821, "Aura Mastery", 60 * 2, 6),
-        HandOfSacrifice = Spell:New(6940, "Hand of Sacrifice", 60 * 2, 12),
-        DivineGuardian = Spell:New(70940, "Divine Guardian", 60 * 3, 6),
+        DivineProtection = SRTSpell:New(498, "Divine Protection", 60 * 1, 10),
+        GuardianOfAncientKings = SRTSpell:New(86659, "Guardian of Ancient Kings", 0, 12),
+        ArdentDefender = SRTSpell:New(31850, "Ardent Defender", 60 * 3, 10),
+        HandOfSalvation = SRTSpell:New(1038, "Hand of Salvation", 60 * 2, 10),
+        HandOfProtection = SRTSpell:New(1022, "Hand of Protection", 60 * 5, 10),
+        AuraMastery = SRTSpell:New(31821, "Aura Mastery", 60 * 2, 6),
+        HandOfSacrifice = SRTSpell:New(6940, "Hand of Sacrifice", 60 * 2, 12),
+        DivineGuardian = SRTSpell:New(70940, "Divine Guardian", 60 * 3, 6),
         -- Priest
-        HymnOfHope = Spell:New(64901, "Hymn of Hope", 60 * 6, 8),
-        DivineHymn = Spell:New(64843, "Divine Hymn", 60 * 8, 8),
-        PainSuppression = Spell:New(33206, "Pain Suppression", 60 * 3, 8),
-        PowerWordBarrier = Spell:New(62618, "Power Word: Barrier", 60 * 3, 10),
+        HymnOfHope = SRTSpell:New(64901, "Hymn of Hope", 60 * 6, 8),
+        DivineHymn = SRTSpell:New(64843, "Divine Hymn", 60 * 8, 8),
+        PainSuppression = SRTSpell:New(33206, "Pain Suppression", 60 * 3, 8),
+        PowerWordBarrier = SRTSpell:New(62618, "Power Word: Barrier", 60 * 3, 10),
         -- Shaman
-        ManaTideTotem = Spell:New(16190, "Mana Tide Totem", 60 * 3, 12),
-        SpiritLinkTotem = Spell:New(98008, "Spirit Link Totem", 60 * 3, 6),
+        ManaTideTotem = SRTSpell:New(16190, "Mana Tide Totem", 60 * 3, 12),
+        SpiritLinkTotem = SRTSpell:New(98008, "Spirit Link Totem", 60 * 3, 6),
         -- Warrior
-        ShieldWall = Spell:New(871, "Shield Wall", 60 * 5, 12),
-        LastStand = Spell:New(12975, "Last Stand", 60 * 3, 0),
-        EnragedRegeneration = Spell:New(55694, "Enraged Regeneration", 60 * 3, 10),
-        RallyingCry = Spell:New(97462, "Rallying Cry", 60 * 3, 10),
+        ShieldWall = SRTSpell:New(871, "Shield Wall", 60 * 5, 12),
+        LastStand = SRTSpell:New(12975, "Last Stand", 60 * 3, 0),
+        EnragedRegeneration = SRTSpell:New(55694, "Enraged Regeneration", 60 * 3, 10),
+        RallyingCry = SRTSpell:New(97462, "Rallying Cry", 60 * 3, 10),
     }
     SRT_Global().srt_data.classes = {
         DeathKnight = Class:New("Death Knight", "DEATHKNIGHT", {
@@ -955,11 +956,9 @@ function SRTData.Initialize()
     
     if SwiftdawnRaidTools.db.profile.data.encountersId then
         SRT_Global().srt_data.activeRosterID = SwiftdawnRaidTools.db.profile.data.encountersId
-        SwiftdawnRaidTools.db.profile.data.encountersId = nil
     end
     if #SwiftdawnRaidTools.db.profile.data.encounters > 0 then
         SRT_Global().srt_data.rosters[SRT_Global().srt_data.activeRosterID] = { encounters = SwiftdawnRaidTools.db.profile.data.encounters }
-        SwiftdawnRaidTools.db.profile.data.encounters = nil
     end
 end
 
@@ -1000,7 +999,7 @@ end
 ---@return string, Roster
 function SRTData.CreateNewRoster()
     local data = SRT_Global().srt_data
-    local rosterID = SwiftdawnRaidTools:GenerateUUID()
+    local rosterID = Utils:GenerateUUID()
     local roster = Roster:New()
     data.rosters[rosterID] = roster
     return rosterID, roster
@@ -1025,12 +1024,12 @@ end
 
 function SRTData.GetAssignmentDefaults()
     local data = SRT_Global().srt_data
-    return SwiftdawnRaidTools:DeepClone(data.defaultAssignments)
+    return Utils:DeepClone(data.defaultAssignments)
 end
 
 ---Retrieve spell object by it's in-game ID
 ---@param spellID number
----@return Spell?
+---@return SRTSpell?
 function SRTData.GetSpellByID(spellID)
     local data = SRT_Global().srt_data
     for _, spell in pairs(data.spells) do
@@ -1056,13 +1055,27 @@ function SRTData.GetClassColorBySpellID(spellID)
     return { r = 0, g = 0, b = 0, colorStr = "ffffffff" }
 end
 
+---comment
+---@param spellID number
+---@return Class?
+function SRTData.GetClassBySpellID(spellID)
+    local data = SRT_Global().srt_data
+    for _, class in pairs(data.classes) do
+        for _, spell in pairs(class.spells) do
+            if spell.id == spellID then
+                return class
+            end
+        end
+    end
+    return nil
+end
+
 function SRTData.GetActiveRosterID()
     return SRT_Global().srt_data.activeRosterID
 end
 
 function SRTData.SetActiveRosterID(rosterID)
-    local data = SRT_Global().srt_data
-    data.activeRosterID = rosterID
+    SRT_Global().srt_data.activeRosterID = rosterID
 end
 
 function SRTData.AddRoster(rosterID, roster)
@@ -1083,6 +1096,10 @@ function SRTData.GetActiveRoster()
         Log.debug("Cannot get active roster; no active roster ID set")
         return {}
     end
+    if not data.rosters[data.activeRosterID] then
+        Log.debug("Cannot get active roster; roster not found")
+        return {}
+    end
     return data.rosters[data.activeRosterID]
 end
 
@@ -1091,10 +1108,8 @@ function SRTData.GetActiveEncounters()
         return testAssignments
     end
     local activeRoster = SRTData.GetActiveRoster()
-    if not activeRoster then
-        return {}
-    end
     if not activeRoster.encounters then
+        Log.debug("Cannot get active encounters; encounters not found")
         return {}
     end
     return activeRoster.encounters

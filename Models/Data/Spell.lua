@@ -1,14 +1,14 @@
----@class Spell
-Spell = {}
-Spell.__index = Spell
+---@class SRTSpell
+SRTSpell = {}
+SRTSpell.__index = SRTSpell
 
----@return Spell
+---@return SRTSpell
 ---@param name string
 ---@param cooldown number
 ---@param duration number
 ---@param info table?
-function Spell:New(id, name, cooldown, duration, info)
-    ---@class Spell
+function SRTSpell:New(id, name, cooldown, duration, info)
+    ---@class SRTSpell
     local obj = setmetatable({}, self)
     self.__index = self
     obj.id = id

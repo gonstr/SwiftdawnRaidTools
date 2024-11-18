@@ -26,7 +26,7 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
                             version = "Unknown"
                         end
 
-                        Log.info(version .. ": " .. self:StringJoin(players))
+                        Log.info(version .. ": " .. Utils:StringJoin(players))
                     end
                 end)
             end

@@ -27,7 +27,7 @@ function SwiftdawnRaidTools:ImportYAML(str)
     end
 
     for _, part in ipairs(result) do
-        part.uuid = SwiftdawnRaidTools:GenerateUUID()
+        part.uuid = Utils:GenerateUUID()
     end
 
     return true, result
@@ -44,7 +44,7 @@ function SwiftdawnRaidTools:ImportCreateEncountersData(import)
         insert(result[part.encounter], part)
     end
 
-    local uuid = self:GenerateUUID()
+    local uuid = Utils:GenerateUUID()
 
     return result, uuid
 end
