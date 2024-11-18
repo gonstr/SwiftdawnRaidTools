@@ -48,7 +48,7 @@ end
 function LogItem:GetExtraString()
     return string.format(
             "type: %s\nassignment: %s\nactiveGroups: %s\ncountdown: %d\ndelay: %d\ncontext: %s",
-            tostring(self.triggerType), tostring(self.assignmentId), Utils:TableToString(self.activeGroups), tostring(self.countdown), tostring(self.delay), SwiftdawnRaidTools.Utils:TableToString(self.context))
+            tostring(self.triggerType), tostring(self.assignmentId), Utils:TableToString(self.activeGroups), tostring(self.countdown), tostring(self.delay), Utils:TableToString(self.context))
 end
 
 function LogItem:getLogFontType()

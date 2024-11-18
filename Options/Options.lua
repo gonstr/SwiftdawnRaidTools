@@ -475,7 +475,7 @@ local appearanceOptions = {
                     end,
                     set = function(info, value)
                         SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(value)
-                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / SwiftdawnRaidTools.Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / SwiftdawnRaidTools.Utils:GetWeirdScale())
+                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / Utils:GetWeirdScale())
                     end,
                     validate = function(info, value)
                         -- Check if the value is a valid floating-point number
@@ -492,7 +492,7 @@ local appearanceOptions = {
                     end,
                     set = function(info, value)
                         SwiftdawnRaidTools.db.profile.notifications.anchorY = tonumber(value)
-                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / SwiftdawnRaidTools.Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / SwiftdawnRaidTools.Utils:GetWeirdScale())
+                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / Utils:GetWeirdScale())
                     end,
                     validate = function(info, value)
                         -- Check if the value is a valid floating-point number

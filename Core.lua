@@ -192,17 +192,17 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         Log.debug("Received message SYNC_STATUS:", sender)
         self:SyncHandleStatus(payload.d)
     elseif payload.e == "SYNC_PROG" then
-        if payload.d.encountersId ~= SwiftdawnRaidTools.Data.GetActiveRosterID() then
+        if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
             Log.debug("Received message SYNC_PROG:", sender, payload.d.progress)
             self.encountersProgress = payload.d.progress
-            SwiftdawnRaidTools.Data.SetActiveRosterID("none")
+            SRTData.SetActiveRosterID("none")
             self.overview:Update()
         end
     elseif payload.e == "SYNC" then
         Log.debug("Received message SYNC")
         self.encountersProgress = nil
-        SwiftdawnRaidTools.Data.SetActiveRosterID(payload.d.encountersId)
-        SwiftdawnRaidTools.Data.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster"))
+        SRTData.SetActiveRosterID(payload.d.encountersId)
+        SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster"))
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         Log.debug("Received message ACT_GRPS")
@@ -301,7 +301,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
     elseif subEvent == "SPELL_AURA_APPLIED" or subEvent =="SPELL_AURA_REMOVED" then
         self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
-        if SwiftdawnRaidTools.Utils:IsFriendlyRaidMemberOrPlayer(destGUID) then
+        if Utils:IsFriendlyRaidMemberOrPlayer(destGUID) then
             self:UnitsSetDead(destGUID)
             self:RaidAssignmentsUpdateGroups()
             self.overview:UpdateSpells()
