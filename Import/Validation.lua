@@ -388,7 +388,7 @@ end
 Validation = {}
 
 function Validation:ValidateImport(import)
-    local bossEncounters = self:BossEncountersGetAll()
+    local bossEncounters = BossEncounters:BossEncountersGetAll()
 
     local ok, err = validateRequiredFields(import)
     if not ok then return false, err end

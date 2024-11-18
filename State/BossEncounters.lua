@@ -1,12 +1,10 @@
-local SwiftdawnRaidTools = SwiftdawnRaidTools
-local insert = table.insert
+BossEncounters = {
+    isInitialized = false,
+    bossInfo = {}
+}
 
-local bossEncountersInitialized = false
-
-local bossEncounters = {}
-
-function SwiftdawnRaidTools:BossEncountersInit()
-    if bossEncountersInitialized then
+function BossEncounters:Initialize()
+    if BossEncounters.isInitialized then
         return
     end
 
@@ -21,7 +19,7 @@ function SwiftdawnRaidTools:BossEncountersInit()
         local instance_id = EJ_GetInstanceByIndex(instance_index, true)
 
         while instance_id do
-            bossEncountersInitialized = true
+            BossEncounters.isInitialized = true
 
             EJ_SelectInstance(instance_id)
             local instance_name, _, _, _, _, _, dungeonAreaMapID = EJ_GetInstanceInfo(instance_id)
@@ -30,7 +28,7 @@ function SwiftdawnRaidTools:BossEncountersInit()
             local boss, _, _, _, _, _, encounter_id = EJ_GetEncounterInfoByIndex(ej_index, instance_id)
 
             while boss do
-                bossEncounters[encounter_id] = boss
+                BossEncounters.bossInfo[encounter_id] = boss
 
                 ej_index = ej_index + 1
                 boss, _, _, _, _, _, encounter_id = EJ_GetEncounterInfoByIndex(ej_index, instance_id)
@@ -44,14 +42,14 @@ function SwiftdawnRaidTools:BossEncountersInit()
     EJ_SelectTier(currTier)
 
     -- Add bosses not in the encounter journal until discovered
-    bossEncounters[1082] = "Sinestra"
-    bossEncounters[1083] = "Sinestra"
+    BossEncounters.bossInfo[1082] = "Sinestra"
+    BossEncounters.bossInfo[1083] = "Sinestra"
 end
 
-function SwiftdawnRaidTools:BossEncountersGetAll()
-    return bossEncounters
+function BossEncounters:BossEncountersGetAll()
+    return BossEncounters.bossInfo
 end
 
-function SwiftdawnRaidTools:BossEncounterByID(encounterID)
-    return bossEncounters[encounterID]
+function BossEncounters:GetNameByID(encounterID)
+    return BossEncounters.bossInfo[encounterID]
 end

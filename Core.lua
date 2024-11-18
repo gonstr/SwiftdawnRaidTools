@@ -134,7 +134,7 @@ end
 
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
-        self:BossEncountersInit()
+        BossEncounters:Initialize()
         SRTData.Initialize()
         SyncController:SendStatus()
         SyncController:ScheduleAssignmentsSync()
