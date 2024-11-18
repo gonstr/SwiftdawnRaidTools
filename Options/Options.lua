@@ -963,6 +963,35 @@ local importOptions = {
     },
 }
 
+local troubleshootOptions = {
+    name = "Troubleshooting Options",
+    type = "group",
+    args = {
+        notificationsPositionDescription = {
+            type = "description",
+            name = "Active Roster ID",
+            width = "normal",
+            order = 1,
+        },
+        notificationsPositionInputX = {
+            type = "input",
+            name = "X",
+            desc = "Type in some text here",
+            width = "double",
+            get = function(info)
+                return SRTData.GetActiveRosterID()
+            end,
+            set = function(info, value)
+                SRTData.SetActiveRosterID(value)
+            end,
+            validate = function(info, value)
+                return Utils:ValidateUUID(value)
+            end,
+            order = 11,
+        }
+    }
+}
+
 function SwiftdawnRaidTools:OptionsInit()
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools", mainOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools", "Swiftdawn Raid Tools")
@@ -979,6 +1008,9 @@ function SwiftdawnRaidTools:OptionsInit()
     
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Import", importOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Import", "Import", "Swiftdawn Raid Tools")
+    
+    LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Troubleshooting", troubleshootOptions)
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Troubleshooting", "Troubleshooting", "Swiftdawn Raid Tools")
 
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Profiles", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Profiles", "Profiles", "Swiftdawn Raid Tools")
