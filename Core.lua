@@ -129,9 +129,6 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterChatCommand("srt")
 end
 
-function SwiftdawnRaidTools:DBInit()
-end
-
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
         BossEncounters:Initialize()
