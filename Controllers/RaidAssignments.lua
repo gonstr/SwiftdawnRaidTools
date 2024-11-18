@@ -78,7 +78,7 @@ end
 function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId, encounterName)
     resetState()
 
-    if not self.TEST and not self:IsPlayerRaidLeader() then
+    if not self.TEST and not Utils:IsPlayerRaidLeader() then
         return
     end
 
@@ -96,7 +96,7 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId, encounter
     -- Populate caches
     for _, part in ipairs(activeEncounter) do
         if part.type == "RAID_ASSIGNMENTS" then
-            local triggerClones = self:DeepClone(part.triggers)
+            local triggerClones = Utils:DeepClone(part.triggers)
 
             for _, trigger in ipairs(triggerClones) do
                 trigger.triggered = false
@@ -144,7 +144,7 @@ function SwiftdawnRaidTools:RaidAssignmentsStartEncounter(encounterId, encounter
             end
 
             if part.untriggers then
-                local untriggerClones = self:DeepClone(part.untriggers)
+                local untriggerClones = Utils:DeepClone(part.untriggers)
 
                 for _, untrigger in ipairs(untriggerClones) do
                     untrigger.triggered = false
@@ -216,8 +216,8 @@ function SwiftdawnRaidTools:RaidAssignmentsIsGroupsEqual(grp1, grp2)
         return false
     end
 
-    local grp1Copy = self:ShallowClone(grp1)
-    local grp2Copy = self:ShallowClone(grp2)
+    local grp1Copy = Utils:ShallowClone(grp1)
+    local grp2Copy = Utils:ShallowClone(grp2)
 
     tableSort(grp1Copy)
     tableSort(grp2Copy)
@@ -265,7 +265,7 @@ function SwiftdawnRaidTools:RaidAssignmentsUpdateGroups()
                 local selectedGroups = self:RaidAssignmentsSelectGroup(part.assignments)
 
                 if not self:RaidAssignmentsIsGroupsEqual(activeGroups, selectedGroups) then
-                    Log.debug("Updated groups for", part.uuid, self:StringJoin(selectedGroups))
+                    Log.debug("Updated groups for", part.uuid, Utils:StringJoin(selectedGroups))
 
                     groupsUpdated = true
                     self:GroupsSetActive(part.uuid, selectedGroups)

@@ -7,6 +7,6 @@ end
 
 function Log.debug(message, ...)
     if SwiftdawnRaidTools.DEBUG then
-        SwiftdawnRaidTools:Print(" [DEBUG] "..message, ...)
+        SwiftdawnRaidTools:Print("[DEBUG] "..message, ...)
     end
 end

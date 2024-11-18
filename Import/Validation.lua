@@ -98,11 +98,11 @@ local function validateRaidAssignments(import)
             return false, "Import with type RAID_ASSIGNMENTS is missing a triggers field."
         end
 
-        if type(import.triggers) ~= "table" or not SwiftdawnRaidTools:IsArray(import.triggers) then
+        if type(import.triggers) ~= "table" or not Utils:IsArray(import.triggers) then
             return false, "Import has an invalid triggers value: " .. stringSafe(import.triggers) .. "."
         end
 
-        if import.untriggers and (type(import.untriggers) ~= "table" or not SwiftdawnRaidTools:IsArray(import.untriggers)) then
+        if import.untriggers and (type(import.untriggers) ~= "table" or not Utils:IsArray(import.untriggers)) then
             return false, "Import has an invalid untriggers value: " .. stringSafe(import.untriggers) .. "."
         end
 
@@ -122,16 +122,16 @@ local function validateRaidAssignments(import)
             return false, "Import with type RAID_ASSIGNMENTS is missing an assignments field."
         end
 
-        if type(import.assignments) ~= "table" or not SwiftdawnRaidTools:IsArray(import.assignments) then
+        if type(import.assignments) ~= "table" or not Utils:IsArray(import.assignments) then
             return false, "Import has an invalid assignments value: " .. stringSafe(import.assignments) .. "."
         end
 
-        if table.getn(import.assignments) == 0 then
+        if #import.assignments == 0 then
             return false, "Import assignments is empty."
         end
         
         for _, group in pairs(import.assignments) do
-            if type(group) ~= "table" or not SwiftdawnRaidTools:IsArray(group) then
+            if type(group) ~= "table" or not Utils:IsArray(group) then
                 return false, "Import has an invalid assignments value: " .. stringSafe(group) .. "."
             end
 

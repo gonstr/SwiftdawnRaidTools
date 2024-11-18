@@ -27,7 +27,7 @@ local function PerformSync()
 end
 
 function SwiftdawnRaidTools:SyncSchedule()
-    if IsEncounterInProgress() or not self:IsPlayerRaidLeader() then
+    if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
         Log.info("Not syncing, you are not the raid leader, or encounter is in progress")
         return
     end
@@ -45,7 +45,7 @@ function SwiftdawnRaidTools:SyncSchedule()
 end
 
 function SwiftdawnRaidTools:SyncNow()
-    if IsEncounterInProgress() or not self:IsPlayerRaidLeader() then
+    if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
         Log.info("Not syncing, you are not the raid leader, or encounter is in progress")
         return
     end
@@ -66,7 +66,7 @@ function SwiftdawnRaidTools:SyncSendVersion()
 end
 
 function SwiftdawnRaidTools:SyncSendStatus()
-    if IsEncounterInProgress() or not IsInRaid() or self:IsPlayerRaidLeader() then
+    if IsEncounterInProgress() or not IsInRaid() or Utils:IsPlayerRaidLeader() then
         return
     end
 
@@ -78,7 +78,7 @@ function SwiftdawnRaidTools:SyncSendStatus()
 end
 
 function SwiftdawnRaidTools:SyncHandleStatus(data)
-    if IsEncounterInProgress() or not self:IsPlayerRaidLeader() then
+    if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
         return
     end
 

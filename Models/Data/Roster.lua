@@ -1,5 +1,3 @@
-local GenerateUUID = SwiftdawnRaidTools.GenerateUUID
-
 ---@class Roster
 Roster = {}
 Roster.__index = Roster
@@ -15,7 +13,7 @@ function Roster:New()
     ---@class Roster
     local obj = setmetatable({}, self)
     self.__index = self
-    obj.id = GenerateUUID()
+    obj.id = Utils:GenerateUUID()
     obj.name = nil
     obj.timestamp = timestamp()
     obj.players = {}
@@ -32,7 +30,7 @@ end
 
 function Roster.GetTimestamp(roster)
     if not roster.timestamp then
-        roster.timestamp = timestamp()
+        roster.timestamp = Utils:Timestamp()
     end
     return roster.timestamp
 end

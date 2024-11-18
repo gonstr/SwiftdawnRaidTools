@@ -405,7 +405,7 @@ function FrameBuilder.CreateFilterMenu(parentFrame, structure, font, updateFunct
     local lastItem
     local count = 0
     popup.items = {}
-    for name, subStructure in OrderedPairs(structure) do
+    for name, subStructure in Utils:OrderedPairs(structure) do
         if name ~= "_function" then 
             popup.items[name] = FrameBuilder.CreateFilterMenuItem(popup, lastItem, name, structure._function, subStructure, font, updateFunction, depth)
             lastItem = popup.items[name]
@@ -779,4 +779,4 @@ function FrameBuilder.UpdatePopupMenu(popupMenu, items)
     if height > 0 then
         popupMenu:SetHeight(height)
     end
-end 
+end

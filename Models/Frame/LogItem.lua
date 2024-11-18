@@ -48,7 +48,7 @@ end
 function LogItem:GetExtraString()
     return string.format(
             "type: %s\nassignment: %s\nactiveGroups: %s\ncountdown: %d\ndelay: %d\ncontext: %s",
-            tostring(self.triggerType), tostring(self.assignmentId), TableToString(self.activeGroups), tostring(self.countdown), tostring(self.delay), TableToString(self.context))
+            tostring(self.triggerType), tostring(self.assignmentId), Utils:TableToString(self.activeGroups), tostring(self.countdown), tostring(self.delay), SwiftdawnRaidTools.Utils:TableToString(self.context))
 end
 
 function LogItem:getLogFontType()
@@ -63,7 +63,7 @@ function LogItem:CreateFrame(parentFrame)
     self.timestamp:SetShadowColor(0, 0, 0, 1)
     self.timestamp:SetJustifyH("LEFT")
     self.timestamp:SetWordWrap(false)
-    self.timestamp:SetText(GetTimestamp() .. ": ")
+    self.timestamp:SetText(Utils:Timestamp(true) .. ": ")
     self.timestamp:SetTextColor(1, 1, 1)
     self.timestamp:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, 0)
     self.text = self.frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")

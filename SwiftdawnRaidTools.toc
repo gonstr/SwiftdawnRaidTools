@@ -25,7 +25,6 @@ Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
 Core.lua
 Test.lua
-Utils.lua
 Options\Chat.lua
 Options\WeakAuras.lua
 Options\Options.lua
@@ -48,7 +47,8 @@ UI\RosterBuilder.lua
 Utils\FrameBuilder.lua
 Utils\SRTData.lua
 Utils\Log.lua
-Models\Conditions\Condition.lua
+Utils\Utils.lua
+Models\Frame\Conditions\Condition.lua
 Models\Conditions\UnitHealthCondition.lua
 Models\Conditions\SpellCastCountCondition.lua
 Models\Data\BossAbility.lua
@@ -56,7 +56,7 @@ Models\Data\Class.lua
 Models\Data\Encounter.lua
 Models\Data\Player.lua
 Models\Data\Roster.lua
-Models\Data\Spec.lua
+Models\Enum\Spec.lua
 Models\Data\Spell.lua
 Models\Enum\Comparison.lua
 Models\Enum\SRTColor.lua
