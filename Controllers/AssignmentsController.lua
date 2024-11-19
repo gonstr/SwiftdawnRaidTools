@@ -29,11 +29,13 @@ AssignmentsController = {
     delayTimers = {},
     -- key: spellid, value = number of casts
     spellCastCache = {},
-    activeEncounter = nil
+    activeEncounterID = nil,
+    encounterStart = nil
 }
 
 function AssignmentsController:ResetState()
-    AssignmentsController.activeEncounter = nil
+    AssignmentsController.activeEncounterID = nil
+    AssignmentsController.encounterStart = nil
     AssignmentsController.unitHealthTriggersCache = {}
     AssignmentsController.unitHealthUntriggersCache = {}
     AssignmentsController.spellCastTriggersCache = {}
@@ -60,26 +62,34 @@ function AssignmentsController:ResetState()
     end
 end
 
-function AssignmentsController:StartEncounter(encounterId, encounterName)
+function AssignmentsController:GetActiveEncounter()
+    if not AssignmentsController.activeEncounterID then
+        return {}
+    end
+    return SRTData.GetActiveEncounters()[AssignmentsController.activeEncounterID]
+end
+
+function AssignmentsController:StartEncounter(encounterID, encounterName)
     AssignmentsController:ResetState()
 
     if not SwiftdawnRaidTools.TEST and not Utils:IsPlayerRaidLeader() then
         return
     end
 
-    AssignmentsController.activeEncounter = SRTData.GetActiveEncounters()[encounterId]
-
-    if not AssignmentsController.activeEncounter then
+    if not SRTData.GetActiveEncounters()[encounterID] then
         Log.debug("No active encounter found!")
         return
     end
 
-    Log.debug("Encounter starting")
+    AssignmentsController.activeEncounterID = encounterID
+    AssignmentsController.encounterStart = Utils:Timestamp()
+
+    Log.debug("Encounter starting at " .. AssignmentsController.encounterStart)
 
     AssignmentsController:UpdateGroups()
 
     -- Populate caches
-    for _, part in ipairs(AssignmentsController.activeEncounter) do
+    for _, part in ipairs(AssignmentsController:GetActiveEncounter()) do
         if part.type == "RAID_ASSIGNMENTS" then
             local triggerClones = Utils:DeepClone(part.triggers)
 
@@ -162,11 +172,11 @@ function AssignmentsController:StartEncounter(encounterId, encounterName)
 end
 
 function AssignmentsController:EndEncounter()
-    if not AssignmentsController.activeEncounter then
+    if not AssignmentsController.activeEncounterID then
         return
     end
 
-    Log.debug("Encounter ended")
+    Log.debug("Encounter ended at "..Utils:Timestamp())
 
     AssignmentsController:ResetState()
     SwiftdawnRaidTools:GroupsReset()
@@ -174,7 +184,7 @@ function AssignmentsController:EndEncounter()
 end
 
 function AssignmentsController:IsInEncounter()
-    return AssignmentsController.activeEncounter ~= nil
+    return AssignmentsController.activeEncounterID ~= nil
 end
 
 function AssignmentsController:IsGroupsEqual(grp1, grp2)
@@ -206,7 +216,7 @@ function AssignmentsController:IsGroupsEqual(grp1, grp2)
 end
 
 function AssignmentsController:UpdateGroups()
-    if not AssignmentsController.activeEncounter then
+    if not AssignmentsController.activeEncounterID then
         return
     end
 
@@ -214,7 +224,7 @@ function AssignmentsController:UpdateGroups()
 
     local groupsUpdated = false
 
-    for _, part in ipairs(AssignmentsController.activeEncounter) do
+    for _, part in ipairs(AssignmentsController:GetActiveEncounter()) do
         if part.type == "RAID_ASSIGNMENTS" then
             -- Prevent active group from being updated if all spells in the current active group is still ready
             local allActiveGroupsReady = true
@@ -424,7 +434,7 @@ function AssignmentsController:CancelDelayTimers(uuid)
 end
 
 function AssignmentsController:HandleUnitHealth(unit)
-    if not AssignmentsController.activeEncounter then
+    if not AssignmentsController.activeEncounterID then
         return
     end
 
@@ -504,7 +514,7 @@ function AssignmentsController:HandleUnitHealth(unit)
 end
 
 function AssignmentsController:HandleSpellCast(event, spellId, sourceName, destName)
-    if not AssignmentsController.activeEncounter then
+    if not AssignmentsController.activeEncounterID then
         return
     end
 
@@ -549,7 +559,7 @@ function AssignmentsController:HandleSpellCast(event, spellId, sourceName, destN
 end
 
 function AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, destName)
-    if not AssignmentsController.activeEncounter then
+    if not AssignmentsController.activeEncounterID then
         return
     end
 
@@ -597,7 +607,7 @@ function AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, de
 end
 
 function AssignmentsController:HandleRaidBossEmote(text)
-    if not AssignmentsController.activeEncounter then
+    if not AssignmentsController.activeEncounterID then
         return
     end
 
@@ -632,7 +642,7 @@ function AssignmentsController:CancelFojjiNumenTimer(key)
 end
 
 function AssignmentsController:HandleFojjiNumenTimer(key, countdown)
-    if not AssignmentsController.activeEncounter or not countdown then
+    if not AssignmentsController.activeEncounterID or not countdown then
         return
     end
 

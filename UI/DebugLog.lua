@@ -1,8 +1,8 @@
-local MAX_SCROLLBACK = 500
-
 ---@class SRTDebugLog:SRTWindow
 SRTDebugLog = setmetatable({
-    logItems = {}
+    logItems = {},
+    maxFrames = 100,
+    log = {}
 }, SRTWindow)
 SRTDebugLog.__index = SRTDebugLog
 
@@ -55,26 +55,46 @@ function SRTDebugLog:ScrollToBottom()
 end
 
 --- Add a log statement to the debug log
----@param logItem LogItem
-function SRTDebugLog:AddItem(logItem)
-    logItem:CreateFrame(self.scrollContentFrame)
-    -- fix connection points for new and old lines
-    if #self.logItems == 0 then
-        -- no other lines, so connect to top
-        logItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
-    else
-        if #self.logItems > MAX_SCROLLBACK then
-            -- too many lines; remove first line in log
-            local removedItem = table.remove(self.logItems, 1)
-            removedItem:DeleteFrame()
-            -- connect new first line to top
-            self.logItems[1].frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
-        end
-        -- connect to last line in log
-        logItem.frame:SetPoint("TOPLEFT", self.logItems[#self.logItems].frame, "BOTTOMLEFT", 0, -3)
+---@param data table
+function SRTDebugLog:AddItem(data)
+    if not AssignmentsController:IsInEncounter() then
+        Log.debug("Not adding log data. No encounter going on!", data)
+        return
     end
-    -- add line to the list
-    self.logItems[#self.logItems +1] = logItem
+    local encounterID = AssignmentsController.activeEncounterID
+    local encounterStart = AssignmentsController.encounterStart
+    if not encounterStart then
+        Log.debug("Not adding log data. No start time known for current encounter!")
+        return
+    end
+    self.log[encounterID] = self.log[encounterID] or {}
+    self.log[encounterID][encounterStart] = self.log[encounterID][encounterStart] or {}
+
+    table.insert(self.log[encounterID][encounterStart], data)
+
+    if #self.logItems < self.maxFrames then
+        -- Create a new frame and attach at the bottom
+        local newItem = LogItem:New(data)
+        newItem:CreateFrame(self.scrollContentFrame)
+        if #self.logItems == 0 then
+            newItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
+        else
+            newItem.frame:SetPoint("TOPLEFT", self.logItems[#self.logItems].frame, "BOTTOMLEFT", 0, -3)
+        end
+        table.insert(self.logItems, newItem)
+    else
+        -- Grab first frame, update and attach at the bottom
+        local cachedItem = table.remove(self.logItems, 1)
+        cachedItem.frame:ClearAllPoints()
+        local firstItem = self.logItems[1]
+        firstItem.frame:ClearAllPoints()
+        firstItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
+        local lastItem = self.logItems[#self.logItems]
+        cachedItem.frame:SetPoint("TOPLEFT", lastItem.frame, "BOTTOMLEFT", 0, -3)
+        cachedItem:NewData(data)
+        cachedItem:UpdateAppearance()
+        table.insert(self.logItems, cachedItem)
+    end
     if self:GetProfile().scrollToBottom then
         self:ScrollToBottom()
     end
