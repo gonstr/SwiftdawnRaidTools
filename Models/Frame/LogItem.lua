@@ -20,6 +20,15 @@ function LogItem:New(data)
     return obj
 end
 
+function LogItem:NewData(data)
+    self.triggerType = data.triggerType
+    self.assignmentId = data.uuid
+    self.activeGroups = data.activeGroups
+    self.countdown = data.countdown
+    self.delay = data.delay
+    self.context = data.context
+end
+
 function LogItem:GetString()
     local line
 
