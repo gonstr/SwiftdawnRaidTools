@@ -1,9 +1,7 @@
-local MAX_SCROLLBACK = 500
-
 ---@class SRTDebugLog:SRTWindow
 SRTDebugLog = setmetatable({
     logItems = {},
-    maxFrames = 500,
+    maxFrames = 100,
     log = {}
 }, SRTWindow)
 SRTDebugLog.__index = SRTDebugLog
@@ -69,6 +67,7 @@ function SRTDebugLog:AddItem(data)
         Log.debug("Not adding log data. No start time known for current encounter!")
         return
     end
+    self.log[encounterID] = self.log[encounterID] or {}
     self.log[encounterID][encounterStart] = self.log[encounterID][encounterStart] or {}
 
     table.insert(self.log[encounterID][encounterStart], data)
@@ -76,16 +75,22 @@ function SRTDebugLog:AddItem(data)
     if #self.logItems < self.maxFrames then
         -- Create a new frame and attach at the bottom
         local newItem = LogItem:New(data)
+        newItem:CreateFrame(self.scrollContentFrame)
         if #self.logItems == 0 then
             newItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
+        else
+            newItem.frame:SetPoint("TOPLEFT", self.logItems[#self.logItems].frame, "BOTTOMLEFT", 0, -3)
         end
-        newItem.frame:SetPoint("TOPLEFT", self.logItems[#self.logItems].frame, "BOTTOMLEFT", 0, -3)
         table.insert(self.logItems, newItem)
     else
         -- Grab first frame, update and attach at the bottom
         local cachedItem = table.remove(self.logItems, 1)
         cachedItem.frame:ClearAllPoints()
-        cachedItem.frame:SetPoint("TOPLEFT", self.logItems[#self.logItems].frame, "BOTTOMLEFT", 0, -3)
+        local firstItem = self.logItems[1]
+        firstItem.frame:ClearAllPoints()
+        firstItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
+        local lastItem = self.logItems[#self.logItems]
+        cachedItem.frame:SetPoint("TOPLEFT", lastItem.frame, "BOTTOMLEFT", 0, -3)
         cachedItem:NewData(data)
         cachedItem:UpdateAppearance()
         table.insert(self.logItems, cachedItem)
