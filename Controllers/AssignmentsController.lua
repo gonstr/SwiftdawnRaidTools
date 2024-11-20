@@ -179,7 +179,7 @@ function AssignmentsController:EndEncounter()
     Log.debug("Encounter ended at "..Utils:Timestamp())
 
     AssignmentsController:ResetState()
-    SwiftdawnRaidTools:GroupsReset()
+    Groups:Reset()
     SwiftdawnRaidTools.overview:UpdateActiveGroups()
 end
 
@@ -229,7 +229,7 @@ function AssignmentsController:UpdateGroups()
             -- Prevent active group from being updated if all spells in the current active group is still ready
             local allActiveGroupsReady = true
 
-            local activeGroups = SwiftdawnRaidTools:GroupsGetActive(part.uuid)
+            local activeGroups = Groups:GetActive(part.uuid)
 
             if not activeGroups or #activeGroups == 0 then
                 allActiveGroupsReady = false
@@ -238,7 +238,7 @@ function AssignmentsController:UpdateGroups()
                     local group = part.assignments[groupIndex]
 
                     for _, assignment in ipairs(group) do
-                        if not SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+                        if not SpellCache:IsSpellReady(assignment.player, assignment.spell_id) then
                             allActiveGroupsReady = false
                         end
                     end
@@ -252,7 +252,7 @@ function AssignmentsController:UpdateGroups()
                     Log.debug("Updated groups for", part.uuid, Utils:StringJoin(selectedGroups))
 
                     groupsUpdated = true
-                    SwiftdawnRaidTools:GroupsSetActive(part.uuid, selectedGroups)
+                    Groups:SetActive(part.uuid, selectedGroups)
                 end
             end
         end
@@ -261,7 +261,7 @@ function AssignmentsController:UpdateGroups()
     Log.debug("Update groups done. Changed:", groupsUpdated)
 
     if groupsUpdated then
-        SwiftdawnRaidTools:SendRaidMessage("ACT_GRPS", SwiftdawnRaidTools:GroupsGetAllActive())
+        SwiftdawnRaidTools:SendRaidMessage("ACT_GRPS", Groups:GetAllActive())
     end
 end
 
@@ -273,7 +273,7 @@ function AssignmentsController:SelectBestMatchIndex(assignments)
     for i, group in ipairs(assignments) do
         local ready = true
         for _, assignment in ipairs(group) do
-            if not SwiftdawnRaidTools:SpellsIsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) and not SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+            if not SpellCache:IsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) and not SpellCache:IsSpellReady(assignment.player, assignment.spell_id) then
                 ready = false
                 break
             end
@@ -287,7 +287,7 @@ function AssignmentsController:SelectBestMatchIndex(assignments)
     for i, group in pairs(assignments) do
         local readySpells = 0
         for _, assignment in ipairs(group) do
-            if SwiftdawnRaidTools:SpellsIsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) or SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+            if SpellCache:IsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) or SpellCache:IsSpellReady(assignment.player, assignment.spell_id) then
                 readySpells = readySpells + 1
             end
         end
@@ -387,7 +387,7 @@ function AssignmentsController:Trigger(trigger, context, countdown, ignoreTrigge
         return
     end
 
-    local activeGroups = SwiftdawnRaidTools:GroupsGetActive(trigger.uuid)
+    local activeGroups = Groups:GetActive(trigger.uuid)
 
     countdown = countdown or trigger.countdown or 0
 

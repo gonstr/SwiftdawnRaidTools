@@ -69,7 +69,7 @@ function Utils:IsPlayerInAssignments(assignments)
 end
 
 function Utils:IsPlayerInActiveGroup(part)
-    local activeGroups = self:GroupsGetActive(part.uuid)
+    local activeGroups = Groups:GetActive(part.uuid)
     if activeGroups then
         for _, groupIndex in ipairs(activeGroups) do
             local group = part.assignments[groupIndex]

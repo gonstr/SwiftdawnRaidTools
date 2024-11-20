@@ -1,14 +1,14 @@
-local SwiftdawnRaidTools = SwiftdawnRaidTools
+SpellCache = {
+    --- key = "unitId:spellId", Value = cast timestamp
+    casts = {}
+}
 
---- key = "unitId:spellId", Value = cast timestamp
-local spellCastCache = {}
-
-function SwiftdawnRaidTools:SpellsResetCache()
-    spellCastCache = {}
+function SpellCache:Reset()
+    SpellCache.casts = {}
 end
 
-function SwiftdawnRaidTools:SpellsIsSpellReady(unit, spellId, timestamp)
-    if not self.TEST then
+function SpellCache:IsSpellReady(unit, spellId, timestamp)
+    if not SpellCache.TEST then
         if UnitIsDeadOrGhost(unit) then
             return false
         end
@@ -22,7 +22,7 @@ function SwiftdawnRaidTools:SpellsIsSpellReady(unit, spellId, timestamp)
 
     local key = unit .. ":" .. spellId
 
-    local cachedCastTimestamp = spellCastCache[key]
+    local cachedCastTimestamp = SpellCache.casts[key]
 
     if not cachedCastTimestamp then
         return true
@@ -35,8 +35,8 @@ function SwiftdawnRaidTools:SpellsIsSpellReady(unit, spellId, timestamp)
     return true
 end
 
-function SwiftdawnRaidTools:SpellsIsSpellActive(unit, spellId, timestamp)
-    if not self.TEST then
+function SpellCache:IsSpellActive(unit, spellId, timestamp)
+    if not SwiftdawnRaidTools.TEST then
         if UnitIsDeadOrGhost(unit) then
             return false
         end
@@ -50,7 +50,7 @@ function SwiftdawnRaidTools:SpellsIsSpellActive(unit, spellId, timestamp)
 
     local key = unit .. ":" .. spellId
 
-    local cachedCastTimestamp = spellCastCache[key]
+    local cachedCastTimestamp = SpellCache.casts[key]
 
     if not cachedCastTimestamp then
         return false
@@ -63,14 +63,14 @@ function SwiftdawnRaidTools:SpellsIsSpellActive(unit, spellId, timestamp)
     return false
 end
 
-function SwiftdawnRaidTools:SpellsGetCastTimestamp(unit, spellId)
+function SpellCache:GetCastTime(unit, spellId)
     local key = unit .. ":" .. spellId
 
-    return spellCastCache[key]
+    return SpellCache.casts[key]
 end
 
-function SwiftdawnRaidTools:SpellsCacheCast(unit, spellId, updateFunc)
-    if not self.TEST then
+function SpellCache:RegisterCast(unit, spellId, updateFunc)
+    if not SwiftdawnRaidTools.TEST then
         if not UnitIsPlayer(unit) and not UnitInRaid(unit) then
             return
         end
@@ -80,7 +80,7 @@ function SwiftdawnRaidTools:SpellsCacheCast(unit, spellId, updateFunc)
     if spell then
         local key = unit .. ":" .. spellId
 
-        spellCastCache[key] = GetTime()
+        SpellCache.casts[key] = GetTime()
 
         updateFunc()
 

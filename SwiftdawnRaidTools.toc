@@ -30,10 +30,10 @@ Options\WeakAuras.lua
 Options\Options.lua
 Import\SRTImport.lua
 Import\Validation.lua
-State\Spells.lua
+State\SpellCache.lua
 State\BossEncounters.lua
 State\Groups.lua
-State\Units.lua
+State\UnitCache.lua
 Controllers\AssignmentsController.lua
 Controllers\SyncController.lua
 UI\SRTWindow.lua

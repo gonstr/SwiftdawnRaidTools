@@ -890,14 +890,14 @@ local fojjiIntegrationOptions = {
             fontSize = "medium",
             name = "|cffff0000WeakAuras is not installed.|r",
             order = 3,
-            hidden = function() return SwiftdawnRaidTools:WeakAurasIsInstalled() end
+            hidden = function() return WAHelper:IsWeakaurasInstalled() end
         },
         helperWeakAuraInstalledMessage = {
             type = "description",
             fontSize = "medium",
             name = "|cff00ff00Swiftdawn Raid Tools Helper WeakAura Installed.|r",
             order = 4,
-            hidden = function() return not SwiftdawnRaidTools:WeakaurasIsHelperInstalled() end
+            hidden = function() return not WAHelper:IsHelperInstalled() end
         },
         installWeakAuraButton = {
             type = "execute",
@@ -907,7 +907,7 @@ local fojjiIntegrationOptions = {
                 LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Fojji Integration")
             end) end,
             order = 5,
-            hidden = function() return not SwiftdawnRaidTools:WeakAurasIsInstalled() or SwiftdawnRaidTools:WeakaurasIsHelperInstalled() end
+            hidden = function() return not WAHelper:IsWeakaurasInstalled() or WAHelper:IsHelperInstalled() end
         },
     },
 }

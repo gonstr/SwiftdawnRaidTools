@@ -299,7 +299,7 @@ local function updateExtraInfo(frame, prevFrame, assignments, activeGroups)
 
         if group then
             for _, assignment in ipairs(group) do
-                if assignment.type == "SPELL" and SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+                if assignment.type == "SPELL" and SpellCache:IsSpellReady(assignment.player, assignment.spell_id) then
                     insert(playersKeySet, assignment.player)
                 end
             end
@@ -376,7 +376,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
         local groupIndex = 1
         for _, part in pairs(encounter) do
             if part.type == "RAID_ASSIGNMENTS" and part.uuid == uuid then
-                local activeGroups = self:GroupsGetActive(uuid)
+                local activeGroups = Groups:GetActive(uuid)
 
                 if not activeGroups or #activeGroups == 0 then
                     return
@@ -437,15 +437,15 @@ end
 function SwiftdawnRaidTools:NotificationsUpdateSpells()
     for _, groupFrame in pairs(self.notificationRaidAssignmentGroups) do
         for _, assignmentFrame in pairs(groupFrame.assignments) do
-            if self:SpellsIsSpellActive(assignmentFrame.player, assignmentFrame.spellId) then
-                local castTimestamp = self:SpellsGetCastTimestamp(assignmentFrame.player, assignmentFrame.spellId)
+            if SpellCache:IsSpellActive(assignmentFrame.player, assignmentFrame.spellId) then
+                local castTimestamp = SpellCache:GetCastTime(assignmentFrame.player, assignmentFrame.spellId)
                 local spell = SRTData.GetSpellByID(assignmentFrame.spellId)
                 if castTimestamp and spell then
                     assignmentFrame.cooldownFrame:SetCooldown(castTimestamp, spell.duration)
                 end
                 assignmentFrame:SetAlpha(1)
             else
-                if self:SpellsIsSpellReady(assignmentFrame.player, assignmentFrame.spellId) then
+                if SpellCache:IsSpellReady(assignmentFrame.player, assignmentFrame.spellId) then
                     assignmentFrame:SetAlpha(1)
                 else
                     assignmentFrame:SetAlpha(0.4)
