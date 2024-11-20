@@ -1,7 +1,8 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
-local insert = table.insert
 
-function SwiftdawnRaidTools:ImportYAML(str)
+Import = {}
+
+function Import:ParseYAML(str)
     if str == nil or string.len(str) == 0 then
         return false
     end
@@ -33,7 +34,7 @@ function SwiftdawnRaidTools:ImportYAML(str)
     return true, result
 end
 
-function SwiftdawnRaidTools:ImportCreateEncountersData(import)
+function Import:AddIDs(import)
     local result = {}
 
     for _, part in ipairs(import) do
@@ -41,7 +42,7 @@ function SwiftdawnRaidTools:ImportCreateEncountersData(import)
             result[part.encounter] = {}
         end
 
-        insert(result[part.encounter], part)
+        table.insert(result[part.encounter], part)
     end
 
     local uuid = Utils:GenerateUUID()

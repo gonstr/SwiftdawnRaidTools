@@ -28,7 +28,6 @@ Test.lua
 Options\Chat.lua
 Options\WeakAuras.lua
 Options\Options.lua
-Import\YAML.lua
 Import\Import.lua
 Import\Validation.lua
 State\Spells.lua
@@ -46,6 +45,7 @@ Utils\FrameBuilder.lua
 Utils\SRTData.lua
 Utils\Log.lua
 Utils\Utils.lua
+Utils\YAML.lua
 Models\Frame\LogItem.lua
 Models\Data\Spell.lua
 Models\Data\Spec.lua
