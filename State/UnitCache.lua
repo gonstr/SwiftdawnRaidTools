@@ -1,5 +1,3 @@
-local SwiftdawnRaidTools = SwiftdawnRaidTools
-
 UnitCache = {
     dead = {}
 }
