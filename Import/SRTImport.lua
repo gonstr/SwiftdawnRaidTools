@@ -2,7 +2,7 @@ local SwiftdawnRaidTools = SwiftdawnRaidTools
 
 Import = {}
 
-function Import:ParseYAML(str)
+function SRTImport:ParseYAML(str)
     if str == nil or string.len(str) == 0 then
         return false
     end
@@ -34,7 +34,7 @@ function Import:ParseYAML(str)
     return true, result
 end
 
-function Import:AddIDs(import)
+function SRTImport:AddIDs(import)
     local result = {}
 
     for _, part in ipairs(import) do

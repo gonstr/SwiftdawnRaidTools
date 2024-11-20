@@ -37,7 +37,7 @@ do
                 return true
             end
 
-            local ok, result = Import:ParseYAML(text)
+            local ok, result = SRTImport:ParseYAML(text)
             if not ok then
                 self.errorLabel:SetText(result)
                 return false
@@ -949,8 +949,8 @@ local importOptions = {
                 SRTData.SetActiveRosterID("none")
 
                 if val ~= nil and val ~= "" then
-                    local _, result = Import:ParseYAML(val)
-                    local encounters, encountersId = Import:AddIDs(result)
+                    local _, result = SRTImport:ParseYAML(val)
+                    local encounters, encountersId = SRTImport:AddIDs(result)
 
                     SRTData.SetActiveRosterID(encountersId)
                     SRTData.AddRoster(encountersId, Roster.Parse(encounters, "Imported Roster"))

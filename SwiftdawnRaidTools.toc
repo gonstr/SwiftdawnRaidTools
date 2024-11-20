@@ -28,7 +28,7 @@ Test.lua
 Options\Chat.lua
 Options\WeakAuras.lua
 Options\Options.lua
-Import\Import.lua
+Import\SRTImport.lua
 Import\Validation.lua
 State\Spells.lua
 State\BossEncounters.lua
