@@ -1112,5 +1112,14 @@ function SRTData.GetActiveEncounters()
         Log.debug("Cannot get active encounters; encounters not found")
         return {}
     end
-    return activeRoster.encounters
+    local encountersWithAssignments = {}
+    for encounterID, encounter in pairs(activeRoster.encounters) do
+        for _, ability in pairs(encounter) do
+            if #ability.assignments > 0 then
+                encountersWithAssignments[encounterID] = encounter
+                break
+            end
+        end
+    end
+    return encountersWithAssignments
 end
