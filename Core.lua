@@ -109,7 +109,8 @@ function SwiftdawnRaidTools:OnInitialize()
     self.overview = SRTOverview:New(300, 180)
     self.overview:Initialize()
 
-    self:NotificationsInit()
+    self.notification = SRTNotification:New()
+    self.notification:Initialize()
 
     self.debugLog = SRTDebugLog:New(100, 400)
     self.debugLog:Initialize()
@@ -233,8 +234,8 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         Log.debug("Received message TRIGGER")
         self.debugLog:AddItem(payload.d)
         Groups.SetActive(payload.d.uuid, payload.d.activeGroups)
-        self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
-        self:NotificationsUpdateSpells()
+        self.notification:ShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
+        self.notification:UpdateSpells()
     end
 end
 
@@ -256,14 +257,14 @@ function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
     SpellCache.Reset()
     self:UnitsResetDeadCache()
     self.overview:UpdateSpells()
-    self:NotificationsUpdateSpells()
+    self.notification:UpdateSpells()
 end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
     self:TestModeEnd()
     AssignmentsController:EndEncounter()
     self.overview:UpdateSpells()
-    self:NotificationsUpdateSpells()
+    self.notification:UpdateSpells()
 end
 
 function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
@@ -274,7 +275,7 @@ function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
         self:UnitsClearDead(guid)
         AssignmentsController:UpdateGroups()
         self.overview:UpdateSpells()
-        self:NotificationsUpdateSpells()
+        self.notification:UpdateSpells()
     end
 
     AssignmentsController:HandleUnitHealth(unitId)
@@ -282,7 +283,7 @@ end
 
 function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
     self.overview:UpdateSpells()
-    self:NotificationsUpdateSpells()
+    self.notification:UpdateSpells()
 
     if IsInRaid() and not self.sentRaidSync then
         self.sentRaidSync = true
@@ -316,7 +317,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
         SpellCache.RegisterCast(sourceName, spellId, function()
             AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
-            self:NotificationsUpdateSpells()
+            self.notification:UpdateSpells()
         end)
         AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_AURA_APPLIED" or subEvent =="SPELL_AURA_REMOVED" then
@@ -326,7 +327,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
             self:UnitsSetDead(destGUID)
             AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
-            self:NotificationsUpdateSpells()
+            self.notification:UpdateSpells()
         end
     end
 end

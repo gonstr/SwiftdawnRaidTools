@@ -1,4 +1,4 @@
-local SwiftdawnRaidTools = SwiftdawnRaidTools
+local SharedMedia = LibStub("LibSharedMedia-3.0")
 
 FrameBuilder = {}
 FrameBuilder.__index = FrameBuilder
@@ -686,6 +686,10 @@ function FrameBuilder.CreatePopupMenu(parentFrame, items)
     return popupMenu
 end
 
+local function AppearancePopupFontType()
+    return SharedMedia:Fetch("font", "Friz Quadrata TT")
+end
+
 function FrameBuilder.CreatePopupMenuItem(popupMenu, text, onClick, isSetting)
     local item = CreateFrame("Frame", nil, popupMenu, "BackdropTemplate")
     item:SetHeight(20)
@@ -707,7 +711,7 @@ function FrameBuilder.CreatePopupMenuItem(popupMenu, text, onClick, isSetting)
     item.highlight:SetAlpha(0.5)
     item.highlight:Hide()
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    item.text:SetFont(SwiftdawnRaidTools:AppearancePopupFontType(), 10)
+    item.text:SetFont(AppearancePopupFontType(), 10)
     if isSetting then
         item.text:SetTextColor(0.8, 0.8, 0.8, 1)
     else

@@ -145,7 +145,7 @@ function SRTOverview:UpdatePopupMenu()
         name = SRT_Profile().notifications.locked and "Show Anchors" or "Hide Anchors",
         onClick = function()
             SRT_Profile().notifications.locked = not SRT_Profile().notifications.locked
-            SwiftdawnRaidTools:NotificationsToggleFrameLock(SRT_Profile().notifications.locked)
+            SwiftdawnRaidTools.notification:ToggleFrameLock(SRT_Profile().notifications.locked)
         end,
         isSetting = true
     })
