@@ -37,7 +37,7 @@ do
                 return true
             end
 
-            local ok, result = SwiftdawnRaidTools:ImportYAML(text)
+            local ok, result = SRTImport:ParseYAML(text)
             if not ok then
                 self.errorLabel:SetText(result)
                 return false
@@ -79,7 +79,7 @@ local mainOptions = {
                     name = "Toggle Anchors",
                     desc = "Toggle Anchors Visibility.",
                     func = function()
-                        SwiftdawnRaidTools:NotificationsToggleFrameLock()
+                        SwiftdawnRaidTools.notification:ToggleFrameLock()
                     end,
                     order = 1,
                 },
@@ -134,7 +134,7 @@ local mainOptions = {
                         SwiftdawnRaidTools.db.profile.debuglog.appearance.iconSize = 14
 
                         SwiftdawnRaidTools.overview:UpdateAppearance()
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                         SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                     order = 4,
@@ -475,7 +475,7 @@ local appearanceOptions = {
                     end,
                     set = function(info, value)
                         SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(value)
-                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / Utils:GetWeirdScale())
+                        SwiftdawnRaidTools.notification.container:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / Utils:GetWeirdScale())
                     end,
                     validate = function(info, value)
                         -- Check if the value is a valid floating-point number
@@ -519,7 +519,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.scale = value
 
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
                 notificationsHeaderFontDescription = {
@@ -540,7 +540,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType = value
 
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
                 notificationsHeaderFontSize = {
@@ -556,7 +556,7 @@ local appearanceOptions = {
                     set = function(self, key)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize = key
 
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
                 notificationsPlayerFontDescription = {
@@ -577,7 +577,7 @@ local appearanceOptions = {
                     set = function(_, key)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType = key
 
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
                 notificationsPlayerFontSize = {
@@ -593,7 +593,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize = value
 
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
                 notificationsCountdownFontDescription = {
@@ -614,7 +614,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType = value
 
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
                 notificationsCountdownFontSize = {
@@ -630,7 +630,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize = value
 
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
                 notificationsIconSizeDescription = {
@@ -652,7 +652,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = value
 
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
                 notificationsBackgroundOpacityDescription = {
@@ -673,8 +673,7 @@ local appearanceOptions = {
                     get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity end,
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = value
-
-                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
                     end,
                 },
             },
@@ -890,14 +889,14 @@ local fojjiIntegrationOptions = {
             fontSize = "medium",
             name = "|cffff0000WeakAuras is not installed.|r",
             order = 3,
-            hidden = function() return SwiftdawnRaidTools:WeakAurasIsInstalled() end
+            hidden = function() return WAHelper:IsWeakaurasInstalled() end
         },
         helperWeakAuraInstalledMessage = {
             type = "description",
             fontSize = "medium",
             name = "|cff00ff00Swiftdawn Raid Tools Helper WeakAura Installed.|r",
             order = 4,
-            hidden = function() return not SwiftdawnRaidTools:WeakaurasIsHelperInstalled() end
+            hidden = function() return not WAHelper:IsHelperInstalled() end
         },
         installWeakAuraButton = {
             type = "execute",
@@ -907,7 +906,7 @@ local fojjiIntegrationOptions = {
                 LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Fojji Integration")
             end) end,
             order = 5,
-            hidden = function() return not SwiftdawnRaidTools:WeakAurasIsInstalled() or SwiftdawnRaidTools:WeakaurasIsHelperInstalled() end
+            hidden = function() return not WAHelper:IsWeakaurasInstalled() or WAHelper:IsHelperInstalled() end
         },
     },
 }
@@ -949,8 +948,8 @@ local importOptions = {
                 SRTData.SetActiveRosterID("none")
 
                 if val ~= nil and val ~= "" then
-                    local _, result = SwiftdawnRaidTools:ImportYAML(val)
-                    local encounters, encountersId = SwiftdawnRaidTools:ImportCreateEncountersData(result)
+                    local _, result = SRTImport:ParseYAML(val)
+                    local encounters, encountersId = SRTImport:AddIDs(result)
 
                     SRTData.SetActiveRosterID(encountersId)
                     SRTData.AddRoster(encountersId, Roster.Parse(encounters, "Imported Roster"))

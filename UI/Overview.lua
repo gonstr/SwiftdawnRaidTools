@@ -145,7 +145,7 @@ function SRTOverview:UpdatePopupMenu()
         name = SRT_Profile().notifications.locked and "Show Anchors" or "Hide Anchors",
         onClick = function()
             SRT_Profile().notifications.locked = not SRT_Profile().notifications.locked
-            SwiftdawnRaidTools:NotificationsToggleFrameLock(SRT_Profile().notifications.locked)
+            SwiftdawnRaidTools.notification:ToggleFrameLock(SRT_Profile().notifications.locked)
         end,
         isSetting = true
     })
@@ -274,7 +274,7 @@ function SRTOverview:UpdateActiveGroups()
             if encounter then
                 for _, part in ipairs(encounter) do
                     if part.uuid == group.uuid then
-                        local activeGroups = SwiftdawnRaidTools:GroupsGetActive(group.uuid)
+                        local activeGroups = Groups:GetActive(group.uuid)
 
                         if activeGroups and #activeGroups > 0 then
                             for _, index in ipairs(activeGroups) do
@@ -300,8 +300,8 @@ function SRTOverview:UpdateSpells()
     for _, ability in pairs(self.bossAbilities) do
         for _, group in pairs(ability.groups) do
             for _, assignment in pairs(group.assignments) do
-                if SwiftdawnRaidTools:SpellsIsSpellActive(assignment.player, assignment.spellId) then
-                    local castTimestamp = SwiftdawnRaidTools:SpellsGetCastTimestamp(assignment.player, assignment.spellId)
+                if SpellCache:IsSpellActive(assignment.player, assignment.spellId) then
+                    local castTimestamp = SpellCache:GetCastTime(assignment.player, assignment.spellId)
                     local spell = SRTData.GetSpellByID(assignment.spellId)
 
                     if castTimestamp and spell then
@@ -310,7 +310,7 @@ function SRTOverview:UpdateSpells()
 
                     assignment:SetAlpha(1)
                 else
-                    if SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spellId) then
+                    if SpellCache:IsSpellReady(assignment.player, assignment.spellId) then
                         assignment:SetAlpha(1)
                     else
                         assignment:SetAlpha(0.4)

@@ -69,7 +69,7 @@ function Utils:IsPlayerInAssignments(assignments)
 end
 
 function Utils:IsPlayerInActiveGroup(part)
-    local activeGroups = self:GroupsGetActive(part.uuid)
+    local activeGroups = Groups:GetActive(part.uuid)
     if activeGroups then
         for _, groupIndex in ipairs(activeGroups) do
             local group = part.assignments[groupIndex]
@@ -271,8 +271,6 @@ function Utils:IsArray(table)
     return true
 end
 
-local SharedMedia = LibStub("LibSharedMedia-3.0")
-
 function SwiftdawnRaidTools:AppearancePopupFontType()
     return SharedMedia:Fetch("font", "Friz Quadrata TT")
 end
@@ -287,51 +285,4 @@ end
 
 function SwiftdawnRaidTools:AppearanceGetOverviewPlayerFontType()
     return SharedMedia:Fetch("font", self.db.profile.overview.appearance.playerFontType)
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontType()
-    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.headerFontType)
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontSize()
-    return self.db.profile.notifications.appearance.headerFontSize
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontType()
-    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.countdownFontType)
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontSize()
-    return self.db.profile.notifications.appearance.countdownFontSize
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontType()
-    return SharedMedia:Fetch("font", self.db.profile.notifications.appearance.playerFontType)
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize()
-    return self.db.profile.notifications.appearance.playerFontSize
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsPlayerIconSize()
-    return self.db.profile.notifications.appearance.iconSize
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsHeaderHeight()
-    local bossAbilityFontSize = SwiftdawnRaidTools:AppearanceGetNotificationsBossAbilityFontSize()
-    local countdownFontSize = SwiftdawnRaidTools:AppearanceGetNotificationsCountdownFontSize()
-    local padding = 7
-    return (bossAbilityFontSize > countdownFontSize and bossAbilityFontSize or countdownFontSize) + padding
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight()
-    local playerFontSize = SwiftdawnRaidTools:AppearanceGetNotificationsPlayerFontSize()
-    local iconSize = SwiftdawnRaidTools:AppearanceGetNotificationsPlayerIconSize()
-    return playerFontSize > iconSize and playerFontSize or iconSize
-end
-
-function SwiftdawnRaidTools:AppearanceGetNotificationsContentHeight()
-    local assignmentHeight = SwiftdawnRaidTools:AppearanceGetNotificationsAssignmentHeight()
-    local padding = 17
-    return assignmentHeight + padding
 end

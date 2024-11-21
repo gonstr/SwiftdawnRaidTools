@@ -50,9 +50,9 @@ function SwiftdawnRaidTools:TestModeStart()
 
     cancelTimers()
 
-    self:GroupsReset()
-    self:SpellsResetCache()
-    self:UnitsResetDeadCache()
+    Groups:Reset()
+    SpellCache:Reset()
+    UnitCache:ResetDeadCache()
 
     self.overview:SelectEncounter(42001)
     AssignmentsController:StartEncounter(42001, "The Boss")
@@ -117,8 +117,8 @@ function SwiftdawnRaidTools:TestModeEnd()
         cancelTimers()
 
         AssignmentsController:EndEncounter()
-        self:SpellsResetCache()
-        self:UnitsResetDeadCache()
+        SpellCache:Reset()
+        UnitCache:ResetDeadCache()
         self.overview:Update()
     end
 end

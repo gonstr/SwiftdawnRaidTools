@@ -13,7 +13,7 @@ function SwiftdawnRaidTools:MinimapInit()
                 Settings.OpenToCategory("Swiftdawn Raid Tools")
             else
                 if IsShiftKeyDown() then
-                    SwiftdawnRaidTools:NotificationsToggleFrameLock()
+                    SwiftdawnRaidTools.notification:ToggleFrameLock()
                 else
                     SwiftdawnRaidTools.db.profile.overview.show = not SwiftdawnRaidTools.db.profile.overview.show
                     SwiftdawnRaidTools.overview:Update()

@@ -85,7 +85,8 @@ function SwiftdawnRaidTools:OnInitialize()
     self.overview = SRTOverview:New(300, 180)
     self.overview:Initialize()
 
-    self:NotificationsInit()
+    self.notification = SRTNotification:New()
+    self.notification:Initialize()
 
     self.debugLog = SRTDebugLog:New(100, 400)
     self.debugLog:Initialize()
@@ -203,14 +204,14 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         Log.debug("Received message ACT_GRPS")
-        self:GroupsSetAllActive(payload.d)
+        Groups:GetAllActive(payload.d)
         self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         Log.debug("Received message TRIGGER")
         self.debugLog:AddItem(payload.d)
-        self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
+        Groups:SetActive(payload.d.uuid, payload.d.activeGroups)
         self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
-        self:NotificationsUpdateSpells()
+        self.notification:UpdateSpells()
     end
 end
 
@@ -229,28 +230,28 @@ end
 
 function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
     AssignmentsController:EndEncounter()
-    self:SpellsResetCache()
-    self:UnitsResetDeadCache()
+    SpellCache:Reset()
+    UnitCache:ResetDeadCache()
     self.overview:UpdateSpells()
-    self:NotificationsUpdateSpells()
+    self.notification:UpdateSpells()
 end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
     self:TestModeEnd()
     AssignmentsController:EndEncounter()
     self.overview:UpdateSpells()
-    self:NotificationsUpdateSpells()
+    self.notification:UpdateSpells()
 end
 
 function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
     local guid = UnitGUID(unitId)
 
-    if self:UnitsIsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
+    if UnitCache:IsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
         Log.debug("Handling cached unit coming back to life")
-        self:UnitsClearDead(guid)
+        UnitCache:SetAlive(guid)
         AssignmentsController:UpdateGroups()
         self.overview:UpdateSpells()
-        self:NotificationsUpdateSpells()
+        self.notification:UpdateSpells()
     end
 
     AssignmentsController:HandleUnitHealth(unitId)
@@ -258,7 +259,7 @@ end
 
 function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
     self.overview:UpdateSpells()
-    self:NotificationsUpdateSpells()
+    self.notification:UpdateSpells()
 
     if IsInRaid() and not self.sentRaidSync then
         self.sentRaidSync = true
@@ -289,20 +290,20 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
     if subEvent == "SPELL_CAST_START" then
         AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
-        self:SpellsCacheCast(sourceName, spellId, function()
+        SpellCache:RegisterCast(sourceName, spellId, function()
             AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
-            self:NotificationsUpdateSpells()
+            self.notification:UpdateSpells()
         end)
         AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_AURA_APPLIED" or subEvent =="SPELL_AURA_REMOVED" then
         AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
         if Utils:IsFriendlyRaidMemberOrPlayer(destGUID) then
-            self:UnitsSetDead(destGUID)
+            UnitCache:SetDead(destGUID)
             AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
-            self:NotificationsUpdateSpells()
+            self.notification:UpdateSpells()
         end
     end
 end
