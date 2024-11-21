@@ -78,6 +78,8 @@ SwiftdawnRaidTools.DEFAULTS = {
 
 function SwiftdawnRaidTools:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("SwiftdawnRaidTools", self.DEFAULTS)
+    
+    SRTData.Initialize()
 
     self:OptionsInit()
     self:MinimapInit()
@@ -133,7 +135,6 @@ end
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
         BossEncounters:Initialize()
-        SRTData.Initialize()
         SyncController:SendStatus()
         SyncController:ScheduleAssignmentsSync()
     end
@@ -204,13 +205,13 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         Log.debug("Received message ACT_GRPS")
-        Groups:GetAllActive(payload.d)
+        Groups:SetAllActive(payload.d)
         self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         Log.debug("Received message TRIGGER")
         self.debugLog:AddItem(payload.d)
         Groups:SetActive(payload.d.uuid, payload.d.activeGroups)
-        self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
+        self.notification:ShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
         self.notification:UpdateSpells()
     end
 end
