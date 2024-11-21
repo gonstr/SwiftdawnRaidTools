@@ -1,9 +1,6 @@
 UnitCache = {
     dead = {}
 }
-
-local deadCache = {}
-
 function UnitCache:SetDead(destGUID)
     UnitCache.dead[destGUID] = true
 end

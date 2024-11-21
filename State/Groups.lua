@@ -1,9 +1,7 @@
 Groups = {
+    -- Key: UUID, value = assignment group index
     active = {}
 }
-
--- Key: UUID, value = assignment group index
-local activeGroups = {}
 
 function Groups:SetActive(uuid, groups)
     Groups.active[uuid] = groups

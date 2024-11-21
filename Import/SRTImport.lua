@@ -1,6 +1,6 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 
-Import = {}
+SRTImport = {}
 
 function SRTImport:ParseYAML(str)
     if str == nil or string.len(str) == 0 then

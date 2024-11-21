@@ -1,4 +1,5 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
+local SharedMedia = LibStub("LibSharedMedia-3.0")
 
 -- Make sure guild roster data is loaded
 GuildRoster()
