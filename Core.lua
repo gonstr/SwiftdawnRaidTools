@@ -102,6 +102,8 @@ SwiftdawnRaidTools.DEFAULTS = {
 
 function SwiftdawnRaidTools:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("SwiftdawnRaidTools", self.DEFAULTS)
+    
+    SRTData.Initialize()
 
     self:OptionsInit()
     self:MinimapInit()
@@ -157,7 +159,6 @@ end
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
         BossEncounters:Initialize()
-        SRTData.Initialize()
         SyncController:SendStatus()
         SyncController:ScheduleAssignmentsSync()
     end
