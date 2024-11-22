@@ -44,6 +44,7 @@ function BossEncounters:Initialize()
     -- Add bosses not in the encounter journal until discovered
     BossEncounters.bossInfo[1082] = "Sinestra"
     BossEncounters.bossInfo[1083] = "Sinestra"
+    BossEncounters.bossInfo[42001] = "The Test Boss"
 end
 
 function BossEncounters:BossEncountersGetAll()

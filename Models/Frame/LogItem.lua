@@ -7,32 +7,49 @@ LogItem = {
 LogItem.__index = LogItem
 
 ---@return LogItem
-function LogItem:New(data)
+function LogItem:New(data, ...)
     ---@class LogItem
     local obj = {}
     setmetatable(obj, LogItem)
-    obj.triggerType = data.triggerType
-    obj.assignmentId = data.uuid
-    obj.activeGroups = data.activeGroups
-    obj.countdown = data.countdown
-    obj.delay = data.delay
-    obj.context = data.context
+    if type(data) == "string" then
+        obj.triggerType = "STRING"
+        obj.line = data
+        obj.extra = ...
+    else
+        obj.triggerType = data.triggerType
+        obj.assignmentId = data.uuid
+        obj.activeGroups = data.activeGroups
+        obj.countdown = data.countdown
+        obj.delay = data.delay
+        obj.context = data.context
+        obj.line = nil
+        obj.extra = nil
+    end
     return obj
 end
 
-function LogItem:NewData(data)
-    self.triggerType = data.triggerType
-    self.assignmentId = data.uuid
-    self.activeGroups = data.activeGroups
-    self.countdown = data.countdown
-    self.delay = data.delay
-    self.context = data.context
+function LogItem:NewData(data, ...)
+    if type(data) == "string" then
+        self.triggerType = "STRING"
+        self.line = data
+        self.extra = ...
+    else
+        self.triggerType = data.triggerType
+        self.assignmentId = data.uuid
+        self.activeGroups = data.activeGroups
+        self.countdown = data.countdown
+        self.delay = data.delay
+        self.context = data.context
+        self.line = nil
+        self.extra = nil
+    end
 end
 
 function LogItem:GetString()
     local line
-
-    if self.triggerType == "ENCOUNTER_START" then
+    if self.triggerType == "STRING" then
+        return string.format("%s %s", self.line, Utils:StringJoin(self.extra))
+    elseif self.triggerType == "ENCOUNTER_START" then
         line = "Encounter with " .. self.context.encounterName .. " has started"
         return line
     elseif self.triggerType == "SPELL_CAST" then
@@ -55,6 +72,9 @@ function LogItem:GetString()
 end
 
 function LogItem:GetExtraString()
+    if self.triggerType == "STRING" then
+        return ""
+    end
     return string.format(
             "type: %s\nassignment: %s\nactiveGroups: %s\ncountdown: %d\ndelay: %d\ncontext: %s",
             tostring(self.triggerType), tostring(self.assignmentId), Utils:TableToString(self.activeGroups), tostring(self.countdown), tostring(self.delay), Utils:TableToString(self.context))
@@ -89,7 +109,7 @@ function LogItem:CreateFrame(parentFrame)
     self.extraText:SetPoint("TOPLEFT", self.timestamp, "BOTTOMLEFT", 5, -3)
     self.extraText:Hide()
     self.frame:SetScript("OnMouseDown", function(_, button)
-        if button == "LeftButton" then
+        if button == "LeftButton" and not self.line then
             self.showExtra = not self.showExtra
             self:UpdateAppearance()
         end
@@ -102,7 +122,12 @@ function LogItem:UpdateAppearance()
     self.frame:SetWidth(self.frame:GetParent():GetWidth() - 10)
     self.timestamp:SetFont(self:getLogFontType(), logFontSize)
     self.timestamp:SetWidth(self.timestamp:GetStringWidth())
-    self.timestamp:SetText(Utils:Timestamp(true) .. ": ")
+    self.timestamp:SetText(Utils:Timestamp(false) .. ": ")
+    if self.triggerType == "STRING" then
+        self.text:SetTextColor(0.80, 0.80, 0.80)
+    else
+        self.text:SetTextColor(SRTColor.GameYellow.r, SRTColor.GameYellow.g, SRTColor.GameYellow.b)
+    end
     self.text:SetFont(self:getLogFontType(), logFontSize)
     self.text:SetWidth(self.frame:GetWidth() - self.timestamp:GetStringWidth() - 2)
     self.text:SetText(self:GetString())

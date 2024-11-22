@@ -1,7 +1,7 @@
 ---@class SRTDebugLog:SRTWindow
 SRTDebugLog = setmetatable({
     logItems = {},
-    maxFrames = 100,
+    maxFrames = 500,
     log = {}
 }, SRTWindow)
 SRTDebugLog.__index = SRTDebugLog
@@ -56,7 +56,7 @@ end
 
 --- Add a log statement to the debug log
 ---@param data table
-function SRTDebugLog:AddItem(data)
+function SRTDebugLog:AddItem(data, ...)
     if not AssignmentsController:IsInEncounter() then
         Log.debug("Not adding log data. No encounter going on!", data)
         return
@@ -74,7 +74,7 @@ function SRTDebugLog:AddItem(data)
 
     if #self.logItems < self.maxFrames then
         -- Create a new frame and attach at the bottom
-        local newItem = LogItem:New(data)
+        local newItem = LogItem:New(data, ...)
         newItem:CreateFrame(self.scrollContentFrame)
         if #self.logItems == 0 then
             newItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
@@ -91,7 +91,7 @@ function SRTDebugLog:AddItem(data)
         firstItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
         local lastItem = self.logItems[#self.logItems]
         cachedItem.frame:SetPoint("TOPLEFT", lastItem.frame, "BOTTOMLEFT", 0, -3)
-        cachedItem:NewData(data)
+        cachedItem:NewData(data, ...)
         cachedItem:UpdateAppearance()
         table.insert(self.logItems, cachedItem)
     end

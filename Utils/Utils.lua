@@ -81,13 +81,11 @@ function Utils:IsPlayerInActiveGroup(part)
     return false
 end
 
-function Utils:Timestamp(withMilliseconds)
+function Utils:Timestamp(withoutYears)
     local currentTimestamp = time()
-    if withMilliseconds then
-        local seconds = math.floor(currentTimestamp)
-        local milliseconds = math.floor((currentTimestamp - seconds) * 1000)
+    if withoutYears then
         ---@class string
-        return string.format("%s.%03d", date("%H:%M:%S"), milliseconds)
+        return string.format("%s", date("%H:%M:%S"))
     else
         ---@class string
         return date("%d-%m-%Y %H:%M:%S", currentTimestamp)
@@ -209,6 +207,13 @@ function Utils:StringEllipsis(str, len)
 end
 
 function Utils:StringJoin(strings, delimiter)
+    if not strings then
+        return ""
+    elseif type(strings) == "string" then
+        return strings
+    elseif type(strings) ~= "table" then
+        return tostring(strings)
+    end
     delimiter = delimiter or ", "
     local result = ""
     for i, str in ipairs(strings) do
