@@ -274,7 +274,7 @@ function SRTOverview:UpdateActiveGroups()
             if encounter then
                 for _, part in ipairs(encounter) do
                     if part.uuid == group.uuid then
-                        local activeGroups = SwiftdawnRaidTools:GroupsGetActive(group.uuid)
+                        local activeGroups = Groups.GetActive(group.uuid)
 
                         if activeGroups and #activeGroups > 0 then
                             for _, index in ipairs(activeGroups) do

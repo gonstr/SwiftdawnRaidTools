@@ -38,7 +38,7 @@ function SwiftdawnRaidTools:TestModeStart()
 
     cancelTimers()
 
-    self:GroupsReset()
+    Groups.Reset()
     SpellCache.Reset()
     self:UnitsResetDeadCache()
 

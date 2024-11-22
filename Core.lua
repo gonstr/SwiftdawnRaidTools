@@ -227,12 +227,12 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         Log.debug("Received message ACT_GRPS")
-        self:GroupsSetAllActive(payload.d)
+        Groups.SetAllActive(payload.d)
         self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         Log.debug("Received message TRIGGER")
         self.debugLog:AddItem(payload.d)
-        self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
+        Groups.SetActive(payload.d.uuid, payload.d.activeGroups)
         self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
         self:NotificationsUpdateSpells()
     end

@@ -376,7 +376,7 @@ function SwiftdawnRaidTools:NotificationsShowRaidAssignment(uuid, context, delay
         local groupIndex = 1
         for _, part in pairs(encounter) do
             if part.type == "RAID_ASSIGNMENTS" and part.uuid == uuid then
-                local activeGroups = self:GroupsGetActive(uuid)
+                local activeGroups = Groups.GetActive(uuid)
 
                 if not activeGroups or #activeGroups == 0 then
                     return

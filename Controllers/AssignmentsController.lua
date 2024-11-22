@@ -179,7 +179,7 @@ function AssignmentsController:EndEncounter()
     Log.debug("Encounter ended at "..Utils:Timestamp())
 
     AssignmentsController:ResetState()
-    SwiftdawnRaidTools:GroupsReset()
+    Groups.Reset()
     SwiftdawnRaidTools.overview:UpdateActiveGroups()
 end
 
@@ -229,7 +229,7 @@ function AssignmentsController:UpdateGroups()
             -- Prevent active group from being updated if all spells in the current active group is still ready
             local allActiveGroupsReady = true
 
-            local activeGroups = SwiftdawnRaidTools:GroupsGetActive(part.uuid)
+            local activeGroups = Groups.GetActive(part.uuid)
 
             if not activeGroups or #activeGroups == 0 then
                 allActiveGroupsReady = false
@@ -252,7 +252,7 @@ function AssignmentsController:UpdateGroups()
                     Log.debug("Updated groups for", part.uuid, Utils:StringJoin(selectedGroups))
 
                     groupsUpdated = true
-                    SwiftdawnRaidTools:GroupsSetActive(part.uuid, selectedGroups)
+                    Groups.SetActive(part.uuid, selectedGroups)
                 end
             end
         end
@@ -261,7 +261,7 @@ function AssignmentsController:UpdateGroups()
     Log.debug("Update groups done. Changed:", groupsUpdated)
 
     if groupsUpdated then
-        SwiftdawnRaidTools:SendRaidMessage("ACT_GRPS", SwiftdawnRaidTools:GroupsGetAllActive())
+        SwiftdawnRaidTools:SendRaidMessage("ACT_GRPS", Groups.GetAllActive())
     end
 end
 
@@ -387,7 +387,7 @@ function AssignmentsController:Trigger(trigger, context, countdown, ignoreTrigge
         return
     end
 
-    local activeGroups = SwiftdawnRaidTools:GroupsGetActive(trigger.uuid)
+    local activeGroups = Groups.GetActive(trigger.uuid)
 
     countdown = countdown or trigger.countdown or 0
 
