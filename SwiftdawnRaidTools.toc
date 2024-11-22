@@ -26,13 +26,14 @@ Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 Core.lua
 Test.lua
 Options\Chat.lua
+Options\WeakAuras.lua
 Options\Options.lua
 Import\SRTImport.lua
 Import\Validation.lua
-State\SpellCache.lua
+State\Spells.lua
 State\BossEncounters.lua
 State\Groups.lua
-State\UnitCache.lua
+State\Units.lua
 Controllers\AssignmentsController.lua
 Controllers\SyncController.lua
 UI\SRTWindow.lua
@@ -45,7 +46,6 @@ Utils\SRTData.lua
 Utils\Log.lua
 Utils\Utils.lua
 Utils\YAML.lua
-Utils\WAHelper.lua
 Models\Frame\LogItem.lua
 Models\Data\Spell.lua
 Models\Data\Spec.lua

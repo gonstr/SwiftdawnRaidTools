@@ -78,8 +78,6 @@ SwiftdawnRaidTools.DEFAULTS = {
 
 function SwiftdawnRaidTools:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("SwiftdawnRaidTools", self.DEFAULTS)
-    
-    SRTData.Initialize()
 
     self:OptionsInit()
     self:MinimapInit()
@@ -87,8 +85,7 @@ function SwiftdawnRaidTools:OnInitialize()
     self.overview = SRTOverview:New(300, 180)
     self.overview:Initialize()
 
-    self.notification = SRTNotification:New()
-    self.notification:Initialize()
+    self:NotificationsInit()
 
     self.debugLog = SRTDebugLog:New(100, 400)
     self.debugLog:Initialize()
@@ -135,6 +132,7 @@ end
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
         BossEncounters:Initialize()
+        SRTData.Initialize()
         SyncController:SendStatus()
         SyncController:ScheduleAssignmentsSync()
     end
@@ -205,14 +203,14 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
         Log.debug("Received message ACT_GRPS")
-        Groups:SetAllActive(payload.d)
+        self:GroupsSetAllActive(payload.d)
         self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
         Log.debug("Received message TRIGGER")
         self.debugLog:AddItem(payload.d)
-        Groups:SetActive(payload.d.uuid, payload.d.activeGroups)
-        self.notification:ShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
-        self.notification:UpdateSpells()
+        self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
+        self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
+        self:NotificationsUpdateSpells()
     end
 end
 
@@ -231,28 +229,28 @@ end
 
 function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
     AssignmentsController:EndEncounter()
-    SpellCache:Reset()
-    UnitCache:ResetDeadCache()
+    self:SpellsResetCache()
+    self:UnitsResetDeadCache()
     self.overview:UpdateSpells()
-    self.notification:UpdateSpells()
+    self:NotificationsUpdateSpells()
 end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
     self:TestModeEnd()
     AssignmentsController:EndEncounter()
     self.overview:UpdateSpells()
-    self.notification:UpdateSpells()
+    self:NotificationsUpdateSpells()
 end
 
 function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
     local guid = UnitGUID(unitId)
 
-    if UnitCache:IsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
+    if self:UnitsIsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
         Log.debug("Handling cached unit coming back to life")
-        UnitCache:SetAlive(guid)
+        self:UnitsClearDead(guid)
         AssignmentsController:UpdateGroups()
         self.overview:UpdateSpells()
-        self.notification:UpdateSpells()
+        self:NotificationsUpdateSpells()
     end
 
     AssignmentsController:HandleUnitHealth(unitId)
@@ -260,7 +258,7 @@ end
 
 function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
     self.overview:UpdateSpells()
-    self.notification:UpdateSpells()
+    self:NotificationsUpdateSpells()
 
     if IsInRaid() and not self.sentRaidSync then
         self.sentRaidSync = true
@@ -291,20 +289,20 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
     if subEvent == "SPELL_CAST_START" then
         AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
-        SpellCache:RegisterCast(sourceName, spellId, function()
+        self:SpellsCacheCast(sourceName, spellId, function()
             AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
-            self.notification:UpdateSpells()
+            self:NotificationsUpdateSpells()
         end)
         AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_AURA_APPLIED" or subEvent =="SPELL_AURA_REMOVED" then
         AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
         if Utils:IsFriendlyRaidMemberOrPlayer(destGUID) then
-            UnitCache:SetDead(destGUID)
+            self:UnitsSetDead(destGUID)
             AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
-            self.notification:UpdateSpells()
+            self:NotificationsUpdateSpells()
         end
     end
 end

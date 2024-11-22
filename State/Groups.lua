@@ -1,24 +1,24 @@
-Groups = {
-    -- Key: UUID, value = assignment group index
-    active = {}
-}
+local SwiftdawnRaidTools = SwiftdawnRaidTools
 
-function Groups:SetActive(uuid, groups)
-    Groups.active[uuid] = groups
+-- Key: UUID, value = assignment group index
+local activeGroups = {}
+
+function SwiftdawnRaidTools:GroupsSetActive(uuid, groups)
+    activeGroups[uuid] = groups
 end
 
-function Groups:GetActive(uuid)
-    return Groups.active[uuid]
+function SwiftdawnRaidTools:GroupsGetActive(uuid)
+    return activeGroups[uuid]
 end
 
-function Groups:GetAllActive()
-    return Groups.active
+function SwiftdawnRaidTools:GroupsGetAllActive()
+    return activeGroups
 end
 
-function Groups:SetAllActive(groups)
-    Groups.active = groups
+function SwiftdawnRaidTools:GroupsSetAllActive(groups)
+    activeGroups = groups
 end
 
-function Groups:Reset()
-    Groups.active = {}
+function SwiftdawnRaidTools:GroupsReset()
+    activeGroups = {}
 end

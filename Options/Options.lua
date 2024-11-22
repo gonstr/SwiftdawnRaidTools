@@ -79,7 +79,7 @@ local mainOptions = {
                     name = "Toggle Anchors",
                     desc = "Toggle Anchors Visibility.",
                     func = function()
-                        SwiftdawnRaidTools.notification:ToggleFrameLock()
+                        SwiftdawnRaidTools:NotificationsToggleFrameLock()
                     end,
                     order = 1,
                 },
@@ -134,7 +134,7 @@ local mainOptions = {
                         SwiftdawnRaidTools.db.profile.debuglog.appearance.iconSize = 14
 
                         SwiftdawnRaidTools.overview:UpdateAppearance()
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                         SwiftdawnRaidTools.debugLog:UpdateAppearance()
                     end,
                     order = 4,
@@ -475,7 +475,7 @@ local appearanceOptions = {
                     end,
                     set = function(info, value)
                         SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(value)
-                        SwiftdawnRaidTools.notification.container:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / Utils:GetWeirdScale())
+                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / Utils:GetWeirdScale())
                     end,
                     validate = function(info, value)
                         -- Check if the value is a valid floating-point number
@@ -519,7 +519,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.scale = value
 
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
                 notificationsHeaderFontDescription = {
@@ -540,7 +540,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType = value
 
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
                 notificationsHeaderFontSize = {
@@ -556,7 +556,7 @@ local appearanceOptions = {
                     set = function(self, key)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize = key
 
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
                 notificationsPlayerFontDescription = {
@@ -577,7 +577,7 @@ local appearanceOptions = {
                     set = function(_, key)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType = key
 
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
                 notificationsPlayerFontSize = {
@@ -593,7 +593,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize = value
 
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
                 notificationsCountdownFontDescription = {
@@ -614,7 +614,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType = value
 
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
                 notificationsCountdownFontSize = {
@@ -630,7 +630,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize = value
 
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
                 notificationsIconSizeDescription = {
@@ -652,7 +652,7 @@ local appearanceOptions = {
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = value
 
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
                 notificationsBackgroundOpacityDescription = {
@@ -673,7 +673,8 @@ local appearanceOptions = {
                     get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity end,
                     set = function(_, value)
                         SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = value
-                        SwiftdawnRaidTools.notification:UpdateAppearance()
+
+                        SwiftdawnRaidTools:NotificationsUpdateAppearance()
                     end,
                 },
             },
@@ -889,14 +890,14 @@ local fojjiIntegrationOptions = {
             fontSize = "medium",
             name = "|cffff0000WeakAuras is not installed.|r",
             order = 3,
-            hidden = function() return WAHelper:IsWeakaurasInstalled() end
+            hidden = function() return SwiftdawnRaidTools:WeakAurasIsInstalled() end
         },
         helperWeakAuraInstalledMessage = {
             type = "description",
             fontSize = "medium",
             name = "|cff00ff00Swiftdawn Raid Tools Helper WeakAura Installed.|r",
             order = 4,
-            hidden = function() return not WAHelper:IsHelperInstalled() end
+            hidden = function() return not SwiftdawnRaidTools:WeakaurasIsHelperInstalled() end
         },
         installWeakAuraButton = {
             type = "execute",
@@ -906,7 +907,7 @@ local fojjiIntegrationOptions = {
                 LibStub("AceConfigRegistry-3.0"):NotifyChange("SwiftdawnRaidTools Fojji Integration")
             end) end,
             order = 5,
-            hidden = function() return not WAHelper:IsWeakaurasInstalled() or WAHelper:IsHelperInstalled() end
+            hidden = function() return not SwiftdawnRaidTools:WeakAurasIsInstalled() or SwiftdawnRaidTools:WeakaurasIsHelperInstalled() end
         },
     },
 }
