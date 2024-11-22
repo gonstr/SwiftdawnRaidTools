@@ -39,7 +39,7 @@ function SRTDebugLog:Initialize()
     self.scrollFrame:SetScrollChild(self.scrollContentFrame)
 
     self.menuButton:SetScript("OnClick", function()
-        if not SRT_IsTesting() and InCombatLockdown() then
+        if not SwiftdawnRaidTools:IsTesting() and InCombatLockdown() then
             return
         end
         self:UpdatePopupMenu()

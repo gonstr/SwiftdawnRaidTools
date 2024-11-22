@@ -18,7 +18,7 @@ end
 function SRTOverview:Initialize()
     SRTWindow.Initialize(self)
     self.menuButton:SetScript("OnClick", function()
-        if not SRT_IsTesting() and (InCombatLockdown() or AssignmentsController:IsInEncounter()) then
+        if not SwiftdawnRaidTools:IsTesting() and (InCombatLockdown() or AssignmentsController:IsInEncounter()) then
             return
         end
         self:UpdatePopupMenu()
@@ -300,8 +300,8 @@ function SRTOverview:UpdateSpells()
     for _, ability in pairs(self.bossAbilities) do
         for _, group in pairs(ability.groups) do
             for _, assignment in pairs(group.assignments) do
-                if SwiftdawnRaidTools:SpellsIsSpellActive(assignment.player, assignment.spellId) then
-                    local castTimestamp = SwiftdawnRaidTools:SpellsGetCastTimestamp(assignment.player, assignment.spellId)
+                if SpellCache.IsSpellActive(assignment.player, assignment.spellId) then
+                    local castTimestamp = SpellCache.GetCastTime(assignment.player, assignment.spellId)
                     local spell = SRTData.GetSpellByID(assignment.spellId)
 
                     if castTimestamp and spell then
@@ -310,7 +310,7 @@ function SRTOverview:UpdateSpells()
 
                     assignment:SetAlpha(1)
                 else
-                    if SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spellId) then
+                    if SpellCache.IsSpellReady(assignment.player, assignment.spellId) then
                         assignment:SetAlpha(1)
                     else
                         assignment:SetAlpha(0.4)

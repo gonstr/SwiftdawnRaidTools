@@ -12,7 +12,7 @@ local function cancelTimers()
 end
 
 function SwiftdawnRaidTools:InternalTestStart()
-    self.TEST = true
+    self:SetTestMode(true)
 
     self.overview:UpdateSpells()
 
@@ -28,30 +28,18 @@ function SwiftdawnRaidTools:InternalTestStart()
 end
 
 function SwiftdawnRaidTools:InternalTestEnd()
-    self.TEST = false
+    self:SetTestMode(false)
 
     self:ENCOUNTER_END(nil, 1082)
 end
 
-function SwiftdawnRaidTools:TestModeEnabled()
-    return self.TEST and true or false
-end
-
-function SwiftdawnRaidTools:TestModeToggle()
-    if self.TEST then
-        self:TestModeEnd()
-    else
-        self:TestModeStart()
-    end
-end
-
 function SwiftdawnRaidTools:TestModeStart()
-    self.TEST = true
+    self:SetTestMode(true)
 
     cancelTimers()
 
     self:GroupsReset()
-    self:SpellsResetCache()
+    SpellCache.Reset()
     self:UnitsResetDeadCache()
 
     self.overview:SelectEncounter(42001)
@@ -111,13 +99,13 @@ function SwiftdawnRaidTools:TestModeStart()
 end
 
 function SwiftdawnRaidTools:TestModeEnd()
-    if self.TEST then
-        self.TEST = false
+    if self:IsTesting() then
+        self:SetTestMode(false)
 
         cancelTimers()
 
         AssignmentsController:EndEncounter()
-        self:SpellsResetCache()
+        SpellCache.Reset()
         self:UnitsResetDeadCache()
         self.overview:Update()
     end

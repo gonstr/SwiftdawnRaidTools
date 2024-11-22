@@ -11,10 +11,6 @@ function SRT_Profile()
     return SwiftdawnRaidTools.db.profile
 end
 
-function SRT_IsTesting()
-    return SwiftdawnRaidTools.TEST
-end
-
 Utils = {}
 
 -- Function to get the name of a guild rank by index

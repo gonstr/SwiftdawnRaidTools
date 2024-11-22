@@ -1,7 +1,31 @@
 SwiftdawnRaidTools = LibStub("AceAddon-3.0"):NewAddon("SwiftdawnRaidTools", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
 
-SwiftdawnRaidTools.DEBUG = true
-SwiftdawnRaidTools.TEST = false
+local SRTDebugMode = true
+local SRTTestMode = false
+
+function SwiftdawnRaidTools:IsDebugging()
+    return SRTDebugMode
+end
+
+function SwiftdawnRaidTools:SetDebugMode(mode)
+    SRTDebugMode = mode
+end
+
+function SwiftdawnRaidTools:IsTesting()
+    return SRTTestMode
+end
+
+function SwiftdawnRaidTools:SetTestMode(mode)
+    SRTTestMode = mode
+end
+
+function SwiftdawnRaidTools:TestModeToggle()
+    if self:IsTesting() then
+        self:TestModeEnd()
+    else
+        self:TestModeStart()
+    end
+end
 
 SwiftdawnRaidTools.PREFIX_SYNC = "SRT-S"
 SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS = "SRT-SP"
@@ -229,7 +253,7 @@ end
 
 function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
     AssignmentsController:EndEncounter()
-    self:SpellsResetCache()
+    SpellCache.Reset()
     self:UnitsResetDeadCache()
     self.overview:UpdateSpells()
     self:NotificationsUpdateSpells()
@@ -289,7 +313,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
     if subEvent == "SPELL_CAST_START" then
         AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
-        self:SpellsCacheCast(sourceName, spellId, function()
+        SpellCache.RegisterCast(sourceName, spellId, function()
             AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
             self:NotificationsUpdateSpells()

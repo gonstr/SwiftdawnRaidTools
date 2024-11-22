@@ -72,7 +72,7 @@ end
 function AssignmentsController:StartEncounter(encounterID, encounterName)
     AssignmentsController:ResetState()
 
-    if not SwiftdawnRaidTools.TEST and not Utils:IsPlayerRaidLeader() then
+    if not SwiftdawnRaidTools:IsTesting() and not Utils:IsPlayerRaidLeader() then
         return
     end
 
@@ -238,7 +238,7 @@ function AssignmentsController:UpdateGroups()
                     local group = part.assignments[groupIndex]
 
                     for _, assignment in ipairs(group) do
-                        if not SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+                        if not SpellCache.IsSpellReady(assignment.player, assignment.spell_id) then
                             allActiveGroupsReady = false
                         end
                     end
@@ -273,7 +273,7 @@ function AssignmentsController:SelectBestMatchIndex(assignments)
     for i, group in ipairs(assignments) do
         local ready = true
         for _, assignment in ipairs(group) do
-            if not SwiftdawnRaidTools:SpellsIsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) and not SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+            if not SpellCache.IsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) and not SpellCache.IsSpellReady(assignment.player, assignment.spell_id) then
                 ready = false
                 break
             end
@@ -287,7 +287,7 @@ function AssignmentsController:SelectBestMatchIndex(assignments)
     for i, group in pairs(assignments) do
         local readySpells = 0
         for _, assignment in ipairs(group) do
-            if SwiftdawnRaidTools:SpellsIsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) or SwiftdawnRaidTools:SpellsIsSpellReady(assignment.player, assignment.spell_id) then
+            if SpellCache.IsSpellActive(assignment.player, assignment.spell_id, GetTime() + 5) or SpellCache.IsSpellReady(assignment.player, assignment.spell_id) then
                 readySpells = readySpells + 1
             end
         end
