@@ -133,6 +133,9 @@ local mainOptions = {
                         SwiftdawnRaidTools.db.profile.debuglog.appearance.backgroundOpacity = 0.4
                         SwiftdawnRaidTools.db.profile.debuglog.appearance.iconSize = 14
 
+                        SwiftdawnRaidTools.notification.container:ClearAllPoints()
+                        SwiftdawnRaidTools.notification.container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+
                         SwiftdawnRaidTools.overview:UpdateAppearance()
                         SwiftdawnRaidTools.notification:UpdateAppearance()
                         SwiftdawnRaidTools.debugLog:UpdateAppearance()
