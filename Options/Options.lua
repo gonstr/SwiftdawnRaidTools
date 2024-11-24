@@ -37,8 +37,7 @@ do
                 return true
             end
 
-            local ok, result = SwiftdawnRaidTools:ImportYAML(text)
-
+            local ok, result = SRTImport:ParseYAML(text)
             if not ok then
                 self.errorLabel:SetText(result)
                 return false
@@ -75,24 +74,14 @@ local mainOptions = {
             name = "",
             order = 1,
             args = {
-                toggleOverview = {
-                    type = "execute",
-                    name = "Toggle Overview",
-                    desc = "Toggle Overview visiblity.",
-                    func = function()
-                        SwiftdawnRaidTools.db.profile.overview.show = not SwiftdawnRaidTools.db.profile.overview.show
-                        SwiftdawnRaidTools:OverviewUpdate()
-                    end,
-                    order = 1,
-                },
                 toggleAnchors = {
                     type = "execute",
                     name = "Toggle Anchors",
                     desc = "Toggle Anchors Visibility.",
                     func = function()
-                        SwiftdawnRaidTools:NotificationsToggleFrameLock()
+                        SwiftdawnRaidTools.notification:ToggleFrameLock()
                     end,
-                    order = 2,
+                    order = 1,
                 },
                 toggleTestMode = {
                     type = "execute",
@@ -103,464 +92,743 @@ local mainOptions = {
                             SwiftdawnRaidTools:TestModeToggle()
                         end
                     end,
+                    order = 2,
+                },
+                separator01 = {
+                    type = "description",
+                    name = " ",
+                    width = "full",
                     order = 3,
+                },
+                resetAppearance = {
+                    type = "execute",
+                    name = "Reset Appearance",
+                    desc = "Reset to default settings.",
+                    func = function()
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize = 14
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize = 12
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize = 12
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.scale = 1.2
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = 0.9
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = 16
+                        SwiftdawnRaidTools.db.profile.overview.appearance.scale = 1.0
+                        SwiftdawnRaidTools.db.profile.overview.appearance.titleFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.overview.appearance.titleFontSize = 10
+                        SwiftdawnRaidTools.db.profile.overview.appearance.headerFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.overview.appearance.headerFontSize = 10
+                        SwiftdawnRaidTools.db.profile.overview.appearance.playerFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize = 10
+                        SwiftdawnRaidTools.db.profile.overview.appearance.titleBarOpacity = 0.8
+                        SwiftdawnRaidTools.db.profile.overview.appearance.backgroundOpacity = 0.4
+                        SwiftdawnRaidTools.db.profile.overview.appearance.iconSize = 14
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.scale = 1.0
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.headerFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.headerFontSize = 10
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontType = "Friz Quadrata TT"
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontSize = 10
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.titleBarOpacity = 0.8
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.backgroundOpacity = 0.4
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.iconSize = 14
+
+                        SwiftdawnRaidTools.notification.container:ClearAllPoints()
+                        SwiftdawnRaidTools.notification.container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
+                    end,
+                    order = 4,
+                },
+                forceSync = {
+                    type = "execute",
+                    name = "Force Sync",
+                    desc = "Synchronize raid assignments with Raid.",
+                    func = function()
+                        SyncController:SyncAssignmentsNow()
+                    end,
+                    order = 5,
                 },
             },
         },
+        separator01 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 2,
+        },
+        showEnableWindowsDescription = {
+            type = "description",
+            name = "Enable or Disable Windows",
+            width = "full",
+            fontSize = "large",
+            order = 3,
+        },
+        separator02 = {
+            type = "description",
+            name = " ",
+            width = "full",
+            order = 4,
+        },
+        showOverviewDescription = {
+            type = "description",
+            name = "Show Overview",
+            width = "normal",
+            order = 10,
+        },
+        showOverview = {
+            name = " ",
+            desc = "Enables / Disables Overview window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.overview.show = value
+                SwiftdawnRaidTools.overview:Update()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.overview.show end,
+            order = 11,
+        },
+        lockOverviewDescription = {
+            type = "description",
+            name = "Lock Overview",
+            width = "normal",
+            order = 12,
+        },
+        lockOverview = {
+            name = " ",
+            desc = "Lock / Unlocks Overview window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.overview.locked = value
+                SwiftdawnRaidTools.overview:Update()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.overview.locked end,
+            order = 13,
+        },
+        showDebugLogDescription = {
+            type = "description",
+            name = "Show Debug Log",
+            width = "normal",
+            order = 20,
+        },
+        showDebugLog = {
+            name = " ",
+            desc = "Enables / Disables Debug Log window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.debuglog.show = value
+                SwiftdawnRaidTools.debugLog:Update()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.show end,
+            order = 21,
+        },
+        lockDebugLogDescription = {
+            type = "description",
+            name = "Lock Debug Log",
+            width = "normal",
+            order = 22,
+        },
+        lockDebugLog = {
+            name = " ",
+            desc = "Lock / Unlocks Debug Log window",
+            type = "toggle",
+            width = "half",
+            set = function(info, value)
+                SwiftdawnRaidTools.db.profile.debuglog.locked = value
+                SwiftdawnRaidTools.debugLog:Update()
+            end,
+            get = function(info) return SwiftdawnRaidTools.db.profile.debuglog.locked end,
+            order = 23,
+        }
     },
 }
 
 local appearanceOptions = {
     name = "Appearance",
     type = "group",
+    childGroups = "tab",
     args =  {
-        toggleTestMode = {
-            type = "execute",
-            name = "Toggle Test Mode",
-            desc = "Toggle Test Mode to see example Raid Assignments and Notifications.",
-            func = function()
-                if not InCombatLockdown() then
-                    SwiftdawnRaidTools:TestModeToggle()
-                end
-            end,
-            order = 1,
-        },
-        separator0 = {
-            type = "description",
-            name = " ",
-            width = "full",
-            order = 10,
-        },
-        overviewOptionsDescription = {
-            type = "description",
+        overview = {
+            type = "group",
             name = "Overview",
-            width = "full",
-            fontSize = "large",
-            order = 11,
-        },
-        overviewScaleDescription = {
-            type = "description",
-            name = "Scale",
-            width = "normal",
-            order = 12,
-        },
-        overviewScale = {
-            type = "range",
-            min = 0.6,
-            max = 1.4,
-            isPercent = true,
-            name = "",
-            desc = "Set the Overview UI Scale.",
-            width = "double",
-            order = 13,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewScale end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewScale = value
+            order = 1, 
+            args = {
+                overviewScaleDescription = {
+                    type = "description",
+                    name = "Scale",
+                    width = "normal",
+                    order = 18,
+                },
+                overviewScale = {
+                    type = "range",
+                    min = 0.6,
+                    max = 1.4,
+                    isPercent = true,
+                    name = "",
+                    desc = "Set the Overview UI Scale.",
+                    width = "double",
+                    order = 19,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.scale end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.scale = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewTitleFontDescription = {
-            type = "description",
-            name = "Encounter Name",
-            width = "normal",
-            order = 21,
-        },
-        overviewTitleFontType = {
-            type = "select",
-            name = "",
-            desc = "Set the font used in the overview title",
-            values = SharedMedia:HashTable("font"),
-            dialogControl = "LSM30_Font",
-            width = "normal",
-            order = 22,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontType end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontType = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewTitleFontDescription = {
+                    type = "description",
+                    name = "Encounter Name",
+                    width = "normal",
+                    order = 21,
+                },
+                overviewTitleFontType = {
+                    type = "select",
+                    name = "",
+                    desc = "Set the font used in the overview title",
+                    values = SharedMedia:HashTable("font"),
+                    dialogControl = "LSM30_Font",
+                    width = "normal",
+                    order = 22,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.titleFontType end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.titleFontType = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewTitleFontSize = {
-            type = "range",
-            name = "",
-            desc = "Set the font size used in the overview title",
-            min = 8,
-            max = 32,
-            step = 1,
-            width = "normal",
-            order = 23,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewTitleFontSize = {
+                    type = "range",
+                    name = "",
+                    desc = "Set the font size used in the overview title",
+                    min = 8,
+                    max = 32,
+                    step = 1,
+                    width = "normal",
+                    order = 23,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.titleFontSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.titleFontSize = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewHeaderFontDescription = {
-            type = "description",
-            name = "Boss Ability",
-            width = "normal",
-            order = 31,
-        },
-        overviewHeaderFontType = {
-            type = "select",
-            name = "",
-            desc = "Set the font used in the overview header",
-            values = SharedMedia:HashTable("font"),
-            dialogControl = "LSM30_Font",
-            width = "normal",
-            order = 32,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontType end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontType = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewHeaderFontDescription = {
+                    type = "description",
+                    name = "Boss Ability",
+                    width = "normal",
+                    order = 31,
+                },
+                overviewHeaderFontType = {
+                    type = "select",
+                    name = "",
+                    desc = "Set the font used in the overview header",
+                    values = SharedMedia:HashTable("font"),
+                    dialogControl = "LSM30_Font",
+                    width = "normal",
+                    order = 32,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.headerFontType end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.headerFontType = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewHeaderFontSize = {
-            type = "range",
-            name = "",
-            desc = "Set the font sze used in the overview header",
-            min = 8,
-            max = 32,
-            step = 1,
-            width = "normal",
-            order = 33,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewHeaderFontSize = {
+                    type = "range",
+                    name = "",
+                    desc = "Set the font sze used in the overview header",
+                    min = 8,
+                    max = 32,
+                    step = 1,
+                    width = "normal",
+                    order = 33,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.headerFontSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.headerFontSize = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewPlayerFontDescription = {
-            type = "description",
-            name = "Player Names",
-            width = "normal",
-            order = 41,
-        },
-        overviewPlayerFontType = {
-            type = "select",
-            name = "",
-            desc = "Set the font used in the overview player name",
-            values = SharedMedia:HashTable("font"),
-            dialogControl = "LSM30_Font",
-            width = "normal",
-            order = 42,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontType end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontType = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewPlayerFontDescription = {
+                    type = "description",
+                    name = "Player Names",
+                    width = "normal",
+                    order = 41,
+                },
+                overviewPlayerFontType = {
+                    type = "select",
+                    name = "",
+                    desc = "Set the font used in the overview player name",
+                    values = SharedMedia:HashTable("font"),
+                    dialogControl = "LSM30_Font",
+                    width = "normal",
+                    order = 42,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.playerFontType end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.playerFontType = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewPlayerFontSize = {
-            type = "range",
-            name = "",
-            desc = "Set the font size used in the overview player name",
-            min = 8,
-            max = 32,
-            step = 1,
-            width = "normal",
-            order = 43,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewPlayerFontSize = {
+                    type = "range",
+                    name = "",
+                    desc = "Set the font size used in the overview player name",
+                    min = 8,
+                    max = 32,
+                    step = 1,
+                    width = "normal",
+                    order = 43,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.playerFontSize = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewIconSizeDescription = {
-            type = "description",
-            name = "Icon Size",
-            width = "normal",
-            order = 51,
-        },
-        overviewIconSize = {
-            type = "range",
-            min = 12,
-            max = 32,
-            step = 1,
-            name = "",
-            desc = "Set the ability icon size.",
-            width = "double",
-            order = 52,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewIconSizeDescription = {
+                    type = "description",
+                    name = "Icon Size",
+                    width = "normal",
+                    order = 51,
+                },
+                overviewIconSize = {
+                    type = "range",
+                    min = 12,
+                    max = 32,
+                    step = 1,
+                    name = "",
+                    desc = "Set the ability icon size.",
+                    width = "double",
+                    order = 52,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.iconSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.iconSize = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewTitleBarOpacityDescription = {
-            type = "description",
-            name = "Title Bar Opacity",
-            width = "normal",
-            order = 53,
-        },
-        overviewTitleBarOpacity = {
-            type = "range",
-            min = 0,
-            max = 1,
-            isPercent = true,
-            name = "",
-            desc = "Set the Overview Background Opacity.",
-            width = "double",
-            order = 54,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewTitleBarOpacityDescription = {
+                    type = "description",
+                    name = "Title Bar Opacity",
+                    width = "normal",
+                    order = 53,
+                },
+                overviewTitleBarOpacity = {
+                    type = "range",
+                    min = 0,
+                    max = 1,
+                    isPercent = true,
+                    name = "",
+                    desc = "Set the Overview Background Opacity.",
+                    width = "double",
+                    order = 54,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.titleBarOpacity end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.titleBarOpacity = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
-        },
-        overviewBackgroundOpacityDescription = {
-            type = "description",
-            name = "Background Opacity",
-            width = "normal",
-            order = 55,
-        },
-        overviewBackgroundOpacity = {
-            type = "range",
-            min = 0,
-            max = 1,
-            isPercent = true,
-            name = "",
-            desc = "Set the Overview Background Opacity.",
-            width = "double",
-            order = 56,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity = value
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                },
+                overviewBackgroundOpacityDescription = {
+                    type = "description",
+                    name = "Background Opacity",
+                    width = "normal",
+                    order = 55,
+                },
+                overviewBackgroundOpacity = {
+                    type = "range",
+                    min = 0,
+                    max = 1,
+                    isPercent = true,
+                    name = "",
+                    desc = "Set the Overview Background Opacity.",
+                    width = "double",
+                    order = 56,
+                    get = function() return SwiftdawnRaidTools.db.profile.overview.appearance.backgroundOpacity end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.overview.appearance.backgroundOpacity = value
 
-                SwiftdawnRaidTools:OverviewUpdateAppearance()
-            end,
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                    end,
+                }
+            }
         },
-        separator3 = {
-            type = "description",
-            name = " ",
-            width = "full",
-            order = 60,
-        },
-        notificationsOptionsDescription = {
-            type = "description",
+        notifications = {
+            type = "group",
             name = "Notifications",
-            width = "full",
-            fontSize = "large",
-            order = 61,
-        },
-        separator4 = {
-            type = "description",
-            name = " ",
-            width = "full",
-            order = 62,
-        },
-        notificationsScaleDescription = {
-            type = "description",
-            name = "Scale",
-            width = "normal",
-            order = 63,
-        },
-        notificationsScale = {
-            type = "range",
-            min = 0.6,
-            max = 1.4,
-            isPercent = true,
-            name = "",
-            desc = "Set the Notifications UI Scale.",
-            width = "double",
-            order = 64,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale = value
+            order = 2,
+            args = {
+                notificationsPositionDescription = {
+                    type = "description",
+                    name = "Position",
+                    width = "normal",
+                    order = 10,
+                },
+                notificationsPositionInputX = {
+                    type = "input",
+                    name = "X",
+                    desc = "Type in some text here",
+                    get = function(info)
+                        return string.format("%.1f", SwiftdawnRaidTools.db.profile.notifications.anchorX)
+                    end,
+                    set = function(info, value)
+                        SwiftdawnRaidTools.db.profile.notifications.anchorX = tonumber(value)
+                        SwiftdawnRaidTools.notification.container:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / Utils:GetWeirdScale())
+                    end,
+                    validate = function(info, value)
+                        -- Check if the value is a valid floating-point number
+                        return tonumber(value) ~= nil or "Please enter a valid number."
+                    end,
+                    order = 11,
+                },
+                notificationsPositionInputY = {
+                    type = "input",
+                    name = "Y",
+                    desc = "Type in some text here",
+                    get = function(info)
+                        return string.format("%.1f", SwiftdawnRaidTools.db.profile.notifications.anchorY)
+                    end,
+                    set = function(info, value)
+                        SwiftdawnRaidTools.db.profile.notifications.anchorY = tonumber(value)
+                        SwiftdawnRaidTools.notificationFrame:SetPoint("CENTER", UIParent, "CENTER", SwiftdawnRaidTools.db.profile.notifications.anchorX / Utils:GetWeirdScale(), SwiftdawnRaidTools.db.profile.notifications.anchorY / Utils:GetWeirdScale())
+                    end,
+                    validate = function(info, value)
+                        -- Check if the value is a valid floating-point number
+                        return tonumber(value) ~= nil or "Please enter a valid number."
+                    end,
+                    order = 11,
+                },
+                notificationsScaleDescription = {
+                    type = "description",
+                    name = "Scale",
+                    width = "normal",
+                    order = 68,
+                },
+                notificationsScale = {
+                    type = "range",
+                    min = 0.6,
+                    max = 1.4,
+                    isPercent = true,
+                    name = "",
+                    desc = "Set the Notifications UI Scale.",
+                    width = "double",
+                    order = 69,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.scale end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.scale = value
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-        },
-        notificationsHeaderFontDescription = {
-            type = "description",
-            name = "Boss Ability",
-            width = "normal",
-            order = 71,
-        },
-        notificationsHeaderFontType = {
-            type = "select",
-            name = "",
-            desc = "Sets the font used in notification header",
-            values = SharedMedia:HashTable("font"),
-            dialogControl = "LSM30_Font",
-            width = "normal",
-            order = 72,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontType end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontType = value
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+                notificationsHeaderFontDescription = {
+                    type = "description",
+                    name = "Boss Ability",
+                    width = "normal",
+                    order = 71,
+                },
+                notificationsHeaderFontType = {
+                    type = "select",
+                    name = "",
+                    desc = "Sets the font used in notification header",
+                    values = SharedMedia:HashTable("font"),
+                    dialogControl = "LSM30_Font",
+                    width = "normal",
+                    order = 72,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontType = value
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-        },
-        notificationsHeaderFontSize = {
-            type = "range",
-            name = "",
-            desc = "Sets the font size used in notification header",
-            min = 8,
-            max = 32,
-            step = 1,
-            width = "normal",
-            order = 73,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize end,
-            set = function(self, key)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize = key
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+                notificationsHeaderFontSize = {
+                    type = "range",
+                    name = "",
+                    desc = "Sets the font size used in notification header",
+                    min = 8,
+                    max = 32,
+                    step = 1,
+                    width = "normal",
+                    order = 73,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize end,
+                    set = function(self, key)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.headerFontSize = key
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-        },
-        notificationsPlayerFontDescription = {
-            type = "description",
-            name = "Player Names",
-            width = "normal",
-            order = 81,
-        },
-        notificationsPlayerFontType = {
-            type = "select",
-            name = "",
-            desc = "Sets the font used in notification player names",
-            values = SharedMedia:HashTable("font"),
-            dialogControl = "LSM30_Font",
-            width = "normal",
-            order = 82,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType end,
-            set = function(_, key)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType = key
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+                notificationsPlayerFontDescription = {
+                    type = "description",
+                    name = "Player Names",
+                    width = "normal",
+                    order = 81,
+                },
+                notificationsPlayerFontType = {
+                    type = "select",
+                    name = "",
+                    desc = "Sets the font used in notification player names",
+                    values = SharedMedia:HashTable("font"),
+                    dialogControl = "LSM30_Font",
+                    width = "normal",
+                    order = 82,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType end,
+                    set = function(_, key)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontType = key
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-        },
-        notificationsPlayerFontSize = {
-            type = "range",
-            name = "",
-            desc = "Sets the font size used in notification player names",
-            min = 8,
-            max = 32,
-            step = 1,
-            width = "normal",
-            order = 83,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize = value
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+                notificationsPlayerFontSize = {
+                    type = "range",
+                    name = "",
+                    desc = "Sets the font size used in notification player names",
+                    min = 8,
+                    max = 32,
+                    step = 1,
+                    width = "normal",
+                    order = 83,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.playerFontSize = value
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-        },
-        notificationsCountdownFontDescription = {
-            type = "description",
-            name = "Countdown",
-            width = "normal",
-            order = 84,
-        },
-        notificationsCountdownFontType = {
-            type = "select",
-            name = "",
-            desc = "Sets the font used in notification countdown",
-            values = SharedMedia:HashTable("font"),
-            dialogControl = "LSM30_Font",
-            width = "normal",
-            order = 85,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontType end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontType = value
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+                notificationsCountdownFontDescription = {
+                    type = "description",
+                    name = "Countdown",
+                    width = "normal",
+                    order = 84,
+                },
+                notificationsCountdownFontType = {
+                    type = "select",
+                    name = "",
+                    desc = "Sets the font used in notification countdown",
+                    values = SharedMedia:HashTable("font"),
+                    dialogControl = "LSM30_Font",
+                    width = "normal",
+                    order = 85,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontType = value
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-        },
-        notificationsCountdownFontSize = {
-            type = "range",
-            name = "",
-            desc = "Sets the font size used in notification countdown",
-            min = 8,
-            max = 32,
-            step = 1,
-            width = "normal",
-            order = 86,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize = value
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+                notificationsCountdownFontSize = {
+                    type = "range",
+                    name = "",
+                    desc = "Sets the font size used in notification countdown",
+                    min = 8,
+                    max = 32,
+                    step = 1,
+                    width = "normal",
+                    order = 86,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.countdownFontSize = value
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-        },
-        notificationsIconSizeDescription = {
-            type = "description",
-            name = "Icon Size",
-            width = "normal",
-            order = 91,
-        },
-        notificationsIconSize = {
-            type = "range",
-            min = 12,
-            max = 32,
-            step = 1,
-            name = "",
-            desc = "Set the notification icon size",
-            width = "double",
-            order = 92,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize = value
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+                notificationsIconSizeDescription = {
+                    type = "description",
+                    name = "Icon Size",
+                    width = "normal",
+                    order = 91,
+                },
+                notificationsIconSize = {
+                    type = "range",
+                    min = 12,
+                    max = 32,
+                    step = 1,
+                    name = "",
+                    desc = "Set the notification icon size",
+                    width = "double",
+                    order = 92,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.iconSize = value
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+                notificationsBackgroundOpacityDescription = {
+                    type = "description",
+                    name = "Background Opacity",
+                    width = "normal",
+                    order = 93,
+                },
+                notificationsBackgroundOpacity = {
+                    type = "range",
+                    min = 0,
+                    max = 1,
+                    isPercent = true,
+                    name = "",
+                    desc = "Set the Notifications Background Opacity.",
+                    width = "double",
+                    order = 94,
+                    get = function() return SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.notifications.appearance.backgroundOpacity = value
+                        SwiftdawnRaidTools.notification:UpdateAppearance()
+                    end,
+                },
+            },
         },
-        notificationsBackgroundOpacityDescription = {
-            type = "description",
-            name = "Background Opacity",
-            width = "normal",
-            order = 93,
-        },
-        notificationsBackgroundOpacity = {
-            type = "range",
-            min = 0,
-            max = 1,
-            isPercent = true,
-            name = "",
-            desc = "Set the Notifications Background Opacity.",
-            width = "double",
-            order = 94,
-            get = function() return SwiftdawnRaidTools.db.profile.options.appearance.notificationsBackgroundOpacity end,
-            set = function(_, value)
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsBackgroundOpacity = value
+        debugLog = {
+            type = "group",
+            name = "Debug Log",
+            order = 3,
+            args = {
+                debugLogScaleDescription = {
+                    type = "description",
+                    name = "Scale",
+                    width = "normal",
+                    order = 10,
+                },
+                debugLogScale = {
+                    type = "range",
+                    min = 0.6,
+                    max = 1.4,
+                    isPercent = true,
+                    name = "",
+                    desc = "Set the Debug Log UI Scale.",
+                    width = "double",
+                    order = 11,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.scale end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.scale = value
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-        },
-        reset = {
-            type = "execute",
-            name = "Reset",
-            desc = "Reset to default settings.",
-            func = function()
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewScale = 1.0
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontType = "Friz Quadrata TT"
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleFontSize = 10
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontType = "Friz Quadrata TT"
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewHeaderFontSize = 10
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontType = "Friz Quadrata TT"
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewPlayerFontSize = 10
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewTitleBarOpacity = 0.8
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewBackgroundOpacity = 0.4
-                SwiftdawnRaidTools.db.profile.options.appearance.overviewIconSize = 14
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontType = "Friz Quadrata TT"
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsHeaderFontSize = 14
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontType = "Friz Quadrata TT"
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsPlayerFontSize = 12
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontType = "Friz Quadrata TT"
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsCountdownFontSize = 12
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsScale = 1.2
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsBackgroundOpacity = 0.9
-                SwiftdawnRaidTools.db.profile.options.appearance.notificationsIconSize = 16
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
+                    end,
+                },
+                debugLogTitleFontDescription = {
+                    type = "description",
+                    name = "Title Bar",
+                    width = "normal",
+                    order = 20,
+                },
+                debugLogTitleFontType = {
+                    type = "select",
+                    name = "",
+                    desc = "Set the font used in the Debug Log title",
+                    values = SharedMedia:HashTable("font"),
+                    dialogControl = "LSM30_Font",
+                    width = "normal",
+                    order = 21,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.titleFontType end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.titleFontType = value
 
-                SwiftdawnRaidTools:NotificationsUpdateAppearance()
-            end,
-            order = 100,
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
+                    end,
+                },
+                debugLogTitleFontSize = {
+                    type = "range",
+                    name = "",
+                    desc = "Set the font size used in the Debug Log title",
+                    min = 8,
+                    max = 32,
+                    step = 1,
+                    width = "normal",
+                    order = 22,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.titleFontSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.titleFontSize = value
+
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
+                    end,
+                },
+                debugLogLineFontDescription = {
+                    type = "description",
+                    name = "Log Lines",
+                    width = "normal",
+                    order = 30,
+                },
+                debugLogLineFontType = {
+                    type = "select",
+                    name = "",
+                    desc = "Set the font used in the Debug Log lines",
+                    values = SharedMedia:HashTable("font"),
+                    dialogControl = "LSM30_Font",
+                    width = "normal",
+                    order = 142,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontType end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontType = value
+
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
+                    end,
+                },
+                debugLogLineFontSize = {
+                    type = "range",
+                    name = "",
+                    desc = "Set the font size used in the Debug Log lines",
+                    min = 8,
+                    max = 32,
+                    step = 1,
+                    width = "normal",
+                    order = 143,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontSize end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.logFontSize = value
+
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
+                    end,
+                },
+                debugLogTitleBarOpacityDescription = {
+                    type = "description",
+                    name = "Title Bar Opacity",
+                    width = "normal",
+                    order = 153,
+                },
+                debugLogTitleBarOpacity = {
+                    type = "range",
+                    min = 0,
+                    max = 1,
+                    isPercent = true,
+                    name = "",
+                    desc = "Set the Debug Log title bar background opacity.",
+                    width = "double",
+                    order = 154,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.titleBarOpacity end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.titleBarOpacity = value
+
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
+                    end,
+                },
+                debugLogBackgroundOpacityDescription = {
+                    type = "description",
+                    name = "Background Opacity",
+                    width = "normal",
+                    order = 155,
+                },
+                debugLogBackgroundOpacity = {
+                    type = "range",
+                    min = 0,
+                    max = 1,
+                    isPercent = true,
+                    name = "",
+                    desc = "Set the Debug Log background opacity.",
+                    width = "double",
+                    order = 156,
+                    get = function() return SwiftdawnRaidTools.db.profile.debuglog.appearance.backgroundOpacity end,
+                    set = function(_, value)
+                        SwiftdawnRaidTools.db.profile.debuglog.appearance.backgroundOpacity = value
+
+                        SwiftdawnRaidTools.overview:UpdateAppearance()
+                        SwiftdawnRaidTools.debugLog:UpdateAppearance()
+                    end,
+                },
+            },
         },
     },
 }
@@ -575,8 +843,8 @@ local notificationOptions = {
             desc = "Only show Raid Notifications that apply to You.",
             width = "full",
             order = 1,
-            get = function() return SwiftdawnRaidTools.db.profile.options.notifications.showOnlyOwnNotifications end,
-            set = function(_, value) SwiftdawnRaidTools.db.profile.options.notifications.showOnlyOwnNotifications = value end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.showOnlyOwnNotifications end,
+            set = function(_, value) SwiftdawnRaidTools.db.profile.notifications.showOnlyOwnNotifications = value end,
         },
         showOnlyOwnNotificationsDescription = {
             type = "description",
@@ -594,8 +862,8 @@ local notificationOptions = {
             desc = "Mute all Raid Notification Sounds.",
             width = "full",
             order = 4,
-            get = function() return SwiftdawnRaidTools.db.profile.options.notifications.mute end,
-            set = function(_, value)SwiftdawnRaidTools.db.profile.options.notifications.mute = value end,
+            get = function() return SwiftdawnRaidTools.db.profile.notifications.mute end,
+            set = function(_, value)SwiftdawnRaidTools.db.profile.notifications.mute = value end,
         },
         muteDescription = {
             type = "description",
@@ -680,28 +948,76 @@ local importOptions = {
 
                 SwiftdawnRaidTools.db.profile.options.import = val
 
-                SwiftdawnRaidTools.db.profile.data.encounters = {}
-                SwiftdawnRaidTools.db.profile.data.encountersId = nil
+                SRTData.SetActiveRosterID("none")
 
                 if val ~= nil and val ~= "" then
-                    local _, result = SwiftdawnRaidTools:ImportYAML(val)
-                    local encounters, encountersId = SwiftdawnRaidTools:ImportCreateEncountersData(result)
+                    local _, result = SRTImport:ParseYAML(val)
+                    local encounters, encountersId = SRTImport:AddIDs(result)
 
-                    SwiftdawnRaidTools.db.profile.data.encountersId = encountersId
-                    SwiftdawnRaidTools.db.profile.data.encounters = encounters
+                    SRTData.SetActiveRosterID(encountersId)
+                    SRTData.AddRoster(encountersId, Roster.Parse(encounters, "Imported Roster"))
                 end
 
-                SwiftdawnRaidTools:SyncSchedule()
-                SwiftdawnRaidTools:OverviewUpdate()
+                SyncController:ScheduleAssignmentsSync()
+                SwiftdawnRaidTools.overview:Update()
             end,
         },
     },
 }
 
+local troubleshootOptions = {
+    name = "Troubleshooting Options",
+    type = "group",
+    args = {
+        activeRosterIDInputDescription = {
+            type = "description",
+            name = "Active Roster ID",
+            width = "normal",
+            order = 1
+        },
+        activeRosterIDInput = {
+            type = "input",
+            name = "Active Roster ID Input",
+            width = "double",
+            get = function(_)
+                return SRTData.GetActiveRosterID()
+            end,
+            set = function(_, value)
+                SRTData.SetActiveRosterID(value)
+                SwiftdawnRaidTools.overview:Update()
+            end,
+            order = 2
+        },
+        activeRosterIDSelectDescription = {
+            type = "description",
+            name = "Active Roster ID",
+            width = "normal",
+            order = 11
+        },
+        activeRosterIDSelect = {
+            type = "select",
+            name = "Active Roster ID Select",
+            width = "double",
+            values = function ()
+                local v = {}
+                for id, _ in pairs(SRTData.GetRosters()) do
+                    v[id] = id
+                end
+                return v
+            end,
+            get = function() return tostring(SRTData.GetActiveRosterID()) end,
+            set = function(_, key)
+                SRTData.SetActiveRosterID(key)
+                SwiftdawnRaidTools.overview:Update()
+            end,
+            order = 12
+        },
+    }
+}
+
 function SwiftdawnRaidTools:OptionsInit()
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools", mainOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools", "Swiftdawn Raid Tools")
-
 
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Appearance", appearanceOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Appearance", "Appearance", "Swiftdawn Raid Tools")
@@ -711,9 +1027,12 @@ function SwiftdawnRaidTools:OptionsInit()
 
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Fojji Integration", fojjiIntegrationOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Fojji Integration", "Fojji Integration", "Swiftdawn Raid Tools")
-    
+
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Import", importOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Import", "Import", "Swiftdawn Raid Tools")
+
+    LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Troubleshooting", troubleshootOptions)
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Troubleshooting", "Troubleshooting", "Swiftdawn Raid Tools")
 
     LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("SwiftdawnRaidTools Profiles", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("SwiftdawnRaidTools Profiles", "Profiles", "Swiftdawn Raid Tools")

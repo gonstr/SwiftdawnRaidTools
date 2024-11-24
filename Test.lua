@@ -12,9 +12,9 @@ local function cancelTimers()
 end
 
 function SwiftdawnRaidTools:InternalTestStart()
-    self.TEST = true
+    SRT_SetTestMode(true)
 
-    self:OverviewUpdateSpells()
+    self.overview:UpdateSpells()
 
     self:ENCOUNTER_START(nil, 1082)
 
@@ -28,17 +28,13 @@ function SwiftdawnRaidTools:InternalTestStart()
 end
 
 function SwiftdawnRaidTools:InternalTestEnd()
-    self.TEST = false
+    SRT_SetTestMode(false)
 
     self:ENCOUNTER_END(nil, 1082)
 end
 
-function SwiftdawnRaidTools:TestModeEnabled()
-    return self.TEST and true or false
-end
-
 function SwiftdawnRaidTools:TestModeToggle()
-    if self.TEST then
+    if SRT_IsTesting() then
         self:TestModeEnd()
     else
         self:TestModeStart()
@@ -46,166 +42,79 @@ function SwiftdawnRaidTools:TestModeToggle()
 end
 
 function SwiftdawnRaidTools:TestModeStart()
-    self.TEST = true
+    SRT_SetTestMode(true)
 
     cancelTimers()
 
-    self:GroupsReset()
-    self:SpellsResetCache()
-    self:UnitsResetDeadCache()
-    self:OverviewUpdate()
+    Groups.Reset()
+    SpellCache.Reset()
+    UnitCache:ResetDeadCache()
 
-    self:OverviewSelectEncounter(1027)
-    self:RaidAssignmentsStartEncounter(1027)
+    self.overview:SelectEncounter(42001)
+    AssignmentsController:StartEncounter(42001, "The Boss")
 
-    insert(timers, C_Timer.NewTimer(2, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+    -- Phase 1
+
+    insert(timers, C_Timer.NewTimer(10, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_AURA_APPLIED", "The Boss", nil, nil, 81572)
     end))
 
-    insert(timers, C_Timer.NewTimer(4, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Ant", nil, nil, 31821)
+    insert(timers, C_Timer.NewTimer(11, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Aeolyne", nil, nil, 740)
     end))
 
-    insert(timers, C_Timer.NewTimer(15, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+    insert(timers, C_Timer.NewTimer(11.5, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Kondec", nil, nil, 62618)
     end))
+
+    insert(timers, C_Timer.NewTimer(12, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Aeolyne", nil, nil, 740)
+    end))
+
+    insert(timers, C_Timer.NewTimer(12.5, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Kondec", nil, nil, 62618)
+    end))
+
+    -- Phase 2
 
     insert(timers, C_Timer.NewTimer(17, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Condoc", nil, nil, 62618)
+        SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(nil, "I will breathe fire on you!")
     end))
 
-    insert(timers, C_Timer.NewTimer(17, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Mirven", nil, nil, 98008)
+    insert(timers, C_Timer.NewTimer(18.5, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Anticipâte", nil, nil, 31821)
     end))
 
-    insert(timers, C_Timer.NewTimer(25, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 79023)
+    insert(timers, C_Timer.NewTimer(19.5, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Anticipâte", nil, nil, 31821)
     end))
 
-    insert(timers, C_Timer.NewTimer(28, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Elli", nil, nil, 31821)
+    -- Phase 3
+
+    insert(timers, C_Timer.NewTimer(24, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "The Boss", nil, nil, 88853)
     end))
 
-    insert(timers, C_Timer.NewTimer(33, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
+    insert(timers, C_Timer.NewTimer(29, function()
+        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "The Boss", nil, nil, 88853)
     end))
 
-    insert(timers, C_Timer.NewTimer(35, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Claytox", nil, nil, 77764)
-    end))
+    -- End of Test
 
-    insert(timers, C_Timer.NewTimer(46, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_START", "Boss", nil, nil, 91849)
-    end))
-
-    insert(timers, C_Timer.NewTimer(47, function()
-        SwiftdawnRaidTools:HandleCombatLog("SPELL_CAST_SUCCESS", "Treebush", nil, nil, 77764)
-    end))
-
-    insert(timers, C_Timer.NewTimer(60, function()
+    insert(timers, C_Timer.NewTimer(40, function()
         SwiftdawnRaidTools:TestModeEnd()
     end))
 end
 
 function SwiftdawnRaidTools:TestModeEnd()
-    if self.TEST then
-        self.TEST = false
+    if SRT_IsTesting() then
+        SRT_SetTestMode(false)
 
         cancelTimers()
 
-        self:RaidAssignmentsEndEncounter()
-        self:SpellsResetCache()
-        self:UnitsResetDeadCache()
-        self:OverviewUpdate()
-    end
-end
-
-function SwiftdawnRaidTools:GetEncounters()
-    if self.TEST then
-        return {
-            [1027] = {
-                {
-                    uuid = "1",
-                    type = "RAID_ASSIGNMENTS",
-                    version = 1,
-                    encounter = 1027,
-                    metadata = {
-                        name = "Incineration"
-                    },
-                    triggers = {
-                        {
-                            type = "SPELL_CAST",
-                            spell_id = 79023
-                        }
-                    },
-                    assignments = {
-                        {
-                            {
-                                type = "SPELL",
-                                player = "Ant",
-                                spell_id = 31821
-                            },
-                            {
-                                type = "SPELL",
-                                player = "Eline",
-                                spell_id = 740
-                            }
-                        },
-                        {
-                            {
-                                type = "SPELL",
-                                player = "Mirven",
-                                spell_id = 98008
-                            },
-                            {
-                                type = "SPELL",
-                                player = "Condoc",
-                                spell_id = 62618
-                            }
-                        },
-                        {
-                            {
-                                type = "SPELL",
-                                player = "Elli",
-                                spell_id = 31821
-                            }
-                        }
-                    }
-                },
-                {
-                    uuid = "2",
-                    type = "RAID_ASSIGNMENTS",
-                    version = 1,
-                    encounter = 1027,
-                    metadata = {
-                        name = "Grip of Death"
-                    },
-                    triggers = {
-                        {
-                            type = "SPELL_CAST",
-                            spell_id = 91849
-                        }
-                    },
-                    assignments = {
-                        {
-                            {
-                                type = "SPELL",
-                                player = "Claytox",
-                                spell_id = 77764
-                            }
-                        },
-                        {
-                            {
-                                type = "SPELL",
-                                player = "Treebush",
-                                spell_id = 77764
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    else
-        return self.db.profile.data.encounters
+        AssignmentsController:EndEncounter()
+        SpellCache.Reset()
+        UnitCache:ResetDeadCache()
+        self.overview:Update()
     end
 end

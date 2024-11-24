@@ -1,7 +1,8 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
-local insert = table.insert
 
-function SwiftdawnRaidTools:ImportYAML(str)
+SRTImport = {}
+
+function SRTImport:ParseYAML(str)
     if str == nil or string.len(str) == 0 then
         return false
     end
@@ -19,7 +20,7 @@ function SwiftdawnRaidTools:ImportYAML(str)
     end
 
     for i, part in ipairs(result) do
-        local ok, result = SwiftdawnRaidTools:ValidationValidateImport(part)
+        local ok, result = Validation:ValidateImport(part)
 
         if not ok then
             return false, "Error in document " .. i .. ": " .. result
@@ -27,13 +28,13 @@ function SwiftdawnRaidTools:ImportYAML(str)
     end
 
     for _, part in ipairs(result) do
-        part.uuid = SwiftdawnRaidTools:GenerateUUID()
+        part.uuid = Utils:GenerateUUID()
     end
 
     return true, result
 end
 
-function SwiftdawnRaidTools:ImportCreateEncountersData(import)
+function SRTImport:AddIDs(import)
     local result = {}
 
     for _, part in ipairs(import) do
@@ -41,10 +42,10 @@ function SwiftdawnRaidTools:ImportCreateEncountersData(import)
             result[part.encounter] = {}
         end
 
-        insert(result[part.encounter], part)
+        table.insert(result[part.encounter], part)
     end
 
-    local uuid = self:GenerateUUID()
+    local uuid = Utils:GenerateUUID()
 
     return result, uuid
 end

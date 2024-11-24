@@ -4,7 +4,7 @@ local reqVersionsTimer = nil
 
 function SwiftdawnRaidTools:ChatHandleCommand(input)
     if not input or input:trim() == "" then
-        self:Print("Usage: /srt [config,show,hide,versions]")
+        Log.info("Usage: /srt [config,show,hide,versions]")
     else
         local trimmed = input:trim()
         
@@ -12,27 +12,27 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
             Settings.OpenToCategory("Swiftdawn Raid Tools")
         elseif trimmed == "show" or trimmed == "hide" then
             self.db.profile.overview.show = trimmed == "show" and true or false
-            self:OverviewUpdate()
+            self.overview:Update()
         elseif trimmed == "versions" then
             if not reqVersionsTimer then
-                self:SyncReqVersions()
+                SyncController:RequestVersions()
 
-                self:Print("Requesting versions...")
+                Log.info("Requesting versions...")
                 reqVersionsTimer = C_Timer.NewTimer(10, function()
                     reqVersionsTimer = nil
 
-                    for version, players in pairs(self:SyncGetClientVersions()) do
+                    for version, players in pairs(SyncController:GetClientVersions()) do
                         if not version then
                             version = "Unknown"
                         end
 
-                        self:Print(version .. ": " .. self:StringJoin(players))
+                        Log.info(version .. ": " .. Utils:StringJoin(players))
                     end
                 end)
             end
         elseif trimmed == "debug" then
-            self.DEBUG = not self.DEBUG
-            self:Print("debug", self.DEBUG)
+            SRT_SetDebugMode(not SRT_IsDebugging())
+            Log.info("debug", SRT_IsDebugging())
         elseif trimmed == "teststart" then
             self:InternalTestStart()
         elseif trimmed == "testend" then
@@ -40,7 +40,7 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
         elseif trimmed == "stringfind" then
             local str = "throws a |cff6699FFred|r vial into the cauldron!"
             local match = "red|r vial into the cauldron!"
-            self:Print(str:find(match))
+            Log.info(str:find(match))
         end
     end
 end

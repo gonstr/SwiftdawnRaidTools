@@ -78,7 +78,7 @@ local function validateEncounter(import, bossEncounters)
     return true
 end
 
-local function validateRaidAssignments(import, spells)
+local function validateRaidAssignments(import)
     if import.type == "RAID_ASSIGNMENTS" then
         if not import.assignments then
             return false, "Import with type RAID_ASSIGNMENTS is missing a assignments field."
@@ -98,11 +98,11 @@ local function validateRaidAssignments(import, spells)
             return false, "Import with type RAID_ASSIGNMENTS is missing a triggers field."
         end
 
-        if type(import.triggers) ~= "table" or not SwiftdawnRaidTools:IsArray(import.triggers) then
+        if type(import.triggers) ~= "table" or not Utils:IsArray(import.triggers) then
             return false, "Import has an invalid triggers value: " .. stringSafe(import.triggers) .. "."
         end
 
-        if import.untriggers and (type(import.untriggers) ~= "table" or not SwiftdawnRaidTools:IsArray(import.untriggers)) then
+        if import.untriggers and (type(import.untriggers) ~= "table" or not Utils:IsArray(import.untriggers)) then
             return false, "Import has an invalid untriggers value: " .. stringSafe(import.untriggers) .. "."
         end
 
@@ -122,16 +122,16 @@ local function validateRaidAssignments(import, spells)
             return false, "Import with type RAID_ASSIGNMENTS is missing an assignments field."
         end
 
-        if type(import.assignments) ~= "table" or not SwiftdawnRaidTools:IsArray(import.assignments) then
+        if type(import.assignments) ~= "table" or not Utils:IsArray(import.assignments) then
             return false, "Import has an invalid assignments value: " .. stringSafe(import.assignments) .. "."
         end
 
-        if table.getn(import.assignments) == 0 then
+        if #import.assignments == 0 then
             return false, "Import assignments is empty."
         end
         
         for _, group in pairs(import.assignments) do
-            if type(group) ~= "table" or not SwiftdawnRaidTools:IsArray(group) then
+            if type(group) ~= "table" or not Utils:IsArray(group) then
                 return false, "Import has an invalid assignments value: " .. stringSafe(group) .. "."
             end
 
@@ -157,7 +157,7 @@ local function validateRaidAssignments(import, spells)
                 if type(assignment.spell_id) ~= "number" or assignment.spell_id ~= math.floor(assignment.spell_id) then
                     return false, "Import has an unknown spell_id value: " .. stringSafe(assignment.spell_id) .. "."
                 end
-                if not spells[assignment.spell_id] then
+                if not SRTData.GetSpellByID(assignment.spell_id) then
                     return false, "Import has a spell_id that's not supported: " .. stringSafe(assignment.spell_id) .. "."
                 end
             end
@@ -385,9 +385,10 @@ local function validateUntriggers(import)
     return true
 end
 
-function SwiftdawnRaidTools:ValidationValidateImport(import)
-    local spells = self:SpellsGetAll()
-    local bossEncounters = self:BossEncountersGetAll()
+Validation = {}
+
+function Validation:ValidateImport(import)
+    local bossEncounters = BossEncounters:BossEncountersGetAll()
 
     local ok, err = validateRequiredFields(import)
     if not ok then return false, err end
@@ -404,7 +405,7 @@ function SwiftdawnRaidTools:ValidationValidateImport(import)
     ok, err = validateUntriggers(import)
     if not ok then return false, err end
 
-    ok, err = validateRaidAssignments(import, spells)
+    ok, err = validateRaidAssignments(import)
     if not ok then return false, err end
     
     return true

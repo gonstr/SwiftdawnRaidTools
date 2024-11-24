@@ -1,45 +1,36 @@
 SwiftdawnRaidTools = LibStub("AceAddon-3.0"):NewAddon("SwiftdawnRaidTools", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
 
-SwiftdawnRaidTools.DEBUG = false
-SwiftdawnRaidTools.TEST = false
+local SRTDebugMode = true
+local SRTTestMode = false
+
+function SRT_IsDebugging()
+    return SRTDebugMode
+end
+
+function SRT_SetDebugMode(mode)
+    SRTDebugMode = mode
+end
+
+function SRT_IsTesting()
+    return SRTTestMode
+end
+
+function SRT_SetTestMode(mode)
+    SRTTestMode = mode
+end
 
 SwiftdawnRaidTools.PREFIX_SYNC = "SRT-S"
 SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS = "SRT-SP"
 SwiftdawnRaidTools.PREFIX_MAIN = "SRT-M"
 
-SwiftdawnRaidTools.VERSION = GetAddOnMetadata("SwiftdawnRaidTools", "Version")
+SwiftdawnRaidTools.VERSION = C_AddOns.GetAddOnMetadata("SwiftdawnRaidTools", "Version")
 SwiftdawnRaidTools.IS_DEV = SwiftdawnRaidTools.VERSION == '\@project-version\@'
 
 -- AceDB defaults
-SwiftdawnRaidTools.defaults = {
+SwiftdawnRaidTools.DEFAULTS = {
     profile = {
         options = {
             import = "",
-            notifications = {
-                showOnlyOwnNotifications = false,
-                mute = false
-            },
-            appearance = {
-                overviewScale = 1.0,
-                overviewTitleFontType = "Friz Quadrata TT",
-                overviewTitleFontSize = 10,
-                overviewHeaderFontType = "Friz Quadrata TT",
-                overviewHeaderFontSize = 10,
-                overviewPlayerFontType = "Friz Quadrata TT",
-                overviewPlayerFontSize = 10,
-                overviewTitleBarOpacity = 0.8,
-                overviewBackgroundOpacity = 0.4,
-                overviewIconSize = 14,
-                notificationsHeaderFontType = "Friz Quadrata TT",
-                notificationsHeaderFontSize = 14,
-                notificationsPlayerFontType = "Friz Quadrata TT",
-                notificationsPlayerFontSize = 12,
-                notificationsCountdownFontType = "Friz Quadrata TT",
-                notificationsCountdownFontSize = 12,
-                notificationsScale = 1.2,
-                notificationsBackgroundOpacity = 0.9,
-                notificationsIconSize = 16
-            }
         },
         data = {
             encountersProgress = nil,
@@ -47,20 +38,76 @@ SwiftdawnRaidTools.defaults = {
             encounters = {}
         },
         minimap = {},
+        notifications = {
+            showOnlyOwnNotifications = false,
+            locked = true,
+            show = false,
+            mute = false,
+            anchorX = 0,
+            anchorY = 200,
+            appearance = {
+                scale = 1.2,
+                headerFontType = "Friz Quadrata TT",
+                headerFontSize = 14,
+                playerFontType = "Friz Quadrata TT",
+                playerFontSize = 12,
+                countdownFontType = "Friz Quadrata TT",
+                countdownFontSize = 12,
+                backgroundOpacity = 0.9,
+                iconSize = 16
+            }
+        },
         overview = {
             selectedEncounterId = nil,
             locked = false,
-            show = true
+            show = true,
+            appearance = {
+                scale = 1.0,
+                titleFontType = "Friz Quadrata TT",
+                titleFontSize = 10,
+                headerFontType = "Friz Quadrata TT",
+                headerFontSize = 10,
+                playerFontType = "Friz Quadrata TT",
+                playerFontSize = 10,
+                titleBarOpacity = 0.8,
+                backgroundOpacity = 0.4,
+                iconSize = 14
+            }
+        },
+        debuglog = {
+            locked = false,
+            show = false,
+            scrollToBottom = true,
+            appearance = {
+                scale = 1.0,
+                titleFontType = "Friz Quadrata TT",
+                titleFontSize = 10,
+                logFontType = "Friz Quadrata TT",
+                logFontSize = 10,
+                titleBarOpacity = 0.8,
+                backgroundOpacity = 0.4,
+                iconSize = 14
+            }
         }
     },
 }
 
 function SwiftdawnRaidTools:OnInitialize()
-    self:DBInit() 
+    self.db = LibStub("AceDB-3.0"):New("SwiftdawnRaidTools", self.DEFAULTS)
+    
+    SRTData.Initialize()
+
     self:OptionsInit()
     self:MinimapInit()
-    self:OverviewInit()
-    self:NotificationsInit()
+
+    self.overview = SRTOverview:New(300, 180)
+    self.overview:Initialize()
+
+    self.notification = SRTNotification:New()
+    self.notification:Initialize()
+
+    self.debugLog = SRTDebugLog:New(100, 400)
+    self.debugLog:Initialize()
 
     self:RegisterComm(self.PREFIX_SYNC)
     self:RegisterComm(self.PREFIX_SYNC_PROGRESS)
@@ -101,22 +148,18 @@ function SwiftdawnRaidTools:OnDisable()
     self:UnregisterChatCommand("srt")
 end
 
-function SwiftdawnRaidTools:DBInit()
-    self.db = LibStub("AceDB-3.0"):New("SwiftdawnRaidTools", self.defaults)
-end
-
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
-        self:BossEncountersInit()
-        self:SyncSendStatus()
-        self:SyncSchedule()
+        BossEncounters:Initialize()
+        SyncController:SendStatus()
+        SyncController:ScheduleAssignmentsSync()
     end
-
-    self:OverviewUpdate()
+    self.overview:Update()
+    self.debugLog:Update()
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
-    if self.DEBUG then self:Print("Sending RAID message") end
+    Log.debug("Sending RAID message")
 
     local payload = {
         v = self.VERSION,
@@ -150,7 +193,7 @@ function SwiftdawnRaidTools:OnCommReceived(prefix, message, _, sender)
         local ok, payload = self:Deserialize(message)
 
         if ok then
-            self:SyncSetClientVersion(sender, payload.v)
+            SyncController:SetClientVersion(sender, payload.v)
             self:HandleMessagePayload(payload, sender)
         end
     end
@@ -158,85 +201,87 @@ end
 
 function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
     if payload.e == "SYNC_REQ_VERSIONS" then
-        if self.DEBUG then self:Print("Received message SYNC_REQ_VERSIONS:", sender) end
-        self:SyncSendVersion()
+        Log.debug("Received message SYNC_REQ_VERSIONS:", sender)
+        SyncController:SendVersion()
     elseif payload.e == "SYNC_STATUS" then
-        if self.DEBUG then self:Print("Received message SYNC_STATUS:", sender) end
-        self:SyncHandleStatus(payload.d)
+        Log.debug("Received message SYNC_STATUS:", sender)
+        SyncController:HandleStatus(payload.d)
     elseif payload.e == "SYNC_PROG" then
-        if payload.d.encountersId ~= self.db.profile.data.encountersId then
-            if self.DEBUG then self:Print("Received message SYNC_PROG:", sender, payload.d.progress) end
-            self.db.profile.data.encountersProgress = payload.d.progress
-            self.db.profile.data.encountersId = nil
-            self.db.profile.data.encounters = {}
-            self:OverviewUpdate()
+        if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
+            Log.debug("Received message SYNC_PROG:", sender, payload.d.progress)
+            self.encountersProgress = payload.d.progress
+            SRTData.SetActiveRosterID("none")
+            self.overview:Update()
         end
     elseif payload.e == "SYNC" then
-        if self.DEBUG then self:Print("Received message SYNC") end
-        self.db.profile.data.encountersProgress = nil
-        self.db.profile.data.encountersId = payload.d.encountersId
-        self.db.profile.data.encounters = payload.d.encounters
-        self:OverviewUpdate()
+        Log.debug("Received message SYNC")
+        self.encountersProgress = nil
+        SRTData.SetActiveRosterID(payload.d.encountersId)
+        SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster"))
+        self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
-        if self.DEBUG then self:Print("Received message ACT_GRPS") end
-        self:GroupsSetAllActive(payload.d)
-        self:OverviewUpdateActiveGroups()
+        Log.debug("Received message ACT_GRPS")
+        Groups.SetAllActive(payload.d)
+        self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
-        if self.DEBUG then self:Print("Received message TRIGGER") end
-        self:GroupsSetActive(payload.d.uuid, payload.d.activeGroups)
-        self:NotificationsShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
-        self:NotificationsUpdateSpells()
+        Log.debug("Received message TRIGGER")
+        self.debugLog:AddItem(payload.d)
+        Groups.SetActive(payload.d.uuid, payload.d.activeGroups)
+        self.notification:ShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)
+        self.notification:UpdateSpells()
     end
 end
 
 function SwiftdawnRaidTools:SRT_WA_EVENT(_, event, ...)
     if event == "WA_NUMEN_TIMER" then
-        self:RaidAssignmentsHandleFojjiNumenTimer(...)
+        local key, countdown = ...
+        AssignmentsController:HandleFojjiNumenTimer(key, countdown)
     end
 end
 
-function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterId)
+function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, encounterName, ...)
     self:TestModeEnd()
-    self:OverviewSelectEncounter(encounterId)
-    self:RaidAssignmentsStartEncounter(encounterId)
+    self.overview:SelectEncounter(encounterID)
+    self.debugLog:ClearWindow()
+    AssignmentsController:StartEncounter(encounterID, encounterName)
 end
 
-function SwiftdawnRaidTools:ENCOUNTER_END()
-    self:RaidAssignmentsEndEncounter()
-    self:SpellsResetCache()
-    self:UnitsResetDeadCache()
-    self:OverviewUpdateSpells()
-    self:NotificationsUpdateSpells()
+function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
+    AssignmentsController:EndEncounter()
+    SpellCache.Reset()
+    UnitCache:ResetDeadCache()
+    self.overview:UpdateSpells()
+    self.notification:UpdateSpells()
 end
 
 function SwiftdawnRaidTools:ZONE_CHANGED()
     self:TestModeEnd()
-    self:RaidAssignmentsEndEncounter()
-    self:OverviewUpdateSpells()
-    self:NotificationsUpdateSpells()
+    AssignmentsController:EndEncounter()
+    self.overview:UpdateSpells()
+    self.notification:UpdateSpells()
 end
 
-function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId)
+function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
     local guid = UnitGUID(unitId)
 
-    if self:UnitsIsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
-        if self.DEBUG then self:Print("Handling cached unit coming back to life") end
-        self:UnitsClearDead(guid)
-        self:RaidAssignmentsUpdateGroups()
-        self:OverviewUpdateSpells()
-        self:NotificationsUpdateSpells()
+    if UnitCache:IsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
+        Log.debug("Handling cached unit coming back to life")
+        UnitCache:SetAlive(guid)
+        AssignmentsController:UpdateGroups()
+        self.overview:UpdateSpells()
+        self.notification:UpdateSpells()
     end
 
-    self:RaidAssignmentsHandleUnitHealth(unitId)
+    AssignmentsController:HandleUnitHealth(unitId)
 end
 
 function SwiftdawnRaidTools:GROUP_ROSTER_UPDATE()
-    self:OverviewUpdateSpells()
-    self:NotificationsUpdateSpells()
+    self.overview:UpdateSpells()
+    self.notification:UpdateSpells()
 
     if IsInRaid() and not self.sentRaidSync then
         self.sentRaidSync = true
-        self:SyncSendStatus()
+        SyncController:SendStatus()
     else
         self.sentRaidSync = false
     end
@@ -248,35 +293,35 @@ function SwiftdawnRaidTools:COMBAT_LOG_EVENT_UNFILTERED()
 end
 
 function SwiftdawnRaidTools:CHAT_MSG_RAID_BOSS_EMOTE(_, text)
-    self:RaidAssignmentsHandleRaidBossEmote(text)
+    AssignmentsController:HandleRaidBossEmote(text)
 end
 
-function SwiftdawnRaidTools:CHAT_MSG_MONSTER_EMOTE(_, text)
-    self:RaidAssignmentsHandleRaidBossEmote(text)
+function SwiftdawnRaidTools:CHAT_MSG_MONSTER_EMOTE(_, text, ...)
+    AssignmentsController:HandleRaidBossEmote(text)
 end
 
-function SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(_, text)
-    self:RaidAssignmentsHandleRaidBossEmote(text)
+function SwiftdawnRaidTools:CHAT_MSG_MONSTER_YELL(_, text, ...)
+    AssignmentsController:HandleRaidBossEmote(text)
 end
 
 function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, destName, spellId)
     if subEvent == "SPELL_CAST_START" then
-        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
+        AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_CAST_SUCCESS" then
-        self:SpellsCacheCast(sourceName, spellId, function()
-            self:RaidAssignmentsUpdateGroups()
-            self:OverviewUpdateSpells()
-            self:NotificationsUpdateSpells()
+        SpellCache.RegisterCast(sourceName, spellId, function()
+            AssignmentsController:UpdateGroups()
+            self.overview:UpdateSpells()
+            self.notification:UpdateSpells()
         end)
-        self:RaidAssignmentsHandleSpellCast(subEvent, spellId, sourceName, destName)
+        AssignmentsController:HandleSpellCast(subEvent, spellId, sourceName, destName)
     elseif subEvent == "SPELL_AURA_APPLIED" or subEvent =="SPELL_AURA_REMOVED" then
-        self:RaidAssignmentsHandleSpellAura(subEvent, spellId, sourceName, destName)
+        AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
-        if self:IsFriendlyRaidMemberOrPlayer(destGUID) then
-            self:UnitsSetDead(destGUID)
-            self:RaidAssignmentsUpdateGroups()
-            self:OverviewUpdateSpells()
-            self:NotificationsUpdateSpells()
+        if Utils:IsFriendlyRaidMemberOrPlayer(destGUID) then
+            UnitCache:SetDead(destGUID)
+            AssignmentsController:UpdateGroups()
+            self.overview:UpdateSpells()
+            self.notification:UpdateSpells()
         end
     end
 end
