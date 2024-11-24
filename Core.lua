@@ -249,7 +249,7 @@ end
 function SwiftdawnRaidTools:ENCOUNTER_END(_, ...)
     AssignmentsController:EndEncounter()
     SpellCache.Reset()
-    self:UnitsResetDeadCache()
+    UnitCache:ResetDeadCache()
     self.overview:UpdateSpells()
     self.notification:UpdateSpells()
 end
@@ -264,9 +264,9 @@ end
 function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
     local guid = UnitGUID(unitId)
 
-    if self:UnitsIsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
+    if UnitCache:IsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
         Log.debug("Handling cached unit coming back to life")
-        self:UnitsClearDead(guid)
+        UnitCache:SetAlive(guid)
         AssignmentsController:UpdateGroups()
         self.overview:UpdateSpells()
         self.notification:UpdateSpells()
@@ -318,7 +318,7 @@ function SwiftdawnRaidTools:HandleCombatLog(subEvent, sourceName, destGUID, dest
         AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, destName)
     elseif subEvent == "UNIT_DIED" then
         if Utils:IsFriendlyRaidMemberOrPlayer(destGUID) then
-            self:UnitsSetDead(destGUID)
+            UnitCache:SetDead(destGUID)
             AssignmentsController:UpdateGroups()
             self.overview:UpdateSpells()
             self.notification:UpdateSpells()

@@ -1,20 +1,21 @@
 UnitCache = {
     dead = {}
 }
-function UnitCache:SetDead(destGUID)
-    UnitCache.dead[destGUID] = true
+
+function UnitCache:SetDead(unitGUID)
+    UnitCache.dead[unitGUID] = true
 end
 
-function UnitCache:IsDead(destGUID)
-    if UnitCache.dead[destGUID] then
+function UnitCache:IsDead(unitGUID)
+    if UnitCache.dead[unitGUID] then
         return true
     end
 
     return false
 end
 
-function UnitCache:SetAlive(destGUID)
-    UnitCache.dead[destGUID] = nil
+function UnitCache:SetAlive(unitGUID)
+    UnitCache.dead[unitGUID] = nil
 end
 
 function UnitCache:ResetDeadCache()
