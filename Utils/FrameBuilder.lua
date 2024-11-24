@@ -202,9 +202,17 @@ function FrameBuilder.CreateLargeSpellFrame(parentFrame)
     spellFrame.castTimeText:SetTextColor(1, 1, 1, 1)
     spellFrame.castTimeText:SetPoint("TOPLEFT", spellFrame.name, "BOTTOMLEFT", 0, -3)
 
+    spellFrame.durationText = spellFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    spellFrame.durationText:SetTextColor(1, 1, 1, 1)
+    spellFrame.durationText:SetPoint("TOPLEFT", spellFrame.castTimeText, "BOTTOMLEFT", 0, -3)
+
+    spellFrame.cooldownText = spellFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    spellFrame.cooldownText:SetTextColor(1, 1, 1, 1)
+    spellFrame.cooldownText:SetPoint("TOPLEFT", spellFrame.durationText, "BOTTOMLEFT", 0, -3)
+
     spellFrame.rangeText = spellFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     spellFrame.rangeText:SetTextColor(1, 1, 1, 1)
-    spellFrame.rangeText:SetPoint("TOPLEFT", spellFrame.castTimeText, "BOTTOMLEFT", 0, -3)
+    spellFrame.rangeText:SetPoint("TOPLEFT", spellFrame.cooldownText, "BOTTOMLEFT", 0, -3)
 
     spellFrame.descriptionText = spellFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     spellFrame.descriptionText:SetTextColor(1, 1, 1, 1)
@@ -214,6 +222,7 @@ end
 
 function FrameBuilder.UpdateLargeSpellFrame(spellFrame, spellID, font, fontSize, iconSize)
     local spellInfo = C_Spell.GetSpellInfo(spellID)
+    local srtSpellInfo = SRTData.GetSpellByID(spellID)
     spellFrame:Show()
     spellFrame.spellID = spellID
     spellFrame.iconFrame:SetSize(iconSize, iconSize)
@@ -222,6 +231,17 @@ function FrameBuilder.UpdateLargeSpellFrame(spellFrame, spellID, font, fontSize,
     spellFrame.name:SetText(spellInfo.name)
     spellFrame.castTimeText:SetFont(font, fontSize)
     spellFrame.castTimeText:SetText(string.format("Cast time: %ds", spellInfo.castTime/1000))
+    if srtSpellInfo ~= nil then
+        spellFrame.durationText:Show()
+        spellFrame.durationText:SetFont(font, fontSize)
+        spellFrame.durationText:SetText(string.format("Duration: %ds", srtSpellInfo.duration))
+        spellFrame.cooldownText:Show()
+        spellFrame.cooldownText:SetFont(font, fontSize)
+        spellFrame.cooldownText:SetText(string.format("Cooldown: %ds", srtSpellInfo.cooldown))
+    else
+        spellFrame.durationText:Hide()
+        spellFrame.cooldownText:Hide()
+    end
     spellFrame.rangeText:SetFont(font, fontSize)
     spellFrame.rangeText:SetText(string.format("Range: %d to %d yards", spellInfo.minRange, spellInfo.maxRange))
     local description = C_Spell.GetSpellDescription(spellID)
@@ -231,6 +251,9 @@ function FrameBuilder.UpdateLargeSpellFrame(spellFrame, spellID, font, fontSize,
     spellFrame.descriptionText:SetJustifyH("LEFT")
     spellFrame.descriptionText:SetHeight(spellFrame.descriptionText:GetStringHeight())
     local textHeight = 5 + 1 + spellFrame.name:GetStringHeight() + 3 + spellFrame.castTimeText:GetStringHeight() + 3 + spellFrame.rangeText:GetStringHeight() + 3 + spellFrame.descriptionText:GetStringHeight() + 10
+    if srtSpellInfo ~= nil then
+        textHeight = textHeight + 3 + spellFrame.durationText:GetStringHeight() + 3 + spellFrame.cooldownText:GetStringHeight()
+    end
     local height = iconSize > textHeight and iconSize+10 or textHeight
     spellFrame:SetHeight(height)
     spellFrame:SetBackdrop({
