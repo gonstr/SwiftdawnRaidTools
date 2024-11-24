@@ -529,7 +529,6 @@ function AssignmentsController:HandleSpellCast(event, spellId, sourceName, destN
 
     if triggers then
         local spellInfo = C_Spell.GetSpellInfo(spellId)
-        -- local spellName, _, _, castTime = GetSpellInfo(spellId)
 
         local ctx = {
             spell_name = spellInfo.name,
@@ -550,7 +549,6 @@ function AssignmentsController:HandleSpellCast(event, spellId, sourceName, destN
 
     if untriggers then
         local spellInfo = C_Spell.GetSpellInfo(spellId)
-        -- local _, _, _, castTime = GetSpellInfo(spellId)
 
         if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not spellInfo.castTime or spellInfo.castTime == 0)) then
             for _, untrigger in ipairs(untriggers) do
@@ -565,11 +563,10 @@ function AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, de
         return
     end
 
-    local spellInfo = C_Spell.GetSpellInfo(spellId)
-    -- local spellName = GetSpellInfo(spellId)
+    local spellName = C_Spell.GetSpellName(spellId)
 
     local ctx = {
-        spell_name = spellInfo.name,
+        spell_name = spellName,
         source_name = sourceName,
         dest_name = destName
     }
