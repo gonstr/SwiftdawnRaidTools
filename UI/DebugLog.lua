@@ -21,7 +21,6 @@ function SRTDebugLog:Initialize()
     -- Create the scroll frame
     local logFontSize = self:GetAppearance().logFontSize
     self.scrollFrame = CreateFrame("ScrollFrame", "SRT_"..self.name.."_ScrollFrame", self.main, "UIPanelScrollFrameTemplate")
-    --scrollFrame:SetSize(500, MIN_HEIGHT)  -- Set the size of the scroll frame
     self.scrollFrame:SetPoint("TOPLEFT", self.main, "TOPLEFT", 0, 0)
     self.scrollFrame:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", 0, 0)
     self.scrollFrame:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 0, 5)
