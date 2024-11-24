@@ -106,14 +106,11 @@ function SRTNotification:Initialize()
     self.container:SetPoint("CENTER", UIParent, "CENTER", 0, 200) -- self.db.profile.notifications.anchorX, self.db.profile.notifications.anchorY)
     self.container:SetFrameStrata("HIGH")
     self.container:SetMovable(true)
+    self.container:SetUserPlaced(true)
+    self.container:SetClampedToScreen(true)
     self.container:RegisterForDrag("LeftButton")
-    self.container:SetScript("OnDragStart", function()
-        self.container:StartMoving()
-    end)
-    self.container:SetScript("OnDragStop", function()
-        self.container:StopMovingOrSizing()
-        ReAnchorFrame(self.container) -- Re-anchor after dragging
-    end)
+    self.container:SetScript("OnDragStart", function(container) container:StartMoving() end)
+    self.container:SetScript("OnDragStop", function(container) container:StopMovingOrSizing() end)
     self.container:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
@@ -201,23 +198,23 @@ function SRTNotification:ToggleFrameLock(lock)
         self.container:SetBackdropColor(0, 0, 0, 0)
         self.container.frameLockText:Hide()
         self.container.frameLockPositionText:Hide()
-        self.container:SetScript("OnUpdate", nil)
+        -- self.container:SetScript("OnUpdate", nil)
     else
-        self.container:ClearAllPoints()
-        self.container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+        -- self.container:ClearAllPoints()
+        -- self.container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
         self.container:EnableMouse(true)
         self.container:SetBackdropColor(0, 0, 0, 0.6)
         self.container.frameLockText:Show()
         self.container.frameLockPositionText:Show()
         self.content:Hide()
-        self.container:SetScript("OnUpdate", function (frame)
-            local relativeX, relativeY = GetScaledRelativeCoords(frame)
-            -- Save to profile
-            SwiftdawnRaidTools.db.profile.notifications.anchorX = relativeX
-            SwiftdawnRaidTools.db.profile.notifications.anchorY = relativeY
-            -- Set X, Y text
-            self.container.frameLockPositionText:SetText(string.format("%.1f, %.1f", relativeX, relativeY))
-        end)
+        -- self.container:SetScript("OnUpdate", function (frame)
+        --     local relativeX, relativeY = GetScaledRelativeCoords(frame)
+        --     -- Save to profile
+        --     SwiftdawnRaidTools.db.profile.notifications.anchorX = relativeX
+        --     SwiftdawnRaidTools.db.profile.notifications.anchorY = relativeY
+        --     -- Set X, Y text
+        --     self.container.frameLockPositionText:SetText(string.format("%.1f, %.1f", relativeX, relativeY))
+        -- end)
     end
 end
 
