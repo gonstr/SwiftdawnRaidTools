@@ -31,8 +31,8 @@ function SwiftdawnRaidTools:ChatHandleCommand(input)
                 end)
             end
         elseif trimmed == "debug" then
-            self.DEBUG = not self.DEBUG
-            Log.info("debug", self.DEBUG)
+            SRT_SetDebugMode(not SRT_IsDebugging())
+            Log.info("debug", SRT_IsDebugging())
         elseif trimmed == "teststart" then
             self:InternalTestStart()
         elseif trimmed == "testend" then

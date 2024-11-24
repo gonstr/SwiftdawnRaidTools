@@ -1,4 +1,4 @@
-local SwiftdawnRaidTools = SwiftdawnRaidTools
+local SharedMedia = LibStub("LibSharedMedia-3.0")
 
 FrameBuilder = {}
 FrameBuilder.__index = FrameBuilder
@@ -34,7 +34,7 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
     local previousIconFrame = nil
     if showSpells then
         for _, spell in pairs(SRTData.GetClass(classFileName).spells) do
-            local _, _, icon, _, _, _, _, _ = GetSpellInfo(spell.id)
+            local spellIcon, _ = C_Spell.GetSpellTexture(spell.id)
             local iconFrame = playerFrame.spells[spell.id] or CreateFrame("Frame", nil, playerFrame)
             iconFrame:EnableMouse(false)
             iconFrame:SetSize(iconSize, iconSize)
@@ -46,7 +46,7 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
             iconFrame.icon = iconFrame.icon or iconFrame:CreateTexture(nil, "ARTWORK")
             iconFrame.icon:SetAllPoints()
             iconFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-            iconFrame.icon:SetTexture(icon)
+            iconFrame.icon:SetTexture(spellIcon)
             previousIconFrame = iconFrame
             playerFrame.spells[spell.id] = iconFrame
         end
@@ -171,8 +171,8 @@ function FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment)
     assignmentFrame.spellId = assignment.spell_id
     assignmentFrame:Show()
     if assignmentFrame.spellId then
-        local _, _, icon = GetSpellInfo(assignmentFrame.spellId)
-        assignmentFrame.icon:SetTexture(icon)
+        local spellIcon, _ = C_Spell.GetSpellTexture(assignmentFrame.spellId)
+        assignmentFrame.icon:SetTexture(spellIcon)
         local color = SRTData.GetClassColorBySpellID(assignmentFrame.spellId)
         assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
     end
@@ -202,9 +202,17 @@ function FrameBuilder.CreateLargeSpellFrame(parentFrame)
     spellFrame.castTimeText:SetTextColor(1, 1, 1, 1)
     spellFrame.castTimeText:SetPoint("TOPLEFT", spellFrame.name, "BOTTOMLEFT", 0, -3)
 
+    spellFrame.durationText = spellFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    spellFrame.durationText:SetTextColor(1, 1, 1, 1)
+    spellFrame.durationText:SetPoint("TOPLEFT", spellFrame.castTimeText, "BOTTOMLEFT", 0, -3)
+
+    spellFrame.cooldownText = spellFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    spellFrame.cooldownText:SetTextColor(1, 1, 1, 1)
+    spellFrame.cooldownText:SetPoint("TOPLEFT", spellFrame.durationText, "BOTTOMLEFT", 0, -3)
+
     spellFrame.rangeText = spellFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     spellFrame.rangeText:SetTextColor(1, 1, 1, 1)
-    spellFrame.rangeText:SetPoint("TOPLEFT", spellFrame.castTimeText, "BOTTOMLEFT", 0, -3)
+    spellFrame.rangeText:SetPoint("TOPLEFT", spellFrame.cooldownText, "BOTTOMLEFT", 0, -3)
 
     spellFrame.descriptionText = spellFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     spellFrame.descriptionText:SetTextColor(1, 1, 1, 1)
@@ -213,24 +221,39 @@ function FrameBuilder.CreateLargeSpellFrame(parentFrame)
 end
 
 function FrameBuilder.UpdateLargeSpellFrame(spellFrame, spellID, font, fontSize, iconSize)
-    local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(spellID)
+    local spellInfo = C_Spell.GetSpellInfo(spellID)
+    local srtSpellInfo = SRTData.GetSpellByID(spellID)
     spellFrame:Show()
     spellFrame.spellID = spellID
     spellFrame.iconFrame:SetSize(iconSize, iconSize)
-    spellFrame.icon:SetTexture(icon)
+    spellFrame.icon:SetTexture(spellInfo.iconID)
     spellFrame.name:SetFont(font, fontSize+2)
-    spellFrame.name:SetText(name)
+    spellFrame.name:SetText(spellInfo.name)
     spellFrame.castTimeText:SetFont(font, fontSize)
-    spellFrame.castTimeText:SetText(string.format("Cast time: %ds", castTime/1000))
+    spellFrame.castTimeText:SetText(string.format("Cast time: %ds", spellInfo.castTime/1000))
+    if srtSpellInfo ~= nil then
+        spellFrame.durationText:Show()
+        spellFrame.durationText:SetFont(font, fontSize)
+        spellFrame.durationText:SetText(string.format("Duration: %ds", srtSpellInfo.duration))
+        spellFrame.cooldownText:Show()
+        spellFrame.cooldownText:SetFont(font, fontSize)
+        spellFrame.cooldownText:SetText(string.format("Cooldown: %ds", srtSpellInfo.cooldown))
+    else
+        spellFrame.durationText:Hide()
+        spellFrame.cooldownText:Hide()
+    end
     spellFrame.rangeText:SetFont(font, fontSize)
-    spellFrame.rangeText:SetText(string.format("Range: %d to %d yards", minRange, maxRange))
-    local description = GetSpellDescription(spellID)
+    spellFrame.rangeText:SetText(string.format("Range: %d to %d yards", spellInfo.minRange, spellInfo.maxRange))
+    local description = C_Spell.GetSpellDescription(spellID)
     spellFrame.descriptionText:SetFont(font, fontSize)
     spellFrame.descriptionText:SetText(string.format("%s", description))
     spellFrame.descriptionText:SetWidth(280 - iconSize - 27)
     spellFrame.descriptionText:SetJustifyH("LEFT")
     spellFrame.descriptionText:SetHeight(spellFrame.descriptionText:GetStringHeight())
     local textHeight = 5 + 1 + spellFrame.name:GetStringHeight() + 3 + spellFrame.castTimeText:GetStringHeight() + 3 + spellFrame.rangeText:GetStringHeight() + 3 + spellFrame.descriptionText:GetStringHeight() + 10
+    if srtSpellInfo ~= nil then
+        textHeight = textHeight + 3 + spellFrame.durationText:GetStringHeight() + 3 + spellFrame.cooldownText:GetStringHeight()
+    end
     local height = iconSize > textHeight and iconSize+10 or textHeight
     spellFrame:SetHeight(height)
     spellFrame:SetBackdrop({
@@ -699,6 +722,10 @@ function FrameBuilder.CreatePopupMenu(parentFrame, items)
     return popupMenu
 end
 
+local function AppearancePopupFontType()
+    return SharedMedia:Fetch("font", "Friz Quadrata TT")
+end
+
 function FrameBuilder.CreatePopupMenuItem(popupMenu, text, onClick, isSetting)
     local item = CreateFrame("Frame", nil, popupMenu, "BackdropTemplate")
     item:SetHeight(20)
@@ -720,7 +747,7 @@ function FrameBuilder.CreatePopupMenuItem(popupMenu, text, onClick, isSetting)
     item.highlight:SetAlpha(0.5)
     item.highlight:Hide()
     item.text = item:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    item.text:SetFont(SwiftdawnRaidTools:AppearancePopupFontType(), 10)
+    item.text:SetFont(AppearancePopupFontType(), 10)
     if isSetting then
         item.text:SetTextColor(0.8, 0.8, 0.8, 1)
     else

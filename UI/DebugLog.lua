@@ -1,7 +1,9 @@
+local SwiftdawnRaidTools = SwiftdawnRaidTools
+
 ---@class SRTDebugLog:SRTWindow
 SRTDebugLog = setmetatable({
     logItems = {},
-    maxFrames = 100,
+    maxFrames = 500,
     log = {}
 }, SRTWindow)
 SRTDebugLog.__index = SRTDebugLog
@@ -21,7 +23,6 @@ function SRTDebugLog:Initialize()
     -- Create the scroll frame
     local logFontSize = self:GetAppearance().logFontSize
     self.scrollFrame = CreateFrame("ScrollFrame", "SRT_"..self.name.."_ScrollFrame", self.main, "UIPanelScrollFrameTemplate")
-    --scrollFrame:SetSize(500, MIN_HEIGHT)  -- Set the size of the scroll frame
     self.scrollFrame:SetPoint("TOPLEFT", self.main, "TOPLEFT", 0, 0)
     self.scrollFrame:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", 0, 0)
     self.scrollFrame:SetPoint("BOTTOMLEFT", self.main, "BOTTOMLEFT", 0, 5)
@@ -56,25 +57,26 @@ end
 
 --- Add a log statement to the debug log
 ---@param data table
-function SRTDebugLog:AddItem(data)
+function SRTDebugLog:AddItem(data, ...)
     if not AssignmentsController:IsInEncounter() then
-        Log.debug("Not adding log data. No encounter going on!", data)
+        if SRT_IsDebugging() then SwiftdawnRaidTools:Print("[DEBUG] Not adding log data. No encounter going on!", ...) end
         return
+    else
+        local encounterID = AssignmentsController.activeEncounterID
+        local encounterStart = AssignmentsController.encounterStart
+        if not encounterStart then
+            if SRT_IsDebugging() then SwiftdawnRaidTools:Print("[DEBUG] Not adding log data. No start time known for current encounter!", ...) end
+            return
+        else
+            self.log[encounterID] = self.log[encounterID] or {}
+            self.log[encounterID][encounterStart] = self.log[encounterID][encounterStart] or {}
+            table.insert(self.log[encounterID][encounterStart], data)
+        end
     end
-    local encounterID = AssignmentsController.activeEncounterID
-    local encounterStart = AssignmentsController.encounterStart
-    if not encounterStart then
-        Log.debug("Not adding log data. No start time known for current encounter!")
-        return
-    end
-    self.log[encounterID] = self.log[encounterID] or {}
-    self.log[encounterID][encounterStart] = self.log[encounterID][encounterStart] or {}
-
-    table.insert(self.log[encounterID][encounterStart], data)
 
     if #self.logItems < self.maxFrames then
         -- Create a new frame and attach at the bottom
-        local newItem = LogItem:New(data)
+        local newItem = LogItem:New(data, ...)
         newItem:CreateFrame(self.scrollContentFrame)
         if #self.logItems == 0 then
             newItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
@@ -91,7 +93,7 @@ function SRTDebugLog:AddItem(data)
         firstItem.frame:SetPoint("TOPLEFT", self.scrollContentFrame, "TOPLEFT", 5, -3)
         local lastItem = self.logItems[#self.logItems]
         cachedItem.frame:SetPoint("TOPLEFT", lastItem.frame, "BOTTOMLEFT", 0, -3)
-        cachedItem:NewData(data)
+        cachedItem:NewData(data, ...)
         cachedItem:UpdateAppearance()
         table.insert(self.logItems, cachedItem)
     end
