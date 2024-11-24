@@ -1,3 +1,5 @@
+local SwiftdawnRaidTools = SwiftdawnRaidTools
+
 ---@class SRTDebugLog:SRTWindow
 SRTDebugLog = setmetatable({
     logItems = {},
