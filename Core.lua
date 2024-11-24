@@ -1,6 +1,6 @@
 SwiftdawnRaidTools = LibStub("AceAddon-3.0"):NewAddon("SwiftdawnRaidTools", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceSerializer-3.0")
 
-local SRTDebugMode = true
+local SRTDebugMode = false
 local SRTTestMode = false
 
 function SRT_IsDebugging()
