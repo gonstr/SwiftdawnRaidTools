@@ -528,18 +528,19 @@ function AssignmentsController:HandleSpellCast(event, spellId, sourceName, destN
     end
 
     if triggers then
-        local spellName, _, _, castTime = GetSpellInfo(spellId)
+        local spellInfo = C_Spell.GetSpellInfo(spellId)
+        -- local spellName, _, _, castTime = GetSpellInfo(spellId)
 
         local ctx = {
-            spell_name = spellName,
+            spell_name = spellInfo.name,
             source_name = sourceName,
             dest_name = destName
         }
 
         -- We don't want to handle a spellcast twice so we only look for start events or success events for instant cast spells
-        if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not castTime or castTime == 0)) then
+        if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not spellInfo.castTime or spellInfo.castTime == 0)) then
             for _, trigger in ipairs(triggers) do
-                local countdown = castTime / 1000
+                local countdown = spellInfo.castTime / 1000
                 AssignmentsController:Trigger(trigger, ctx, countdown)
             end
         end
@@ -548,9 +549,10 @@ function AssignmentsController:HandleSpellCast(event, spellId, sourceName, destN
     local untriggers = AssignmentsController.spellCastUntriggersCache[spellId]
 
     if untriggers then
-        local _, _, _, castTime = GetSpellInfo(spellId)
+        local spellInfo = C_Spell.GetSpellInfo(spellId)
+        -- local _, _, _, castTime = GetSpellInfo(spellId)
 
-        if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not castTime or castTime == 0)) then
+        if event == "SPELL_CAST_START" or (event == "SPELL_CAST_SUCCESS" and (not spellInfo.castTime or spellInfo.castTime == 0)) then
             for _, untrigger in ipairs(untriggers) do
                 AssignmentsController:CancelDelayTimers(untrigger.uuid)
             end
@@ -563,10 +565,11 @@ function AssignmentsController:HandleSpellAura(subEvent, spellId, sourceName, de
         return
     end
 
-    local spellName = GetSpellInfo(spellId)
+    local spellInfo = C_Spell.GetSpellInfo(spellId)
+    -- local spellName = GetSpellInfo(spellId)
 
     local ctx = {
-        spell_name = spellName,
+        spell_name = spellInfo.name,
         source_name = sourceName,
         dest_name = destName
     }

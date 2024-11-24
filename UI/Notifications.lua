@@ -264,9 +264,10 @@ function SRTNotification:UpdateNotificationGroupAssignment(assignmentFrame, assi
     assignmentFrame.player = assignment.player
     assignmentFrame.spellId = assignment.spell_id
 
-    local _, _, icon = GetSpellInfo(assignment.spell_id)
+    local spellInfo = C_Spell.GetSpellInfo(assignment.spell_id)
+    -- local _, _, icon = GetSpellInfo(assignment.spell_id)
 
-    assignmentFrame.icon:SetTexture(icon)
+    assignmentFrame.icon:SetTexture(spellInfo.iconID)
     assignmentFrame.text:SetText(assignment.player)
 
     local color = SRTData.GetClassColorBySpellID(assignment.spell_id)

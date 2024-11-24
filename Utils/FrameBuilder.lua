@@ -34,7 +34,8 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
     local previousIconFrame = nil
     if showSpells then
         for _, spell in pairs(SRTData.GetClass(classFileName).spells) do
-            local _, _, icon, _, _, _, _, _ = GetSpellInfo(spell.id)
+            local spellInfo = C_Spell.GetSpellInfo(spell.id)
+            -- local _, _, icon, _, _, _, _, _ = GetSpellInfo(spell.id)
             local iconFrame = playerFrame.spells[spell.id] or CreateFrame("Frame", nil, playerFrame)
             iconFrame:EnableMouse(false)
             iconFrame:SetSize(iconSize, iconSize)
@@ -46,7 +47,7 @@ function FrameBuilder.CreatePlayerFrame(parentFrame, playerName, classFileName, 
             iconFrame.icon = iconFrame.icon or iconFrame:CreateTexture(nil, "ARTWORK")
             iconFrame.icon:SetAllPoints()
             iconFrame.icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-            iconFrame.icon:SetTexture(icon)
+            iconFrame.icon:SetTexture(spellInfo.iconID)
             previousIconFrame = iconFrame
             playerFrame.spells[spell.id] = iconFrame
         end
@@ -171,8 +172,9 @@ function FrameBuilder.UpdateAssignmentFrame(assignmentFrame, assignment)
     assignmentFrame.spellId = assignment.spell_id
     assignmentFrame:Show()
     if assignmentFrame.spellId then
-        local _, _, icon = GetSpellInfo(assignmentFrame.spellId)
-        assignmentFrame.icon:SetTexture(icon)
+        local spellInfo = C_Spell.GetSpellInfo(assignmentFrame.spellId)
+        -- local _, _, icon = GetSpellInfo(assignmentFrame.spellId)
+        assignmentFrame.icon:SetTexture(spellInfo.iconID)
         local color = SRTData.GetClassColorBySpellID(assignmentFrame.spellId)
         assignmentFrame.text:SetTextColor(color.r, color.g, color.b)
     end
@@ -213,18 +215,20 @@ function FrameBuilder.CreateLargeSpellFrame(parentFrame)
 end
 
 function FrameBuilder.UpdateLargeSpellFrame(spellFrame, spellID, font, fontSize, iconSize)
-    local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(spellID)
+    local spellInfo = C_Spell.GetSpellInfo(spellID)
+    -- local name, rank, icon, castTime, minRange, maxRange, spellID, originalIcon = GetSpellInfo(spellID)
     spellFrame:Show()
     spellFrame.spellID = spellID
     spellFrame.iconFrame:SetSize(iconSize, iconSize)
-    spellFrame.icon:SetTexture(icon)
+    spellFrame.icon:SetTexture(spellInfo.iconID)
     spellFrame.name:SetFont(font, fontSize+2)
-    spellFrame.name:SetText(name)
+    spellFrame.name:SetText(spellInfo.name)
     spellFrame.castTimeText:SetFont(font, fontSize)
-    spellFrame.castTimeText:SetText(string.format("Cast time: %ds", castTime/1000))
+    spellFrame.castTimeText:SetText(string.format("Cast time: %ds", spellInfo.castTime/1000))
     spellFrame.rangeText:SetFont(font, fontSize)
-    spellFrame.rangeText:SetText(string.format("Range: %d to %d yards", minRange, maxRange))
-    local description = GetSpellDescription(spellID)
+    spellFrame.rangeText:SetText(string.format("Range: %d to %d yards", spellInfo.minRange, spellInfo.maxRange))
+    local description = C_Spell.GetSpellDescription(spellID)
+    -- local description = GetSpellDescription(spellID)
     spellFrame.descriptionText:SetFont(font, fontSize)
     spellFrame.descriptionText:SetText(string.format("%s", description))
     spellFrame.descriptionText:SetWidth(280 - iconSize - 27)
