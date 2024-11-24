@@ -8,7 +8,7 @@ function SwiftdawnRaidTools:SpellsResetCache()
 end
 
 function SwiftdawnRaidTools:SpellsIsSpellReady(unit, spellId, timestamp)
-    if not self:IsTesting() then
+    if not SRT_IsTesting() then
         if UnitIsDeadOrGhost(unit) then
             return false
         end
@@ -36,7 +36,7 @@ function SwiftdawnRaidTools:SpellsIsSpellReady(unit, spellId, timestamp)
 end
 
 function SwiftdawnRaidTools:SpellsIsSpellActive(unit, spellId, timestamp)
-    if not self:IsTesting() then
+    if not SRT_IsTesting() then
         if UnitIsDeadOrGhost(unit) then
             return false
         end
@@ -70,7 +70,7 @@ function SwiftdawnRaidTools:SpellsGetCastTimestamp(unit, spellId)
 end
 
 function SwiftdawnRaidTools:SpellsCacheCast(unit, spellId, updateFunc)
-    if not self:IsTesting() then
+    if not SRT_IsTesting() then
         if not UnitIsPlayer(unit) and not UnitInRaid(unit) then
             return
         end

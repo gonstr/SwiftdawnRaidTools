@@ -39,7 +39,7 @@ function SRTDebugLog:Initialize()
     self.scrollFrame:SetScrollChild(self.scrollContentFrame)
 
     self.menuButton:SetScript("OnClick", function()
-        if not SwiftdawnRaidTools:IsTesting() and InCombatLockdown() then
+        if not SRT_IsTesting() and InCombatLockdown() then
             return
         end
         self:UpdatePopupMenu()
@@ -58,19 +58,20 @@ end
 ---@param data table
 function SRTDebugLog:AddItem(data, ...)
     if not AssignmentsController:IsInEncounter() then
-        Log.debug("Not adding log data. No encounter going on!", data)
+        if SRT_IsDebugging() then SwiftdawnRaidTools:Print("[DEBUG] Not adding log data. No encounter going on!", ...) end
         return
+    else
+        local encounterID = AssignmentsController.activeEncounterID
+        local encounterStart = AssignmentsController.encounterStart
+        if not encounterStart then
+            if SRT_IsDebugging() then SwiftdawnRaidTools:Print("[DEBUG] Not adding log data. No start time known for current encounter!", ...) end
+            return
+        else
+            self.log[encounterID] = self.log[encounterID] or {}
+            self.log[encounterID][encounterStart] = self.log[encounterID][encounterStart] or {}
+            table.insert(self.log[encounterID][encounterStart], data)
+        end
     end
-    local encounterID = AssignmentsController.activeEncounterID
-    local encounterStart = AssignmentsController.encounterStart
-    if not encounterStart then
-        Log.debug("Not adding log data. No start time known for current encounter!")
-        return
-    end
-    self.log[encounterID] = self.log[encounterID] or {}
-    self.log[encounterID][encounterStart] = self.log[encounterID][encounterStart] or {}
-
-    table.insert(self.log[encounterID][encounterStart], data)
 
     if #self.logItems < self.maxFrames then
         -- Create a new frame and attach at the bottom

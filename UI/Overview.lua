@@ -18,7 +18,7 @@ end
 function SRTOverview:Initialize()
     SRTWindow.Initialize(self)
     self.menuButton:SetScript("OnClick", function()
-        if not SwiftdawnRaidTools:IsTesting() and (InCombatLockdown() or AssignmentsController:IsInEncounter()) then
+        if not SRT_IsTesting() and (InCombatLockdown() or AssignmentsController:IsInEncounter()) then
             return
         end
         self:UpdatePopupMenu()

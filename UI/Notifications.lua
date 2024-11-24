@@ -373,7 +373,7 @@ function SRTNotification:ShowRaidAssignment(uuid, context, delay, countdown)
     local selectedEncounterId = SwiftdawnRaidTools.db.profile.overview.selectedEncounterId
     local encounter = SRTData.GetActiveEncounters()[selectedEncounterId]
 
-    if not SwiftdawnRaidTools:IsTesting() then
+    if not SRT_IsTesting() then
         if SwiftdawnRaidTools.db.profile.notifications.showOnlyOwnNotifications then
             local part = Utils:GetRaidAssignmentPart(uuid)
 

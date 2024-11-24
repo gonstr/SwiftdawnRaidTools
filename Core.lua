@@ -3,28 +3,20 @@ SwiftdawnRaidTools = LibStub("AceAddon-3.0"):NewAddon("SwiftdawnRaidTools", "Ace
 local SRTDebugMode = true
 local SRTTestMode = false
 
-function SwiftdawnRaidTools:IsDebugging()
+function SRT_IsDebugging()
     return SRTDebugMode
 end
 
-function SwiftdawnRaidTools:SetDebugMode(mode)
+function SRT_SetDebugMode(mode)
     SRTDebugMode = mode
 end
 
-function SwiftdawnRaidTools:IsTesting()
+function SRT_IsTesting()
     return SRTTestMode
 end
 
-function SwiftdawnRaidTools:SetTestMode(mode)
+function SRT_SetTestMode(mode)
     SRTTestMode = mode
-end
-
-function SwiftdawnRaidTools:TestModeToggle()
-    if self:IsTesting() then
-        self:TestModeEnd()
-    else
-        self:TestModeStart()
-    end
 end
 
 SwiftdawnRaidTools.PREFIX_SYNC = "SRT-S"
@@ -250,6 +242,7 @@ end
 function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, encounterName, ...)
     self:TestModeEnd()
     self.overview:SelectEncounter(encounterID)
+    self.debugLog:ClearWindow()
     AssignmentsController:StartEncounter(encounterID, encounterName)
 end
 

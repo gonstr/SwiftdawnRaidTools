@@ -72,7 +72,7 @@ end
 function AssignmentsController:StartEncounter(encounterID, encounterName)
     AssignmentsController:ResetState()
 
-    if not SwiftdawnRaidTools:IsTesting() and not Utils:IsPlayerRaidLeader() then
+    if not SRT_IsTesting() and not Utils:IsPlayerRaidLeader() then
         return
     end
 

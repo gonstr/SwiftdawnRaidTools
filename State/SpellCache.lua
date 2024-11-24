@@ -10,7 +10,7 @@ function SpellCache.Reset()
 end
 
 function SpellCache.IsSpellReady(unit, spellId, timestamp)
-    if not SwiftdawnRaidTools:IsTesting() then
+    if not SRT_IsTesting() then
         if UnitIsDeadOrGhost(unit) then
             return false
         end
@@ -38,7 +38,7 @@ function SpellCache.IsSpellReady(unit, spellId, timestamp)
 end
 
 function SpellCache.IsSpellActive(unit, spellId, timestamp)
-    if not SwiftdawnRaidTools:IsTesting() then
+    if not SRT_IsTesting() then
         if UnitIsDeadOrGhost(unit) then
             return false
         end
@@ -72,7 +72,7 @@ function SpellCache.GetCastTime(unit, spellId)
 end
 
 function SpellCache.RegisterCast(unit, spellId, updateFunc)
-    if not SwiftdawnRaidTools:IsTesting() then
+    if not SRT_IsTesting() then
         if not UnitIsPlayer(unit) and not UnitInRaid(unit) then
             return
         end

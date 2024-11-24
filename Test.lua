@@ -12,7 +12,7 @@ local function cancelTimers()
 end
 
 function SwiftdawnRaidTools:InternalTestStart()
-    self:SetTestMode(true)
+    SRT_SetTestMode(true)
 
     self.overview:UpdateSpells()
 
@@ -28,13 +28,21 @@ function SwiftdawnRaidTools:InternalTestStart()
 end
 
 function SwiftdawnRaidTools:InternalTestEnd()
-    self:SetTestMode(false)
+    SRT_SetTestMode(false)
 
     self:ENCOUNTER_END(nil, 1082)
 end
 
+function SwiftdawnRaidTools:TestModeToggle()
+    if SRT_IsTesting() then
+        self:TestModeEnd()
+    else
+        self:TestModeStart()
+    end
+end
+
 function SwiftdawnRaidTools:TestModeStart()
-    self:SetTestMode(true)
+    SRT_SetTestMode(true)
 
     cancelTimers()
 
@@ -99,8 +107,8 @@ function SwiftdawnRaidTools:TestModeStart()
 end
 
 function SwiftdawnRaidTools:TestModeEnd()
-    if self:IsTesting() then
-        self:SetTestMode(false)
+    if SRT_IsTesting() then
+        SRT_SetTestMode(false)
 
         cancelTimers()
 

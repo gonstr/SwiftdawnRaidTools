@@ -1104,7 +1104,7 @@ function SRTData.GetActiveRoster()
 end
 
 function SRTData.GetActiveEncounters()
-    if SwiftdawnRaidTools:IsTesting() then
+    if SRT_IsTesting() then
         return testAssignments
     end
     local activeRoster = SRTData.GetActiveRoster()
