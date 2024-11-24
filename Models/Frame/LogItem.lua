@@ -122,7 +122,7 @@ function LogItem:UpdateAppearance()
     self.frame:SetWidth(self.frame:GetParent():GetWidth() - 10)
     self.timestamp:SetFont(self:getLogFontType(), logFontSize)
     self.timestamp:SetWidth(self.timestamp:GetStringWidth())
-    self.timestamp:SetText(Utils:Timestamp(false) .. ": ")
+    self.timestamp:SetText(Utils:Timestamp(true) .. ": ")
     if self.triggerType == "STRING" then
         self.text:SetTextColor(0.80, 0.80, 0.80)
     else
