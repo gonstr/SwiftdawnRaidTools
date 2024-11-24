@@ -1,7 +1,7 @@
 local SwiftdawnRaidTools = SwiftdawnRaidTools
 
 -- Make sure guild roster data is loaded
-GuildRoster()
+C_GuildInfo.GuildRoster()
 
 function SRT_Global()
     return SwiftdawnRaidTools.db.global
