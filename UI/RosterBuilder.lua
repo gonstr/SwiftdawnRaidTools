@@ -150,14 +150,15 @@ function RosterBuilder:InitializeLoadOrCreateRoster()
     self.loadCreate.info.scroll:SetPoint("BOTTOMRIGHT", self.loadCreate.info.pane, "BOTTOMRIGHT", 0, 35)
 
     -- Create buttons
-    self.loadCreate.activateButton = FrameBuilder.CreateButton(self.loadCreate.info.pane, 70, 25, "Activate", SRTColor.Gray, SRTColor.Gray)
-    self.loadCreate.activateButton:SetPoint("BOTTOMLEFT", self.loadCreate.load.pane, "BOTTOMLEFT", 0, 5)
-    self.loadCreate.activateButton:SetScript("OnMouseDown", nil)
-    self.loadCreate.editButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 70, 25, "Edit", SRTColor.Gray, SRTColor.Gray)
-    self.loadCreate.editButton:SetPoint("LEFT", self.loadCreate.activateButton, "RIGHT", 10, 0)
-
     self.loadCreate.deleteButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 70, 25, "Delete", SRTColor.Gray, SRTColor.Gray)
-    self.loadCreate.deleteButton:SetPoint("BOTTOMRIGHT", self.loadCreate.load.pane, "BOTTOMRIGHT", 0, 5)
+    self.loadCreate.deleteButton:SetPoint("BOTTOMLEFT", self.loadCreate.load.pane, "BOTTOMLEFT", 0, 5)
+
+    self.loadCreate.activateButton = FrameBuilder.CreateButton(self.loadCreate.info.pane, 70, 25, "Activate", SRTColor.Gray, SRTColor.Gray)
+    self.loadCreate.activateButton:SetPoint("BOTTOMRIGHT", self.loadCreate.load.pane, "BOTTOMRIGHT", 0, 5)
+    self.loadCreate.activateButton:SetScript("OnMouseDown", nil)
+
+    self.loadCreate.editButton = FrameBuilder.CreateButton(self.loadCreate.load.pane, 70, 25, "Edit", SRTColor.Gray, SRTColor.Gray)
+    self.loadCreate.editButton:SetPoint("BOTTOMLEFT", self.loadCreate.info.pane, "BOTTOMLEFT", 0, 5)
 
     self.loadCreate.createButton = FrameBuilder.CreateButton(self.loadCreate.info.pane, 95, 25, "Create New", SRTColor.Green, SRTColor.GreenHighlight)
     self.loadCreate.createButton:SetPoint("BOTTOMRIGHT", self.loadCreate.info.pane, "BOTTOMRIGHT", 0, 5)
@@ -392,15 +393,17 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
             self.state = State.ADD_OR_REMOVE_PLAYERS
             self:UpdateAppearance()
         end)
-        self.loadCreate.activateButton.color = SRTColor.Blue
-        self.loadCreate.activateButton.colorHighlight = SRTColor.BlueHighlight
-        self.loadCreate.activateButton:SetScript("OnMouseDown", function (button)
-            SRTData.SetActiveRosterID(self.selectedRoster.id)
-            SyncController:SyncAssignmentsNow()
-            SwiftdawnRaidTools.overview:Update()
-            SwiftdawnRaidTools.assignmentExplorer:Update()
-        end)
-        FrameBuilder.UpdateButton(self.loadCreate.activateButton)
+        if Utils:IsPlayerRaidLeader() and not IsEncounterInProgress() then
+            self.loadCreate.activateButton.color = SRTColor.Blue
+            self.loadCreate.activateButton.colorHighlight = SRTColor.BlueHighlight
+            self.loadCreate.activateButton:SetScript("OnMouseDown", function (button)
+                SRTData.SetActiveRosterID(self.selectedRoster.id)
+                SyncController:SyncAssignmentsNow()
+                SwiftdawnRaidTools.overview:Update()
+                SwiftdawnRaidTools.assignmentExplorer:Update()
+            end)
+            FrameBuilder.UpdateButton(self.loadCreate.activateButton)
+        end
         self.loadCreate.info.title:SetText(Roster.GetName(self.selectedRoster))
 
         rosterInfo.timestamp = rosterInfo.timestamp or self.loadCreate.info.scroll.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
