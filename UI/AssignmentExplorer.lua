@@ -195,9 +195,13 @@ function AssignmentExplorer:UpdateEncounterPane()
         return
     end
 
+    for _, abilityFrame in pairs(self.encounter.bossAbilities) do
+        abilityFrame:Hide()
+    end
     local previousAbilityFrame
     for abilityIndex, ability in ipairs(encounterAssignments) do
         local abilityFrame = self.encounter.bossAbilities[abilityIndex] or CreateFrame("Frame", nil, self.encounterPane)
+        abilityFrame:Show()
         if previousAbilityFrame then
             abilityFrame:SetPoint("TOPLEFT", previousAbilityFrame, "BOTTOMLEFT", 0, 0)
             abilityFrame:SetPoint("TOPRIGHT", previousAbilityFrame, "BOTTOMRIGHT", 0, 0)
@@ -441,7 +445,7 @@ function AssignmentExplorer:UpdateApplyChangePane()
         return
     end
 
-    local originalSpellName, _, _, _, _, _, originalSpellID, _ = GetSpellInfo(self.selectedPlayer.selectedID)
+    local originalSpellName, _, _, _, _, _, originalSpellID, _ = C_Spell.GetSpellInfo(self.selectedPlayer.selectedID)
 
     self.applyChangePane.questionPartOne = self.applyChangePane.questionPartOne or self.applyChangePane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     self.applyChangePane.questionPartOne:SetText(string.format("Change %s's %s", self.selectedPlayer.name, originalSpellName))
@@ -456,7 +460,7 @@ function AssignmentExplorer:UpdateApplyChangePane()
     self.applyChangePane.originalSpellFrame:SetPoint("TOPLEFT", self.applyChangePane.questionPartOne, "BOTTOMLEFT", 5, -7)
     self.applyChangePane.originalSpellFrame:SetPoint("TOPRIGHT", self.applyChangePane.questionPartOne, "BOTTOMLEFT", 285, -7)
 
-    local replacementSpellName, _, _, _, _, _, replacementSpellID, _ = GetSpellInfo(self.selectedRosterPlayer.selectedID)
+    local replacementSpellName, _, _, _, _, _, replacementSpellID, _ = C_Spell.GetSpellInfo(self.selectedRosterPlayer.selectedID)
 
     self.applyChangePane.questionPartTwo = self.applyChangePane.questionPartTwo or self.applyChangePane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     self.applyChangePane.questionPartTwo:SetText(string.format("To %s's %s?", self.selectedRosterPlayer.name, replacementSpellName))
