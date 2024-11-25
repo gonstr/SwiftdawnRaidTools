@@ -1049,7 +1049,6 @@ end
 ---@return Roster
 function SRTData.CreateNewRoster()
     local data = SRT_Global().srt_data
-    local rosterID = Utils:GenerateUUID()
     local roster = Roster:New()
     data.rosters[roster.id] = roster
     return roster
