@@ -502,7 +502,7 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
         local playerFrame = self.addRemove.roster.scroll.items[rosteredPlayer.name] or FrameBuilder.CreatePlayerFrame(self.addRemove.roster.scroll.content, rosteredPlayer.name, rosteredPlayer.class.fileName, 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize, 14)
         playerFrame.info = rosteredPlayer.info
         if lastPlayerFrame then
-            playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -3)
+            playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, 0)
         else
             playerFrame:SetPoint("TOPLEFT", self.addRemove.roster.scroll.content, "TOPLEFT", 10, 0)
         end
@@ -557,13 +557,13 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
 
     visiblePlayers = 0
     lastPlayerFrame = nil
-    for name, frame in pairs(self.addRemove.available.scroll.items) do
+    for _, frame in pairs(self.addRemove.available.scroll.items) do
         frame:Hide()
     end
-    for name, playerInfo in pairs(self:GetGuildMembers()) do
-        if shouldShowPlayer(playerInfo) then
-            local playerFrame = self.addRemove.available.scroll.items[playerInfo.name] or FrameBuilder.CreatePlayerFrame(self.addRemove.available.scroll.content, playerInfo.name, playerInfo.classFileName, 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize, 14)
-            playerFrame.info = playerInfo
+    for player in Utils:CombinedIteratorWithUniqueNames(Utils:GetRaidMembers(), Utils:GetOnlineGuildMembers()) do
+        if shouldShowPlayer(player) then
+            local playerFrame = self.addRemove.available.scroll.items[player.name] or FrameBuilder.CreatePlayerFrame(self.addRemove.available.scroll.content, player.name, player.fileName, 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize, 14)
+            playerFrame.info = player
             if lastPlayerFrame then
                 playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -3)
             else
@@ -573,7 +573,7 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
             playerFrame:EnableMouse(true)
             playerFrame:RegisterForDrag("LeftButton")
             playerFrame:SetScript("OnDragStart", function(_)
-                self.addRemove.available.scroll.DisconnectItem(name, playerFrame, self.content)
+                self.addRemove.available.scroll.DisconnectItem(player.name, playerFrame, self.content)
                 playerFrame:StartMoving()
             end)
             playerFrame:SetScript("OnDragStop", function(_)
@@ -581,17 +581,17 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
                 playerFrame:SetParent(self.addRemove.available.scroll.content)
                 playerFrame:StopMovingOrSizing()
                 if self.addRemove.roster.scroll.IsMouseOverArea() then
-                    self.selectedRoster.players[playerInfo.name] = self.selectedRoster.players[playerInfo.name] or Player:New(playerInfo.name, SRTData.GetClass(playerInfo.classFileName))
-                    self.selectedRoster.players[playerInfo.name].info = playerInfo
+                    self.selectedRoster.players[player.name] = self.selectedRoster.players[player.name] or Player:New(player.name, SRTData.GetClass(player.fileName))
+                    self.selectedRoster.players[player.name].info = player
                     playerFrame:Hide()
                 else
-                    self.addRemove.available.scroll.ConnectItem(name, playerFrame)
+                    self.addRemove.available.scroll.ConnectItem(player.name, playerFrame)
                 end
                 self:UpdateAddOrRemovePlayers()
             end)
             playerFrame:Show()
             visiblePlayers = visiblePlayers + 1
-            self.addRemove.available.scroll.items[playerInfo.name] = playerFrame
+            self.addRemove.available.scroll.items[player.name] = playerFrame
             lastPlayerFrame = playerFrame
         end
     end
@@ -688,7 +688,7 @@ function RosterBuilder:UpdateCreateAssignments()
                         for _, groupFrame in pairs(assignmentFrame.groups) do
                             if groupFrame:IsShown() and groupFrame.IsMouseOverFrame() then
                                 groupFrame:SetBackdropColor(0, 0, 0, 0)
-                                self.pickedPlayer = { name = player.name, classFileName = player.class.fileName }
+                                self.pickedPlayer = { name = player.name, fileName = player.class.fileName }
                                 self.pickedAssignment = {
                                     encounterID = self.selectedEncounterID,
                                     abilityIndex = assignmentFrame.abilityIndex,
@@ -700,7 +700,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             end
                         end
 
-                        self.pickedPlayer = { name = player.name, classFileName = player.class.fileName }
+                        self.pickedPlayer = { name = player.name, fileName = player.class.fileName }
                         self.pickedAssignment = {
                             encounterID = self.selectedEncounterID,
                             abilityIndex = assignmentFrame.abilityIndex,
@@ -781,15 +781,15 @@ function RosterBuilder:UpdateCreateAssignments()
                     assignmentFrame:ClearAllPoints()
                     if previousAssignmentFrame then
                         assignmentFrame:SetPoint("TOPLEFT", groupFrame, "TOP", 0, 0)
-                        assignmentFrame:SetPoint("BOTTOMRIGHT", groupFrame, "BOTTOMRIGHT", -10, 0)
+                        assignmentFrame:SetPoint("BOTTOMRIGHT", groupFrame, "BOTTOMRIGHT", 0, 0)
                     else
-                        assignmentFrame:SetPoint("TOPLEFT", groupFrame, "TOPLEFT", 10, 0)
+                        assignmentFrame:SetPoint("TOPLEFT", groupFrame, "TOPLEFT", 0, 0)
                         assignmentFrame:SetPoint("BOTTOMRIGHT", groupFrame, "BOTTOM", 0, 0)
                     end
 
                     assignmentFrame:SetScript("OnMouseDown", function (af, button)
                         if button == "LeftButton" then
-                            self.pickedPlayer = { name = assignmentFrame.player, classFileName = SRTData.GetClassBySpellID(assignmentFrame.spellId).fileName }
+                            self.pickedPlayer = { name = assignmentFrame.player, fileName = SRTData.GetClassBySpellID(assignmentFrame.spellId).fileName }
                             self.pickedAssignment = {
                                 encounterID = self.selectedEncounterID,
                                 abilityIndex = bossAbilityIndex,
@@ -847,7 +847,7 @@ function RosterBuilder:UpdateCreateAssignments()
             return
         end
         DevTool:AddData(self.pickedPlayer, "self.pickedPlayer")
-        local class = SRTData.GetClass(self.pickedPlayer.classFileName)
+        local class = SRTData.GetClass(self.pickedPlayer.fileName)
 
         for _, spellFrame in pairs(self.assignments.pickspell.scroll.items) do
             spellFrame:Hide()
@@ -945,34 +945,6 @@ function RosterBuilder:Update()
     end
     self.assignments.bossSelector.selectedName = self.selectedEncounterID and BossEncounters:BossEncountersGetAll()[self.selectedEncounterID] or "Select encounter..."
     self.assignments.bossSelector.Update()
-end
-
-local lastUpdatedGuildMembers = 0
-local guildMembers = {}
-function RosterBuilder:GetGuildMembers()
-    if GetTime() - lastUpdatedGuildMembers < 5 then
-        return guildMembers
-    end
-    guildMembers = {}
-    local numTotalGuildMembers, _, _ = GetNumGuildMembers()
-    for index = 1, numTotalGuildMembers, 1 do
-        local name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index)
-        if level == 85 then
-            table.insert(guildMembers, { name=name, rank=rank, rankIndex=rankIndex, level=level, class=class, zone=zone, note=note, officernote=officernote, online=online, status=status, classFileName=classFileName, achievementPoints=achievementPoints, achievementRank=achievementRank, isMobile=isMobile, isSoREligible=isSoREligible, standingID=standingID })
-        end
-    end
-    table.sort(guildMembers, function (a, b)
-        if a.online ~= b.online then
-            return a.online
-        elseif a.standing ~= b.standing then
-            return a.standing > b.standing
-        elseif a.rankIndex ~= b.rankIndex then
-            return a.rankIndex < b.rankIndex
-        else
-            return a.name < b.name
-        end
-    end)
-    return guildMembers
 end
 
 ---@return FontFile

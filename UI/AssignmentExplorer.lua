@@ -15,7 +15,7 @@ local State = {
 AssignmentExplorer = setmetatable({
     state = State.ONLY_ENCOUNTER,
     lastState = State.ONLY_ENCOUNTER,
-    selectedEncounterID = 1025,
+    selectedEncounterID = nil,
     selectedPlayer= {},
     viewRosterPlayer = false,
     selectedRosterPlayer= {},
@@ -47,7 +47,6 @@ function AssignmentExplorer:Initialize()
 
     self.encounter.selector = self.encounter.selector or FrameBuilder.CreateSelector(self.encounterPane, {}, 285, self:GetHeaderFontType(), 14, "Select encounter...")
     self.encounter.selector:SetPoint("TOPLEFT", self.encounterPane, "TOPLEFT", 0, -5)
-    self.encounter.selector.selectedName = "Maloriak"
     self.encounter.bossAbilities = self.encounter.bossAbilities or {}
     -- Setup player pane
     self.selectedPlayerPane = CreateFrame("Frame", "SRT_Assignments_SelectedPlayerPane", self.main)
@@ -185,7 +184,15 @@ function AssignmentExplorer:Update()
         }
         table.insert(self.encounter.selector.items, item)
     end
-    self.encounter.selector.selectedName = BossEncounters:GetNameByID(self.selectedEncounterID)
+    if self.selectedEncounterID then
+        self.encounter.selector.selectedName = BossEncounters:GetNameByID(self.selectedEncounterID)
+    elseif #self.encounter.selector.items > 0 then
+        self.encounter.selector.selectedName = self.encounter.selector.items[1].name
+        self.selectedEncounterID = self.encounter.selector.items[1].encounterID
+        self:UpdateAppearance()
+    else
+        self.encounter.selector.selectedName = "No encounters in assignments!"
+    end
     self.encounter.selector.Update()
 end
 
@@ -207,7 +214,7 @@ function AssignmentExplorer:UpdateEncounterPane()
             abilityFrame:SetPoint("TOPRIGHT", previousAbilityFrame, "BOTTOMRIGHT", 0, 0)
         else
             abilityFrame:SetPoint("TOPLEFT", self.encounter.selector, "BOTTOMLEFT", 10, -7)
-            abilityFrame:SetPoint("TOPRIGHT", self.encounter.selector, "BOTTOMLEFT", 190, -7)
+            abilityFrame:SetPoint("TOPRIGHT", self.encounter.selector, "BOTTOMLEFT", 280, -7)
         end
         local bossAbilityFrameHeight = 7
 
@@ -248,11 +255,11 @@ function AssignmentExplorer:UpdateEncounterPane()
                 
                 assignmentFrame:ClearAllPoints()
                 if assignmentIndex > 1 then
-                    assignmentFrame:SetPoint("BOTTOMLEFT", groupFrame, "BOTTOM")
-                    assignmentFrame:SetPoint("TOPRIGHT", -10, 0)
+                    assignmentFrame:SetPoint("TOPLEFT", groupFrame, "TOP", 0, 0)
+                    assignmentFrame:SetPoint("BOTTOMRIGHT", 0, 0)
                 else
-                    assignmentFrame:SetPoint("BOTTOMLEFT", 10, 0)
-                    assignmentFrame:SetPoint("TOPRIGHT", groupFrame, "TOP", 0, 0)
+                    assignmentFrame:SetPoint("TOPLEFT", 0, 0)
+                    assignmentFrame:SetPoint("BOTTOMRIGHT", groupFrame, "BOTTOM", 0, 0)
                 end
 
                 assignmentFrame.groupIndex = groupIndex
@@ -395,14 +402,14 @@ function AssignmentExplorer:UpdateRosterPane()
     self.rosterPane.roster = self.rosterPane.roster or {}
     
     local lastPlayerFrame = nil
-    for _, player in ipairs(self:GetOnlineGuildMembers()) do
-        local playerFrame = self.rosterPane.roster[player.name] or FrameBuilder.CreatePlayerFrame(self.rosterPane, player.name, player.classFileName,
+    for player in Utils:CombinedIteratorWithUniqueNames(Utils:GetRaidMembers(), Utils:GetOnlineGuildMembers()) do
+        local playerFrame = self.rosterPane.roster[player.name] or FrameBuilder.CreatePlayerFrame(self.rosterPane, player.name, player.fileName,
             self.rosterPane:GetWidth(), self:GetAssignmentGroupHeight(), self:GetPlayerFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize + 2)
 
         if not lastPlayerFrame then
-            playerFrame:SetPoint("TOPLEFT", self.rosterPane.guildTitle, "BOTTOMLEFT", 0, -7)
+            playerFrame:SetPoint("TOPLEFT", self.rosterPane.guildTitle, "BOTTOMLEFT", 0, -5)
         else
-            playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, -5)
+            playerFrame:SetPoint("TOPLEFT", lastPlayerFrame, "BOTTOMLEFT", 0, 0)
         end
 
         playerFrame:SetScript("OnEnter", function () playerFrame:SetBackdropColor(1, 1, 1, 0.4) end)
@@ -415,7 +422,7 @@ function AssignmentExplorer:UpdateRosterPane()
                 self.viewRosterPlayer = true
                 self.selectedRosterPlayer = {
                     name = strsplit("-", player.name),
-                    class = player.classFileName,
+                    class = player.fileName,
                     selectedID = nil
                 }
                 self:UpdateAppearance()
@@ -445,10 +452,10 @@ function AssignmentExplorer:UpdateApplyChangePane()
         return
     end
 
-    local originalSpellName, _, _, _, _, _, originalSpellID, _ = C_Spell.GetSpellInfo(self.selectedPlayer.selectedID)
+    local originalSpellInfo = C_Spell.GetSpellInfo(self.selectedPlayer.selectedID)
 
     self.applyChangePane.questionPartOne = self.applyChangePane.questionPartOne or self.applyChangePane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    self.applyChangePane.questionPartOne:SetText(string.format("Change %s's %s", self.selectedPlayer.name, originalSpellName))
+    self.applyChangePane.questionPartOne:SetText(string.format("Change %s's %s", self.selectedPlayer.name, originalSpellInfo.name))
     self.applyChangePane.questionPartOne:SetPoint("TOPLEFT", self.applyChangePane, "TOPLEFT", 0, -5)
     self.applyChangePane.questionPartOne:SetFont(self:GetHeaderFontType(), 14)
     self.applyChangePane.questionPartOne:SetHeight(self.applyChangePane.questionPartOne:GetStringHeight())
@@ -456,21 +463,21 @@ function AssignmentExplorer:UpdateApplyChangePane()
     
     local iconSize = self:GetAppearance().iconSize * 3
     self.applyChangePane.originalSpellFrame = self.applyChangePane.originalSpellFrame or FrameBuilder.CreateLargeSpellFrame(self.applyChangePane)
-    FrameBuilder.UpdateLargeSpellFrame(self.applyChangePane.originalSpellFrame, originalSpellID, self:GetPlayerFont(), self:GetAppearance().playerFontSize, iconSize)
+    FrameBuilder.UpdateLargeSpellFrame(self.applyChangePane.originalSpellFrame, originalSpellInfo.spellID, self:GetPlayerFont(), self:GetAppearance().playerFontSize, iconSize)
     self.applyChangePane.originalSpellFrame:SetPoint("TOPLEFT", self.applyChangePane.questionPartOne, "BOTTOMLEFT", 5, -7)
     self.applyChangePane.originalSpellFrame:SetPoint("TOPRIGHT", self.applyChangePane.questionPartOne, "BOTTOMLEFT", 285, -7)
 
-    local replacementSpellName, _, _, _, _, _, replacementSpellID, _ = C_Spell.GetSpellInfo(self.selectedRosterPlayer.selectedID)
+    local replacementSpellInfo = C_Spell.GetSpellInfo(self.selectedRosterPlayer.selectedID)
 
     self.applyChangePane.questionPartTwo = self.applyChangePane.questionPartTwo or self.applyChangePane:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    self.applyChangePane.questionPartTwo:SetText(string.format("To %s's %s?", self.selectedRosterPlayer.name, replacementSpellName))
+    self.applyChangePane.questionPartTwo:SetText(string.format("To %s's %s?", self.selectedRosterPlayer.name, replacementSpellInfo.name))
     self.applyChangePane.questionPartTwo:SetPoint("TOPLEFT", self.applyChangePane.originalSpellFrame, "BOTTOMLEFT", -5, -7)
     self.applyChangePane.questionPartTwo:SetFont(self:GetHeaderFontType(), 14)
     self.applyChangePane.questionPartTwo:SetHeight(self.applyChangePane.questionPartTwo:GetStringHeight())
     self.applyChangePane.questionPartTwo:SetTextColor(1, 1, 1, 0.8)
     
     self.applyChangePane.replacementSpellFrame = self.applyChangePane.replacementSpellFrame or FrameBuilder.CreateLargeSpellFrame(self.applyChangePane)
-    FrameBuilder.UpdateLargeSpellFrame(self.applyChangePane.replacementSpellFrame, replacementSpellID, self:GetPlayerFont(), self:GetAppearance().playerFontSize, iconSize)
+    FrameBuilder.UpdateLargeSpellFrame(self.applyChangePane.replacementSpellFrame, replacementSpellInfo.spellID, self:GetPlayerFont(), self:GetAppearance().playerFontSize, iconSize)
     self.applyChangePane.replacementSpellFrame:SetPoint("TOPLEFT", self.applyChangePane.questionPartTwo, "BOTTOMLEFT", 5, -7)
     self.applyChangePane.replacementSpellFrame:SetPoint("TOPRIGHT", self.applyChangePane.questionPartTwo, "BOTTOMLEFT", 285, -7)
 
@@ -482,23 +489,6 @@ function AssignmentExplorer:UpdateApplyChangePane()
             self:UpdateAppearance()
         end
     end)
-end
-
-local lastUpdatedOnlineGuildMembers = 0
-local guildMembers = {}
-function AssignmentExplorer:GetOnlineGuildMembers()
-    if GetTime() - lastUpdatedOnlineGuildMembers < 5 then
-        return guildMembers
-    end
-    guildMembers = {}
-    local numTotalGuildMembers, numOnlineGuildMembers, numOnlineAndMobileMembers = GetNumGuildMembers()
-    for index = 1, numTotalGuildMembers, 1 do
-        local name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index)
-        if online and level == 85 then
-            table.insert(guildMembers, { name = name, class = class, classFileName = classFileName })
-        end
-    end
-    return guildMembers
 end
 
 function AssignmentExplorer:CreateTriggerFrame(bossAbilityFrame)
