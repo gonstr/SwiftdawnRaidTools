@@ -58,10 +58,7 @@ end
 --- Add a log statement to the debug log
 ---@param data table
 function SRTDebugLog:AddItem(data, ...)
-    if not AssignmentsController:IsInEncounter() then
-        if SRT_IsDebugging() then SwiftdawnRaidTools:Print("[DEBUG] Not adding log data. No encounter going on!", ...) end
-        return
-    else
+    if AssignmentsController:IsInEncounter() then
         local encounterID = AssignmentsController.activeEncounterID
         local encounterStart = AssignmentsController.encounterStart
         if not encounterStart then
