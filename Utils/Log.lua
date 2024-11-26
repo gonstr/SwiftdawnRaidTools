@@ -9,5 +9,7 @@ function Log.debug(message, ...)
     if SRT_IsDebugging() then
         SwiftdawnRaidTools:Print("[DEBUG] "..message, ...)
     end
-    SwiftdawnRaidTools.debugLog:AddItem(message, ...)
+    if SwiftdawnRaidTools.debugLog then
+        SwiftdawnRaidTools.debugLog:AddItem(message, ...)
+    end
 end
