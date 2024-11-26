@@ -283,3 +283,74 @@ function Utils:IsArray(table)
     end
     return true
 end
+
+local lastUpdatedRaidMembers = 0
+local raidMembers = {}
+function Utils:GetRaidMembers()
+    if GetTime() - lastUpdatedRaidMembers < 5 then
+        return raidMembers
+    end
+    raidMembers = {}
+    if IsInRaid() then
+        local numMembers = GetNumGroupMembers()
+        for i = 1, numMembers do
+            local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
+            if name then
+                table.insert(raidMembers, { name = name, class = class, fileName = fileName })
+            end
+        end
+    end
+    return raidMembers
+end
+
+local lastUpdatedOnlineGuildMembers = 0
+local guildMembers = {}
+function Utils:GetOnlineGuildMembers()
+    if GetTime() - lastUpdatedOnlineGuildMembers < 5 then
+        return guildMembers
+    end
+    guildMembers = {}
+    local numTotalGuildMembers, numOnlineGuildMembers, numOnlineAndMobileMembers = GetNumGuildMembers()
+    for index = 1, numTotalGuildMembers, 1 do
+        local name, rank, rankIndex, level, class, zone, note, officernote, online, status, fileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index)
+        if online and level == 85 then
+            table.insert(guildMembers, { name = name, class = class, fileName = fileName, online = online, standing = standingID, rankIndex = rankIndex })
+        end
+    end
+    table.sort(guildMembers, function (a, b)
+        if a.online ~= b.online then
+            return a.online
+        elseif a.standing ~= b.standing then
+            return a.standing > b.standing
+        elseif a.rankIndex ~= b.rankIndex then
+            return a.rankIndex < b.rankIndex
+        else
+            return a.name < b.name
+        end
+    end)
+    return guildMembers
+end
+
+function Utils:CombinedIteratorWithUniqueNames(t1, t2)
+    local i, j = 1, 1
+    local len1, len2 = #t1, #t2
+    local seen_names = {}
+    return function()
+        while i <= len1 do
+            local item = t1[i]
+            i = i + 1
+            if item.name and not seen_names[strsplit("-", item.name)] then
+                seen_names[strsplit("-", item.name)] = true
+                return item
+            end
+        end
+        while j <= len2 do
+            local item = t2[j]
+            j = j + 1
+            if item.name and not seen_names[strsplit("-", item.name)] then
+                seen_names[strsplit("-", item.name)] = true
+                return item
+            end
+        end
+    end
+end
