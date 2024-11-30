@@ -30,7 +30,6 @@ Options\Options.lua
 Import\SRTImport.lua
 Import\Validation.lua
 State\SpellCache.lua
-State\BossEncounters.lua
 State\Groups.lua
 State\UnitCache.lua
 Controllers\AssignmentsController.lua

@@ -102,7 +102,7 @@ function SRTOverview:UpdateHeaderText()
     self.headerText:SetAlpha(1)
 
     if encountersExists then
-        self.headerText:SetText(BossEncounters:GetNameByID(self:GetProfile().selectedEncounterId))
+        self.headerText:SetText(BossInfo.GetNameByID(self:GetProfile().selectedEncounterId))
     else
         if SwiftdawnRaidTools.encountersProgress then
             self.headerText:SetText((SRTData.GetActiveRosterID() == "none" and "Loading" or "Syncing").." Assignments... |cFFFFFFFF" .. string.format("%.1f", SwiftdawnRaidTools.encountersProgress) .. "%|r")
@@ -129,7 +129,7 @@ function SRTOverview:UpdatePopupMenu()
     end
     table.sort(encounterIndexes)
     for index, encounterId in ipairs(encounterIndexes) do
-        menuItems[index] = { name = BossEncounters:GetNameByID(encounterId), onClick = function() self:SelectEncounter(encounterId) end }
+        menuItems[index] = { name = BossInfo.GetNameByID(encounterId), onClick = function() self:SelectEncounter(encounterId) end }
     end
     if #encounterIndexes > 0 then
         table.insert(menuItems, {})
@@ -150,6 +150,7 @@ function SRTOverview:UpdatePopupMenu()
         end,
         isSetting = true
     })
+    table.insert(menuItems, {})
     table.insert(menuItems, {
         name = "Debug Log",
         onClick = function()

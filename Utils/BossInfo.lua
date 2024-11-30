@@ -67,3 +67,7 @@ function BossInfo.GetEncounterInfoByID(encounterID)
     end
     return nil
 end
+
+function BossInfo.GetNameByID(encounterID)
+    return BossInfo.GetEncounterInfoByID(encounterID).name
+end

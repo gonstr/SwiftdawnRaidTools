@@ -438,9 +438,9 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
         local encounters = nil
         for _, encounterID in pairs(self:EncounterIDsWithFilledAssignments()) do
             if encounters then
-                encounters = string.format("%s, %s", encounters, BossEncounters:GetNameByID(encounterID))
+                encounters = string.format("%s, %s", encounters, BossInfo.GetNameByID(encounterID))
             else
-                encounters = string.format("\nEncounters: \n\n%s", BossEncounters:GetNameByID(encounterID))
+                encounters = string.format("\nEncounters: \n\n%s", BossInfo.GetNameByID(encounterID))
             end
         end
         rosterInfo.encounters:SetText(encounters)

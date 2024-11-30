@@ -181,10 +181,9 @@ end
 function AssignmentEditor:Update()
     SRTWindow.Update(self)
     self.encounter.selector.items = {}
-    BossEncounters:Initialize()
     for encounterID, _ in pairs(SRTData.GetActiveEncounters()) do
         local item = {
-            name = BossEncounters:GetNameByID(encounterID),
+            name = BossInfo.GetNameByID(encounterID),
             encounterID = encounterID,
             onClick = function (row)
                 self.selectedEncounterID = row.item.encounterID
@@ -194,7 +193,7 @@ function AssignmentEditor:Update()
         table.insert(self.encounter.selector.items, item)
     end
     if self.selectedEncounterID then
-        self.encounter.selector.selectedName = BossEncounters:GetNameByID(self.selectedEncounterID)
+        self.encounter.selector.selectedName = BossInfo.GetNameByID(self.selectedEncounterID)
     elseif #self.encounter.selector.items > 0 then
         self.encounter.selector.selectedName = self.encounter.selector.items[1].name
         self.selectedEncounterID = self.encounter.selector.items[1].encounterID
