@@ -142,15 +142,6 @@ local mainOptions = {
                     end,
                     order = 4,
                 },
-                forceSync = {
-                    type = "execute",
-                    name = "Force Sync",
-                    desc = "Synchronize raid assignments with Raid.",
-                    func = function()
-                        SyncController:SyncAssignmentsNow()
-                    end,
-                    order = 5,
-                },
             },
         },
         separator01 = {
@@ -1011,6 +1002,25 @@ local troubleshootOptions = {
                 SwiftdawnRaidTools.overview:Update()
             end,
             order = 12
+        },
+        forceSyncDescription = {
+            type = "description",
+            name = "Synchronize Now",
+            width = "normal",
+            order = 14
+        },
+        forceSync = {
+            type = "execute",
+            name = "Force Sync",
+            width = "normal",
+            desc = "Synchronize raid assignments with Raid.",
+            func = function()
+                SyncController:SyncAssignmentsNow()
+            end,
+            disabled = function()
+                return not Utils:IsPlayerRaidLeader()
+            end,
+            order = 15,
         },
     }
 }
