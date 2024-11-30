@@ -344,7 +344,7 @@ function FrameBuilder.CreateSelector(parentFrame, items, width, font, fontSize, 
 end
 
 function FrameBuilder.UpdateSelector(selector)
-    selector.text:SetText(selector.selectedName)
+    selector.text:SetText(selector.selectedName or "Select...")
     selector.dropdown:SetHeight(#selector.items * (14+4))
     selector.dropdown:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",

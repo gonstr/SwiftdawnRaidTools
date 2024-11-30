@@ -286,7 +286,7 @@ end
 
 local lastUpdatedRaidMembers = 0
 local raidMembers = {}
-function Utils:GetRaidMembers()
+function Utils:GetRaidMembers(onlineOnly)
     if GetTime() - lastUpdatedRaidMembers < 5 then
         return raidMembers
     end
@@ -296,7 +296,9 @@ function Utils:GetRaidMembers()
         for i = 1, numMembers do
             local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
             if name then
-                table.insert(raidMembers, { name = name, class = class, fileName = fileName })
+                if (onlineOnly and online) or not onlineOnly then
+                    table.insert(raidMembers, { name = name, class = class, fileName = fileName })
+                end
             end
         end
     end
@@ -305,7 +307,7 @@ end
 
 local lastUpdatedOnlineGuildMembers = 0
 local guildMembers = {}
-function Utils:GetOnlineGuildMembers()
+function Utils:GetGuildMembers(onlineOnly)
     if GetTime() - lastUpdatedOnlineGuildMembers < 5 then
         return guildMembers
     end
@@ -313,8 +315,10 @@ function Utils:GetOnlineGuildMembers()
     local numTotalGuildMembers, numOnlineGuildMembers, numOnlineAndMobileMembers = GetNumGuildMembers()
     for index = 1, numTotalGuildMembers, 1 do
         local name, rank, rankIndex, level, class, zone, note, officernote, online, status, fileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index)
-        if online and level == 85 then
-            table.insert(guildMembers, { name = name, class = class, fileName = fileName, online = online, standing = standingID, rankIndex = rankIndex })
+        if level == 85 then
+            if (onlineOnly and online) or not onlineOnly then
+                table.insert(guildMembers, { name = name, class = class, fileName = fileName, online = online, standing = standingID, rankIndex = rankIndex })
+            end
         end
     end
     table.sort(guildMembers, function (a, b)

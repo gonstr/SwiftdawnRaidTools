@@ -11,8 +11,8 @@ local State = {
 }
 
 --- Assignment Explorer window class object
----@class AssignmentExplorer:SRTWindow
-AssignmentExplorer = setmetatable({
+---@class AssignmentEditor:SRTWindow
+AssignmentEditor = setmetatable({
     state = State.ONLY_ENCOUNTER,
     lastState = State.ONLY_ENCOUNTER,
     selectedEncounterID = nil,
@@ -23,17 +23,18 @@ AssignmentExplorer = setmetatable({
     player = {},
     roster = {},
 }, SRTWindow)
-AssignmentExplorer.__index = AssignmentExplorer
+AssignmentEditor.__index = AssignmentEditor
 
----@return AssignmentExplorer
-function AssignmentExplorer:New(height)
-    local obj = SRTWindow.New(self, "AssignmentExplorer", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
-    ---@cast obj AssignmentExplorer
+---@return AssignmentEditor
+function AssignmentEditor:New(height)
+    local obj = SRTWindow.New(self, "AssignmentEditor", height, WINDOW_WIDTH, nil, nil, WINDOW_WIDTH, WINDOW_WIDTH)
+    ---@cast obj AssignmentEditor
     self.__index = self
     return obj
 end
 
-function AssignmentExplorer:Initialize()
+function AssignmentEditor:Initialize()
+    DevTool:AddData(self, "AssignmentEditor")
     SRTWindow.Initialize(self)
     -- Setup header
     self.headerText:SetText("Assignments Explorer")
@@ -61,30 +62,29 @@ function AssignmentExplorer:Initialize()
     self.selectedPlayerPane.scroll:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 10, 35)
     self.selectedPlayerPane.scroll:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 10, 35)
 
-    self.player.name = self.player.name or self.selectedPlayerPane:CreateFontString("SRT_AssignmentExplorer_PlayerPane_Name", "OVERLAY", "GameFontNormalLarge")
+    self.player.name = self.player.name or self.selectedPlayerPane:CreateFontString("SRT_AssignmentEditor_PlayerPane_Name", "OVERLAY", "GameFontNormalLarge")
     self.player.name:SetPoint("TOPLEFT", self.selectedPlayerPane, "TOPLEFT", 0, -5)
     self.player.name:SetTextColor(1, 1, 1, 0.8)
     self.player.cooldowns = self.player.cooldowns or {}
 
+    self.applyBuffChangesButton = FrameBuilder.CreateButton(self.selectedPlayerPane, 75, 25, "Apply", SRTColor.Green, SRTColor.GreenHighlight)
+    self.applyBuffChangesButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 5)
+    self.applyBuffChangesButton:Hide()
     self.replaceButton = FrameBuilder.CreateButton(self.selectedPlayerPane, 75, 25, "Replace", SRTColor.Red, SRTColor.RedHighlight)
-    self.replaceButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 5)
+    self.replaceButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 5)
     self.replaceButton:SetScript("OnMouseUp", function (_, button)
         if button == "LeftButton" then
             self.lastState = State.SHOW_PLAYER
             self.state = State.SHOW_ROSTER
             self.viewRosterPlayer = false
             self.selectedRosterPlayer.selectedID = nil
-            self.applyBuffChangesButton.color = SRTColor.Gray
-            self.applyBuffChangesButton.colorHighlight = SRTColor.Gray
+            self.applyBuffChangesButton:Hide()
             self.applyBuffChangesButton:SetScript("OnMouseUp", nil)
-            FrameBuilder.UpdateButton(self.applyBuffChangesButton)
             self:UpdateAppearance()
         end
     end)
-    self.applyBuffChangesButton = FrameBuilder.CreateButton(self.selectedPlayerPane, 75, 25, "Apply", SRTColor.Gray, SRTColor.Gray)
-    self.applyBuffChangesButton:SetPoint("BOTTOMRIGHT", self.selectedPlayerPane, "BOTTOMRIGHT", 0, 5)
     self.cancelBuffChangesButton = FrameBuilder.CreateButton(self.selectedPlayerPane, 75, 25, "Cancel", SRTColor.Red, SRTColor.RedHighlight)
-    self.cancelBuffChangesButton:SetPoint("RIGHT", self.applyBuffChangesButton, "LEFT", -5, 0)
+    self.cancelBuffChangesButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 5)
     self.cancelBuffChangesButton:SetScript("OnMouseUp", function (_, button)
         if button == "LeftButton" then
             self.lastState = State.SHOW_PLAYER
@@ -101,34 +101,43 @@ function AssignmentExplorer:Initialize()
     self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
     self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
     self.rosterPane.roster = {}
-    self.rosterBackButton = FrameBuilder.CreateButton(self.rosterPane, 75, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
-    self.rosterBackButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
-    self.rosterBackButton:SetScript("OnMouseUp", function (_, button)
-        if button == "LeftButton" then
-            self.lastState = State.SHOW_PLAYER
-            self.state = State.SHOW_PLAYER
-            self:UpdateAppearance()
-        end
-    end)
+    -- self.rosterBackButton = FrameBuilder.CreateButton(self.rosterPane, 75, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
+    -- self.rosterBackButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
+    -- self.rosterBackButton:SetScript("OnMouseUp", function (_, button)
+    --     if button == "LeftButton" then
+    --         self.lastState = State.SHOW_PLAYER
+    --         self.state = State.SHOW_PLAYER
+    --         self:UpdateAppearance()
+    --     end
+    -- end)
     self.rosterPane:Hide()
     -- Setup apply buff change pane
-    self.applyChangePane = CreateFrame("Frame", "SRT_AssignmentExplorer_ApplyChange", self.main)
+    self.applyChangePane = CreateFrame("Frame", "SRT_AssignmentEditor_ApplyChange", self.main)
     self.applyChangePane:SetClipsChildren(true)
     self.applyChangePane:SetPoint("TOPLEFT", self.main, "TOP", 5, -5)
     self.applyChangePane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
     self.applyChangePane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
     self.applyChangePane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
-    self.applyChangeBackButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
-    self.applyChangeBackButton:SetPoint("BOTTOMLEFT", self.applyChangePane, "BOTTOMLEFT", 0, 5)
-    self.applyChangeBackButton:SetScript("OnMouseUp", function (_, button)
+    -- self.applyChangeBackButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
+    -- self.applyChangeBackButton:SetPoint("BOTTOMLEFT", self.applyChangePane, "BOTTOMLEFT", 0, 5)
+    -- self.applyChangeBackButton:SetScript("OnMouseUp", function (_, button)
+    --     if button == "LeftButton" then
+    --         self.lastState = State.SHOW_ROSTER
+    --         self.state = State.SHOW_PLAYER
+    --         self:UpdateAppearance()
+    --     end
+    -- end)
+    self.applyChangeAcceptButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Accept", SRTColor.Green, SRTColor.GreenHighlight)
+    self.applyChangeAcceptButton:SetPoint("BOTTOMRIGHT", self.applyChangePane, "BOTTOMRIGHT", 0, 5)
+    self.applyChangeCancelButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Cancel", SRTColor.Red, SRTColor.RedHighlight)
+    self.applyChangeCancelButton:SetPoint("BOTTOMLEFT", self.selectedPlayerPane, "BOTTOMLEFT", 0, 5)
+    self.applyChangeCancelButton:SetScript("OnMouseUp", function (_, button)
         if button == "LeftButton" then
-            self.lastState = State.SHOW_ROSTER
-            self.state = State.SHOW_PLAYER
+            self.lastState = State.SHOW_PLAYER
+            self.state = State.ONLY_ENCOUNTER
             self:UpdateAppearance()
         end
     end)
-    self.applyChangeAcceptButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Accept", SRTColor.Green, SRTColor.GreenHighlight)
-    self.applyChangeAcceptButton:SetPoint("BOTTOMRIGHT", self.applyChangePane, "BOTTOMRIGHT", 0, 5)
     self.applyChangePane:Hide()
     
     self.menuButton:SetScript("OnClick", function()
@@ -143,24 +152,24 @@ function AssignmentExplorer:Initialize()
 end
 
 ---@return FontFile
-function AssignmentExplorer:GetHeaderFontType()
+function AssignmentEditor:GetHeaderFontType()
     ---@class FontFile
     return SharedMedia:Fetch("font", self:GetAppearance().headerFontType)
 end
 
 ---@return FontFile
-function AssignmentExplorer:GetPlayerFont()
+function AssignmentEditor:GetPlayerFont()
     ---@class FontFile
     return SharedMedia:Fetch("font", self:GetAppearance().playerFontType)
 end
 
-function AssignmentExplorer:GetAssignmentGroupHeight()
+function AssignmentEditor:GetAssignmentGroupHeight()
     local playerFontSize = self:GetAppearance().playerFontSize
     local iconSize = self:GetAppearance().iconSize
     return (playerFontSize > iconSize and playerFontSize or iconSize) + 7
 end
 
-function AssignmentExplorer:UpdateAppearance()
+function AssignmentEditor:UpdateAppearance()
     SRTWindow.UpdateAppearance(self)
 
     self:UpdateEncounterPane()
@@ -169,7 +178,7 @@ function AssignmentExplorer:UpdateAppearance()
     self:UpdateApplyChangePane()
 end
 
-function AssignmentExplorer:Update()
+function AssignmentEditor:Update()
     SRTWindow.Update(self)
     self.encounter.selector.items = {}
     BossEncounters:Initialize()
@@ -196,7 +205,7 @@ function AssignmentExplorer:Update()
     self.encounter.selector.Update()
 end
 
-function AssignmentExplorer:UpdateEncounterPane()
+function AssignmentEditor:UpdateEncounterPane()
     local encounterAssignments = SRTData.GetActiveEncounters()[self.selectedEncounterID]
     if not encounterAssignments then
         return
@@ -300,13 +309,7 @@ function AssignmentExplorer:UpdateEncounterPane()
     end
 end
 
-function AssignmentExplorer:UpdateSelectedPlayerPane()
-    if self.lastState == State.SHOW_ROSTER then
-        self.replaceButton.text:SetText("Back")
-    else
-        self.replaceButton.text:SetText("Replace")
-    end
-
+function AssignmentEditor:UpdateSelectedPlayerPane()
     if self.state == State.SHOW_PLAYER then
         self.selectedPlayerPane:Show()
     else
@@ -315,8 +318,11 @@ function AssignmentExplorer:UpdateSelectedPlayerPane()
     end
 
     if self.viewRosterPlayer then
+        self.replaceButton:Hide()
         self.player.name:SetText(self.selectedRosterPlayer.name)
     else
+        self.replaceButton:Show()
+        self.applyBuffChangesButton:Hide()
         self.player.name:SetText(self.selectedPlayer.name)
     end
     self.player.name:SetFont(self:GetHeaderFontType(), 14)
@@ -339,46 +345,46 @@ function AssignmentExplorer:UpdateSelectedPlayerPane()
     end
     local scrollHeight = 0
     for _, spell in pairs(classSpells) do
-        local spellFrame = self.player.cooldowns[spell.id] or FrameBuilder.CreateLargeSpellFrame(self.selectedPlayerPane.scroll.content)
-        FrameBuilder.UpdateLargeSpellFrame(spellFrame, spell.id, self:GetPlayerFont(), self:GetAppearance().playerFontSize, iconSize)
-        spellFrame:SetScript("OnEnter", function () spellFrame:SetBackdropColor(1, 1, 1, 0.4) end)
-        spellFrame:SetScript("OnLeave", function (frame) if frame.spellID ~= selectedID then spellFrame:SetBackdropColor(0, 0, 0, 0) end end)
-        spellFrame:SetScript("OnMouseDown", function (sf, button)
-            if button == "LeftButton" then
-                if self.viewRosterPlayer then
-                    self.selectedRosterPlayer.selectedID = sf.spellID
-                    self.applyBuffChangesButton.color = SRTColor.Green
-                    self.applyBuffChangesButton.colorHighlight = SRTColor.GreenHighlight
-                    self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, b)
-                        if b == "LeftButton" then
-                            self.lastState = State.SHOW_ROSTER
-                            self.state = State.APPLY_BUFF_CHANGE
-                            self:UpdateAppearance()
-                        end
-                    end)
-                    FrameBuilder.UpdateButton(self.applyBuffChangesButton)
-                    self:UpdateAppearance()
+        if spell.id == selectedID or self.viewRosterPlayer then
+            local spellFrame = self.player.cooldowns[spell.id] or FrameBuilder.CreateLargeSpellFrame(self.selectedPlayerPane.scroll.content)
+            FrameBuilder.UpdateLargeSpellFrame(spellFrame, spell.id, self:GetPlayerFont(), self:GetAppearance().playerFontSize, iconSize)
+            spellFrame:SetScript("OnEnter", function () spellFrame:SetBackdropColor(1, 1, 1, 0.4) end)
+            spellFrame:SetScript("OnLeave", function (frame) if frame.spellID ~= selectedID or not self.viewRosterPlayer then spellFrame:SetBackdropColor(0, 0, 0, 0) end end)
+            spellFrame:SetScript("OnMouseDown", function (sf, button)
+                if button == "LeftButton" then
+                    if self.viewRosterPlayer then
+                        self.selectedRosterPlayer.selectedID = sf.spellID
+                        self.applyBuffChangesButton:Show()
+                        self.applyBuffChangesButton:SetScript("OnMouseUp", function (_, b)
+                            if b == "LeftButton" then
+                                self.lastState = State.SHOW_ROSTER
+                                self.state = State.APPLY_BUFF_CHANGE
+                                self:UpdateAppearance()
+                            end
+                        end)
+                        self:UpdateAppearance()
+                    end
                 end
+            end)
+            if lastSpellFrame then
+                spellFrame:SetPoint("TOPLEFT", lastSpellFrame, "BOTTOMLEFT", 0, -7)
+                spellFrame:SetPoint("TOPRIGHT", lastSpellFrame, "BOTTOMRIGHT", 0, -7)
+            else
+                spellFrame:SetPoint("TOPLEFT", self.selectedPlayerPane.scroll.content, "TOPLEFT", 0, -7)
+                spellFrame:SetPoint("TOPRIGHT", self.selectedPlayerPane.scroll.content, "TOPRIGHT", 0, -7)
             end
-        end)
-        if lastSpellFrame then
-            spellFrame:SetPoint("TOPLEFT", lastSpellFrame, "BOTTOMLEFT", 0, -7)
-            spellFrame:SetPoint("TOPRIGHT", lastSpellFrame, "BOTTOMRIGHT", 0, -7)
-        else
-            spellFrame:SetPoint("TOPLEFT", self.selectedPlayerPane.scroll.content, "TOPLEFT", 0, -7)
-            spellFrame:SetPoint("TOPRIGHT", self.selectedPlayerPane.scroll.content, "TOPRIGHT", 0, -7)
+            if spell.id == selectedID and self.viewRosterPlayer then
+                spellFrame:SetBackdropColor(1, 1, 1, 0.4)
+            end
+            self.player.cooldowns[spell.id] = spellFrame
+            scrollHeight = scrollHeight + spellFrame:GetHeight() + 7
+            lastSpellFrame = spellFrame
         end
-        if spell.id == selectedID then
-            spellFrame:SetBackdropColor(1, 1, 1, 0.4)
-        end
-        self.player.cooldowns[spell.id] = spellFrame
-        scrollHeight = scrollHeight + spellFrame:GetHeight() + 7
-        lastSpellFrame = spellFrame
     end
     self.selectedPlayerPane.scroll.content:SetHeight(scrollHeight)
 end
 
-function AssignmentExplorer:UpdateRosterPane()
+function AssignmentEditor:UpdateRosterPane()
     if self.state == State.SHOW_ROSTER then
         self.rosterPane:Show()
     else
@@ -402,7 +408,7 @@ function AssignmentExplorer:UpdateRosterPane()
     self.rosterPane.roster = self.rosterPane.roster or {}
     
     local lastPlayerFrame = nil
-    for player in Utils:CombinedIteratorWithUniqueNames(Utils:GetRaidMembers(), Utils:GetOnlineGuildMembers()) do
+    for player in Utils:CombinedIteratorWithUniqueNames(Utils:GetRaidMembers(true), Utils:GetGuildMembers(true)) do
         local playerFrame = self.rosterPane.roster[player.name] or FrameBuilder.CreatePlayerFrame(self.rosterPane, player.name, player.fileName,
             self.rosterPane:GetWidth(), self:GetAssignmentGroupHeight(), self:GetPlayerFont(), self:GetAppearance().playerFontSize, self:GetAppearance().iconSize + 2)
 
@@ -444,7 +450,7 @@ local function ApplyBuffChange(original, replacement)
     end
 end
 
-function AssignmentExplorer:UpdateApplyChangePane()
+function AssignmentEditor:UpdateApplyChangePane()
     if self.state == State.APPLY_BUFF_CHANGE then
         self.applyChangePane:Show()
     else
@@ -491,7 +497,7 @@ function AssignmentExplorer:UpdateApplyChangePane()
     end)
 end
 
-function AssignmentExplorer:CreateTriggerFrame(bossAbilityFrame)
+function AssignmentEditor:CreateTriggerFrame(bossAbilityFrame)
     local triggerFrame = CreateFrame("Frame", nil, bossAbilityFrame, "BackdropTemplate")
     triggerFrame:SetHeight(self:GetAssignmentGroupHeight())
     triggerFrame:SetBackdrop({
@@ -507,14 +513,14 @@ function AssignmentExplorer:CreateTriggerFrame(bossAbilityFrame)
     return triggerFrame
 end
 
-function AssignmentExplorer:SetDefaultFontStyle(fontString)
+function AssignmentEditor:SetDefaultFontStyle(fontString)
     fontString:SetShadowOffset(1, -1)
     fontString:SetShadowColor(0, 0, 0, 1)
     fontString:SetJustifyH("LEFT")
     fontString:SetHeight(fontString:GetStringHeight())
 end
 
-function AssignmentExplorer:UpdatePopupMenu()
+function AssignmentEditor:UpdatePopupMenu()
     if InCombatLockdown() then
         return
     end

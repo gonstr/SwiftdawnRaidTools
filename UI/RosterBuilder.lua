@@ -400,7 +400,7 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
                 SRTData.SetActiveRosterID(self.selectedRoster.id)
                 SyncController:SyncAssignmentsNow()
                 SwiftdawnRaidTools.overview:Update()
-                SwiftdawnRaidTools.assignmentExplorer:Update()
+                SwiftdawnRaidTools.assignmentEditor:Update()
             end)
             FrameBuilder.UpdateButton(self.loadCreate.activateButton)
         end
@@ -560,7 +560,7 @@ function RosterBuilder:UpdateAddOrRemovePlayers()
     for _, frame in pairs(self.addRemove.available.scroll.items) do
         frame:Hide()
     end
-    for player in Utils:CombinedIteratorWithUniqueNames(Utils:GetRaidMembers(), Utils:GetOnlineGuildMembers()) do
+    for player in Utils:CombinedIteratorWithUniqueNames(Utils:GetRaidMembers(false), Utils:GetGuildMembers(false)) do
         if shouldShowPlayer(player) then
             local playerFrame = self.addRemove.available.scroll.items[player.name] or FrameBuilder.CreatePlayerFrame(self.addRemove.available.scroll.content, player.name, player.fileName, 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize, 14)
             playerFrame.info = player
@@ -846,7 +846,6 @@ function RosterBuilder:UpdateCreateAssignments()
             self.state = State.CREATE_ASSIGNMENTS
             return
         end
-        DevTool:AddData(self.pickedPlayer, "self.pickedPlayer")
         local class = SRTData.GetClass(self.pickedPlayer.fileName)
 
         for _, spellFrame in pairs(self.assignments.pickspell.scroll.items) do
@@ -930,20 +929,21 @@ end
 
 function RosterBuilder:Update()
     SRTWindow.Update(self)
-
     self.assignments.bossSelector.items = {}
-    for encounterID, name in pairs(BossEncounters:BossEncountersGetAll()) do
-        local item = {
-            name = name,
-            encounterID = encounterID,
-            onClick = function (row)
-                self.selectedEncounterID = row.item.encounterID
-                self:UpdateAppearance()
-            end
-        }
-        table.insert(self.assignments.bossSelector.items, item)
+    for _, instanceInfo in Utils:OrderedPairs(BossInfo.instances) do
+        for encounterID, encounterInfo in Utils:OrderedPairs(instanceInfo.encounters) do
+            local item = {
+                name = encounterInfo.name,
+                encounterID = encounterID,
+                onClick = function (row)
+                    self.selectedEncounterID = row.item.encounterID
+                    self:UpdateAppearance()
+                end
+            }
+            table.insert(self.assignments.bossSelector.items, item)
+        end
     end
-    self.assignments.bossSelector.selectedName = self.selectedEncounterID and BossEncounters:BossEncountersGetAll()[self.selectedEncounterID] or "Select encounter..."
+    self.assignments.bossSelector.selectedName = self.selectedEncounterID and BossInfo.GetEncounterInfoByID(self.selectedEncounterID) or "Select encounter..."
     self.assignments.bossSelector.Update()
 end
 

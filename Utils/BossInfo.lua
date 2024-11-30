@@ -56,3 +56,14 @@ function BossInfo.Initialize()
     if DevTool then DevTool:AddData(BossInfo, "BossInfo") end
     BossInfo.initialized = true
 end
+
+function BossInfo.GetEncounterInfoByID(encounterID)
+    for _, instanceInfo in Utils:OrderedPairs(BossInfo.instances) do
+        for storedEncounterID, encounterInfo in Utils:OrderedPairs(instanceInfo.encounters) do
+            if storedEncounterID == encounterID then
+                return encounterInfo
+            end
+        end
+    end
+    return nil
+end

@@ -89,7 +89,7 @@ SwiftdawnRaidTools.DEFAULTS = {
                 iconSize = 14
             }
         },
-        assignmentexplorer = {
+        assignmenteditor = {
             anchorX = GetScreenWidth()/2,
             anchorY = -(GetScreenHeight()/2),
             locked = false,
@@ -145,8 +145,8 @@ function SwiftdawnRaidTools:OnInitialize()
     self.debugLog = SRTDebugLog:New(100, 400)
     self.debugLog:Initialize()
 
-    self.assignmentExplorer = AssignmentExplorer:New(600)
-    self.assignmentExplorer:Initialize()
+    self.assignmentEditor = AssignmentEditor:New(600)
+    self.assignmentEditor:Initialize()
 
     self.rosterBuilder = RosterBuilder:New(600)
     self.rosterBuilder:Initialize()
@@ -199,7 +199,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
     end
     self.overview:Update()
     self.debugLog:Update()
-    self.assignmentExplorer:Update()
+    self.assignmentEditor:Update()
     self.rosterBuilder:Update()
 end
 

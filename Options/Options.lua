@@ -150,13 +150,13 @@ local mainOptions = {
             width = "full",
             order = 2,
         },
-        openAssignmentExplorer = {
+        openAssignmentEditor = {
             type = "execute",
-            name = "Assignment Explorer",
-            desc = "Open Assignment Explorer window.",
+            name = "Assignment Editor",
+            desc = "Open Assignment Editor window.",
             func = function()
-                SwiftdawnRaidTools.db.profile.assignmentexplorer.show = true
-                SwiftdawnRaidTools.assignmentExplorer:Update()
+                SwiftdawnRaidTools.db.profile.assignmenteditor.show = true
+                SwiftdawnRaidTools.assignmentEditor:Update()
             end,
             order = 3,
         },
