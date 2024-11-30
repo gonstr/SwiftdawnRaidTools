@@ -837,9 +837,7 @@ function SRTData.Initialize()
         rosters = {},
         activeRosterID = nil
     }
-    if DevTool then
-        DevTool:AddData(SRT_Global().srt_data, "SRTData")
-    end
+    if DevTool then DevTool:AddData(SRT_Global().srt_data, "SRTData") end
     -- Preseed our database with static information
     SRT_Global().srt_data.defaultAssignments = defaultAssignments
     SRT_Global().srt_data.spells = {

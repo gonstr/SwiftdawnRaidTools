@@ -151,7 +151,6 @@ end
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
         BossInfo.Initialize()
-        if DevTool then DevTool:AddData(BossInfo, "BossInfo") end
         BossEncounters:Initialize()
         SyncController:SendStatus()
         SyncController:ScheduleAssignmentsSync()
@@ -243,6 +242,9 @@ end
 
 function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, encounterName, ...)
     self:TestModeEnd()
+    if BossInfo.initialized then
+        Log.info("Starting encounter with ID: ", encounterID, encounterName)
+    end
     self.overview:SelectEncounter(encounterID)
     self.debugLog:ClearWindow()
     AssignmentsController:StartEncounter(encounterID, encounterName)

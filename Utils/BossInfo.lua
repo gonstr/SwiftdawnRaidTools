@@ -53,5 +53,6 @@ function BossInfo.Initialize()
     end
 
     EJ_SelectTier(currTier)
+    if DevTool then DevTool:AddData(BossInfo, "BossInfo") end
     BossInfo.initialized = true
 end
