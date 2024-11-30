@@ -203,7 +203,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
-    Log.debug("Sending RAID message")
+    Log.debug("Sending RAID message", data)
 
     local payload = {
         v = self.VERSION,
@@ -245,30 +245,30 @@ end
 
 function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
     if payload.e == "SYNC_REQ_VERSIONS" then
-        Log.debug("Received message SYNC_REQ_VERSIONS:", sender)
+        Log.debug("Received message SYNC_REQ_VERSIONS:", payload)
         SyncController:SendVersion()
     elseif payload.e == "SYNC_STATUS" then
-        Log.debug("Received message SYNC_STATUS:", sender)
+        Log.debug("Received message SYNC_STATUS:", payload)
         SyncController:HandleStatus(payload.d)
     elseif payload.e == "SYNC_PROG" then
         if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
-            Log.debug("Received message SYNC_PROG:", sender, payload.d.progress)
+            Log.debug("Received message SYNC_PROG:", payload)
             self.encountersProgress = payload.d.progress
             SRTData.SetActiveRosterID("none")
             self.overview:Update()
         end
     elseif payload.e == "SYNC" then
-        Log.debug("Received message SYNC")
+        Log.debug("Received message SYNC", payload)
         self.encountersProgress = nil
         SRTData.SetActiveRosterID(payload.d.encountersId)
         SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster"))
         self.overview:Update()
     elseif payload.e == "ACT_GRPS" then
-        Log.debug("Received message ACT_GRPS")
+        Log.debug("Received message ACT_GRPS", payload)
         Groups.SetAllActive(payload.d)
         self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
-        Log.debug("Received message TRIGGER")
+        Log.debug("Received message TRIGGER", payload)
         self.debugLog:AddItem(payload.d)
         Groups.SetActive(payload.d.uuid, payload.d.activeGroups)
         self.notification:ShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)

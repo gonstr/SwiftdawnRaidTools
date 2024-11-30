@@ -52,6 +52,11 @@ function BossInfo.Initialize()
         end
     end
 
+    -- Add bosses not in the encounter journal until discovered
+    BossInfo.instances[72][1082] = "Sinestra"
+    BossInfo.instances[72][1083] = "Sinestra"
+    BossInfo.instances[72][42001] = "The Test Boss"
+
     EJ_SelectTier(currTier)
     if DevTool then DevTool:AddData(BossInfo, "BossInfo") end
     BossInfo.initialized = true

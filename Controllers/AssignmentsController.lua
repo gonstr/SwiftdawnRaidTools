@@ -221,8 +221,6 @@ function AssignmentsController:UpdateGroups()
         return
     end
 
-    Log.debug("Update groups start")
-
     local groupsUpdated = false
 
     for _, part in ipairs(AssignmentsController:GetActiveEncounter()) do
@@ -258,8 +256,9 @@ function AssignmentsController:UpdateGroups()
             end
         end
     end
-
-    Log.debug("Update groups done. Changed:", groupsUpdated)
+    if groupsUpdated then
+        Log.debug("Updated groups")
+    end
 
     if groupsUpdated then
         SwiftdawnRaidTools:SendRaidMessage("ACT_GRPS", Groups.GetAllActive())
@@ -374,7 +373,7 @@ function AssignmentsController:CheckTriggerConditions(conditions)
 end
 
 function AssignmentsController:Trigger(trigger, context, countdown, ignoreTriggerDelay)
-    Log.debug("Sending TRIGGER start")
+    Log.debug("Sending TRIGGER start", context)
 
     if trigger.throttle then
         if trigger.lastTriggerTime and GetTime() < trigger.lastTriggerTime + trigger.throttle then
@@ -406,7 +405,7 @@ function AssignmentsController:Trigger(trigger, context, countdown, ignoreTrigge
             context = context
         }
 
-        Log.debug("Sending TRIGGER found groups")
+        Log.debug("Sending TRIGGER found groups", data)
 
         if not ignoreTriggerDelay and (trigger.delay and trigger.delay > 0) then
             if not AssignmentsController.delayTimers[trigger.uuid] then

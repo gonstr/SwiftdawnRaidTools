@@ -72,8 +72,10 @@ function LogItem:GetString()
 end
 
 function LogItem:GetExtraString()
-    if self.triggerType == "STRING" then
+    if self.triggerType == "STRING" and not self.extra then
         return ""
+    elseif self.triggerType == "STRING" and self.extra then
+        return Utils:TableToString(self.extra)
     end
     return string.format(
             "type: %s\nassignment: %s\nactiveGroups: %s\ncountdown: %d\ndelay: %d\ncontext: %s",
@@ -105,11 +107,11 @@ function LogItem:CreateFrame(parentFrame)
     self.extraText:SetShadowColor(0, 0, 0, 1)
     self.extraText:SetJustifyH("LEFT")
     self.extraText:SetWordWrap(true)
-    self.extraText:SetTextColor(0.80, 0.80, 0.80)
+    self.extraText:SetTextColor(1, 0.80, 1)
     self.extraText:SetPoint("TOPLEFT", self.timestamp, "BOTTOMLEFT", 5, -3)
     self.extraText:Hide()
     self.frame:SetScript("OnMouseDown", function(_, button)
-        if button == "LeftButton" and not self.line then
+        if button == "LeftButton" and (not self.line or self.extra) then
             self.showExtra = not self.showExtra
             self:UpdateAppearance()
         end
@@ -123,8 +125,10 @@ function LogItem:UpdateAppearance()
     self.timestamp:SetFont(self:getLogFontType(), logFontSize)
     self.timestamp:SetWidth(self.timestamp:GetStringWidth())
     self.timestamp:SetText(Utils:Timestamp(true) .. ": ")
-    if self.triggerType == "STRING" then
+    if self.triggerType == "STRING" and not self.extra then
         self.text:SetTextColor(0.80, 0.80, 0.80)
+    elseif self.triggerType == "STRING" and self.extra then
+        self.text:SetTextColor(1, 1, 1)
     else
         self.text:SetTextColor(SRTColor.GameYellow.r, SRTColor.GameYellow.g, SRTColor.GameYellow.b)
     end
