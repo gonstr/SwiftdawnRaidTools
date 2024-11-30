@@ -80,18 +80,16 @@ end
 function SRTOverview:Update()
     SRTWindow.Update(self)
 
-    if self:GetProfile().selectedEncounterId == nil then
-        local encounters = SRTData.GetActiveEncounters()
-        if #encounters then
-            local encounterIndexes = {}
-            for encounterId in pairs(encounters) do
-                table.insert(encounterIndexes, encounterId)
-            end
-            table.sort(encounterIndexes)
-            self:GetProfile().selectedEncounterId = encounterIndexes[1]
+    local encounters = SRTData.GetActiveEncounters()
+    if encounters[self:GetProfile().selectedEncounterId] == nil then
+        local encounterIndexes = {}
+        for encounterId in pairs(encounters) do
+            table.insert(encounterIndexes, encounterId)
         end
+        table.sort(encounterIndexes)
+        self:GetProfile().selectedEncounterId = encounterIndexes[1]
     end
-
+    
     self:UpdateHeaderText()
     self:UpdatePopupMenu()
     self:UpdateMain()
