@@ -1004,10 +1004,10 @@ function SRTData.Initialize()
         ProtectionWarrior = Spec:New("Protection", SRT_Global().srt_data.classes.Warrior),
     }
     
-    if SwiftdawnRaidTools.db.profile.data.encountersId then
+    if not SRT_Global().srt_data.activeRosterID and SwiftdawnRaidTools.db.profile.data.encountersId then
         SRT_Global().srt_data.activeRosterID = SwiftdawnRaidTools.db.profile.data.encountersId
     end
-    if #SwiftdawnRaidTools.db.profile.data.encounters > 0 then
+    if not (#SRT_Global().srt_data.rosters > 0) and (#SwiftdawnRaidTools.db.profile.data.encounters > 0) then
         SRT_Global().srt_data.rosters[SRT_Global().srt_data.activeRosterID] = { encounters = SwiftdawnRaidTools.db.profile.data.encounters }
     end
 end
