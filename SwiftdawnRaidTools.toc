@@ -46,6 +46,7 @@ Utils\Log.lua
 Utils\Utils.lua
 Utils\YAML.lua
 Utils\WAHelper.lua
+Utils\BossInfo.lua
 Models\Frame\LogItem.lua
 Models\Data\Spell.lua
 Models\Data\Spec.lua

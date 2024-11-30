@@ -150,6 +150,8 @@ end
 
 function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloadingUi)
     if isInitialLogin or isReloadingUi then
+        BossInfo.Initialize()
+        if DevTool then DevTool:AddData(BossInfo, "BossInfo") end
         BossEncounters:Initialize()
         SyncController:SendStatus()
         SyncController:ScheduleAssignmentsSync()
