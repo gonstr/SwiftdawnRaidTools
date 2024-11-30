@@ -48,6 +48,7 @@ Utils\Log.lua
 Utils\Utils.lua
 Utils\YAML.lua
 Utils\WAHelper.lua
+Utils\BossInfo.lua
 Models\Conditions\Condition.lua
 Models\Conditions\UnitHealthCondition.lua
 Models\Conditions\SpellCastCountCondition.lua

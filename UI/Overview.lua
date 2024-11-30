@@ -89,7 +89,7 @@ function SRTOverview:Update()
         table.sort(encounterIndexes)
         self:GetProfile().selectedEncounterId = encounterIndexes[1]
     end
-
+    
     self:UpdateHeaderText()
     self:UpdatePopupMenu()
     self:UpdateMain()
@@ -97,14 +97,7 @@ function SRTOverview:Update()
 end
 
 function SRTOverview:UpdateHeaderText()
-    local encounters = SRTData.GetActiveEncounters()
-
-    local encountersExists = false
-
-    for _ in pairs(encounters) do
-        encountersExists = true
-        break
-    end
+    local encountersExists = #SRTData.GetActiveEncounters() and true or false
 
     self.headerText:SetAlpha(1)
 
@@ -184,8 +177,7 @@ function SRTOverview:UpdateMain()
         ability:Hide()
     end
 
-    local selectedEncounterId = self:GetProfile().selectedEncounterId
-    local encounter = SRTData.GetActiveEncounters()[selectedEncounterId]
+    local encounter = SRTData.GetActiveEncounters()[self:GetProfile().selectedEncounterId]
 
     if encounter then
 
@@ -268,11 +260,10 @@ end
 function SRTOverview:UpdateActiveGroups()
     for _, ability in pairs(self.bossAbilities) do
         for _, group in pairs(ability.groups) do
-            local selectedEncounterId = self:GetProfile().selectedEncounterId
-            local encounter = SRTData.GetActiveEncounters()[selectedEncounterId]
+            local encounter = SRTData.GetActiveEncounters()[self:GetProfile().selectedEncounterId]
 
             if encounter then
-                for _, part in ipairs(encounter) do
+                for _, part in pairs(encounter) do
                     if part.uuid == group.uuid then
                         local activeGroups = Groups.GetActive(group.uuid)
 
