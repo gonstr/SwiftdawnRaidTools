@@ -169,7 +169,7 @@ function AssignmentsController:StartEncounter(encounterID, encounterName)
             end
         end
     end
-    Log.debug("Starting encounter with ID: ", encounterID, encounterName)
+    Log.debug("Starting encounter with ID: '"..encounterID.."' Name: '"..encounterName.."'")
 end
 
 function AssignmentsController:EndEncounter()
