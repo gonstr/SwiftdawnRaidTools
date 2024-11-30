@@ -242,9 +242,6 @@ end
 
 function SwiftdawnRaidTools:ENCOUNTER_START(_, encounterID, encounterName, ...)
     self:TestModeEnd()
-    if BossInfo.initialized then
-        Log.info("Starting encounter with ID: ", encounterID, encounterName)
-    end
     self.overview:SelectEncounter(encounterID)
     self.debugLog:ClearWindow()
     AssignmentsController:StartEncounter(encounterID, encounterName)
