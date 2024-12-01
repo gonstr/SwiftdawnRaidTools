@@ -7,7 +7,11 @@ end
 
 function Log.debug(message, ...)
     if SRT_IsDebugging() then
-        SwiftdawnRaidTools:Print("[DEBUG] "..message, type(...) == "table" and "" or ...)
+        if ... then
+            SwiftdawnRaidTools:Print("[DEBUG] "..message, type(...) == "table" and "" or ...)
+        else
+            SwiftdawnRaidTools:Print("[DEBUG] "..message)
+        end
     end
     if SwiftdawnRaidTools.debugLog then
         SwiftdawnRaidTools.debugLog:AddItem(message, ...)
