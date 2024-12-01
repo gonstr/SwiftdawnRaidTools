@@ -98,7 +98,7 @@ function AssignmentsController:StartEncounter(encounterID, encounterName)
                 trigger.uuid = part.uuid
 
                 if trigger.type == "ENCOUNTER_START" then
-                    AssignmentsController.Trigger(trigger, { encounterName = encounterName })
+                    AssignmentsController:Trigger(trigger, { encounterName = encounterName })
                 elseif trigger.type == "UNIT_HEALTH" then
                     if not AssignmentsController.unitHealthTriggersCache[trigger.unit] then
                         AssignmentsController.unitHealthTriggersCache[trigger.unit] = {}
@@ -258,6 +258,7 @@ function AssignmentsController:UpdateGroups()
     end
 
     if groupsUpdated then
+        Log.debug("Sending message ACT_GRPS", Groups.GetAllActive())
         SwiftdawnRaidTools:SendRaidMessage("ACT_GRPS", Groups.GetAllActive())
     end
 end
@@ -370,17 +371,17 @@ function AssignmentsController:CheckTriggerConditions(conditions)
 end
 
 function AssignmentsController:Trigger(trigger, context, countdown, ignoreTriggerDelay)
-    Log.debug("Sending TRIGGER start", { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
+    Log.debug("TRIGGER "..tostring(trigger.type), { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
 
     if trigger.throttle then
         if trigger.lastTriggerTime and GetTime() < trigger.lastTriggerTime + trigger.throttle then
-            Log.debug("TRIGGER throttled", { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
+            Log.debug("TRIGGER "..tostring(trigger.type)..": Throttled", { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
             return
         end
     end
 
     if not AssignmentsController:CheckTriggerConditions(trigger.conditions) then
-        Log.debug("TRIGGER conditions did not pass", { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
+        Log.debug("TRIGGER "..tostring(trigger.type)..": Conditions did not pass", { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
         return
     end
 
@@ -402,7 +403,7 @@ function AssignmentsController:Trigger(trigger, context, countdown, ignoreTrigge
             context = context
         }
 
-        Log.debug("Sending TRIGGER found groups", data)
+        Log.debug("TRIGGER "..tostring(trigger.type)..": Found groups", data)
 
         if not ignoreTriggerDelay and (trigger.delay and trigger.delay > 0) then
             if not AssignmentsController.delayTimers[trigger.uuid] then
@@ -415,6 +416,7 @@ function AssignmentsController:Trigger(trigger, context, countdown, ignoreTrigge
             end))
         else
             trigger.lastTriggerTime = GetTime()
+            Log.debug("Sending message TRIGGER "..tostring(trigger.type), data)
             SwiftdawnRaidTools:SendRaidMessage("TRIGGER", data)
         end
     end

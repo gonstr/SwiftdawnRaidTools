@@ -160,25 +160,17 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
 end
 
 function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackFn)
-    Log.debug("Sending RAID message", data)
-
+    -- Set defaults
+    prefix = prefix or self.PREFIX_MAIN
+    prio = prio or "NORMAL"
+    -- Assemble payload
     local payload = {
         v = self.VERSION,
         e = event,
         d = data,
     }
-
-    if not prefix then
-        prefix = self.PREFIX_MAIN
-    end
-
-    if not prio then
-        prio = "NORMAL"
-    end
-
     -- "Send" message directly to self
     self:HandleMessagePayload(payload)
-
     -- Send to raid
     if IsInRaid() then
         self:SendCommMessage(prefix, self:Serialize(payload), "RAID", nil, prio, callbackFn)
@@ -205,11 +197,9 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
         Log.debug("Received message SYNC_REQ_VERSIONS:", payload)
         SyncController:SendVersion()
     elseif payload.e == "SYNC_STATUS" then
-        Log.debug("Received message SYNC_STATUS:", payload)
         SyncController:HandleStatus(payload.d)
     elseif payload.e == "SYNC_PROG" then
         if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
-            Log.debug("Received message SYNC_PROG:", payload)
             self.encountersProgress = payload.d.progress
             SRTData.SetActiveRosterID("none")
             self.overview:Update()
