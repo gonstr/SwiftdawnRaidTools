@@ -27,8 +27,12 @@ local function performSync()
 end
 
 function SyncController:ScheduleAssignmentsSync()
-    if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
-        Log.info("Not syncing, you are not the raid leader, or encounter is in progress")
+    if IsEncounterInProgress() then
+        Log.info("Not scheduling sync. Encounter is in progress")
+        return
+    end
+    if not Utils:IsPlayerRaidLeader() then
+        Log.info("Not scheduling sync. You are not the raid leader")
         return
     end
     if SyncController.syncTimer then
@@ -45,8 +49,12 @@ function SyncController:ScheduleAssignmentsSync()
 end
 
 function SyncController:SyncAssignmentsNow()
-    if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
-        Log.info("Not syncing, you are not the raid leader, or encounter is in progress")
+    if IsEncounterInProgress() then
+        Log.info("Not syncing now. Encounter is in progress")
+        return
+    end
+    if not Utils:IsPlayerRaidLeader() then
+        Log.info("Not syncing now. You are not the raid leader")
         return
     end
     if SyncController.syncTimer then

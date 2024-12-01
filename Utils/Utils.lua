@@ -16,7 +16,6 @@ Utils = {}
 -- Function to get the name of a guild rank by index
 function Utils:GetGuildRankNameByIndex(rankIndex)
     if rankIndex < 0 or rankIndex >= GuildControlGetNumRanks() then
-        Log.info("Invalid rank index")
         return nil
     end
     return GuildControlGetRankName(rankIndex)

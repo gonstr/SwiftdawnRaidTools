@@ -3,6 +3,9 @@ Log = {}
 
 function Log.info(message, ...)
     SwiftdawnRaidTools:Print(message, ...)
+    if SwiftdawnRaidTools.debugLog then
+        SwiftdawnRaidTools.debugLog:AddItem(message..Utils:StringJoin(..., " "))
+    end
 end
 
 function Log.debug(message, ...)

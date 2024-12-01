@@ -153,7 +153,7 @@ function SwiftdawnRaidTools:PLAYER_ENTERING_WORLD(_, isInitialLogin, isReloading
         BossInfo.Initialize()
         BossEncounters:Initialize()
         SyncController:SendStatus()
-        SyncController:ScheduleAssignmentsSync()
+        if Utils:IsPlayerRaidLeader() then SyncController:ScheduleAssignmentsSync() end
     end
     self.overview:Update()
     self.debugLog:Update()

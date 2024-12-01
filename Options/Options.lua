@@ -939,7 +939,6 @@ local importOptions = {
 
                 SwiftdawnRaidTools.db.profile.options.import = val
 
-                SRTData.SetActiveRosterID("none")
 
                 if val ~= nil and val ~= "" then
                     local _, result = SRTImport:ParseYAML(val)
@@ -947,10 +946,13 @@ local importOptions = {
 
                     SRTData.SetActiveRosterID(encountersId)
                     SRTData.AddRoster(encountersId, Roster.Parse(encounters, "Imported Roster"))
+                    if Utils:IsPlayerRaidLeader() then
+                        SyncController:SyncAssignmentsNow()
+                    else
+                        Log.info("Not syncing import. You are not the raid leader")
+                    end
+                    SwiftdawnRaidTools.overview:Update()
                 end
-
-                SyncController:ScheduleAssignmentsSync()
-                SwiftdawnRaidTools.overview:Update()
             end,
         },
     },
