@@ -266,7 +266,7 @@ function SwiftdawnRaidTools:UNIT_HEALTH(_, unitId, ...)
     local guid = UnitGUID(unitId)
 
     if UnitCache:IsDead(guid) and UnitHealth(unitId) > 0 and not UnitIsGhost(unitId) then
-        Log.debug("Handling cached unit coming back to life")
+        Log.debug("Handling cached unit coming back to life", { guid = guid, unitId = unitId, extra = ... })
         UnitCache:SetAlive(guid)
         AssignmentsController:UpdateGroups()
         self.overview:UpdateSpells()
