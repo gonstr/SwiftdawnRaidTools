@@ -256,9 +256,6 @@ function AssignmentsController:UpdateGroups()
             end
         end
     end
-    if groupsUpdated then
-        Log.debug("Updated groups")
-    end
 
     if groupsUpdated then
         SwiftdawnRaidTools:SendRaidMessage("ACT_GRPS", Groups.GetAllActive())
@@ -373,17 +370,17 @@ function AssignmentsController:CheckTriggerConditions(conditions)
 end
 
 function AssignmentsController:Trigger(trigger, context, countdown, ignoreTriggerDelay)
-    Log.debug("Sending TRIGGER start", context)
+    Log.debug("Sending TRIGGER start", { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
 
     if trigger.throttle then
         if trigger.lastTriggerTime and GetTime() < trigger.lastTriggerTime + trigger.throttle then
-            Log.debug("TRIGGER throttled")
+            Log.debug("TRIGGER throttled", { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
             return
         end
     end
 
     if not AssignmentsController:CheckTriggerConditions(trigger.conditions) then
-        Log.debug("TRIGGER conditions did not pass")
+        Log.debug("TRIGGER conditions did not pass", { trigger = trigger, context = context, countdown = countdown, ignoreTriggerDelay = ignoreTriggerDelay })
         return
     end
 
@@ -611,12 +608,12 @@ function AssignmentsController:HandleRaidBossEmote(text)
         return
     end
 
-    Log.debug("Handling raid boss emote", text)
+    Log.debug("Handling raid boss emote: ", text)
 
     for _, triggers in pairs(AssignmentsController.raidBossEmoteTriggersCache) do
         for _, trigger in ipairs(triggers) do
             if text:match(trigger.text) ~= nil then
-                Log.debug("Found raid boss emote TRIGGER match")
+                Log.debug("Found raid boss emote TRIGGER match", trigger)
                 AssignmentsController:Trigger(trigger, { text = text })
             end
         end
@@ -625,7 +622,7 @@ function AssignmentsController:HandleRaidBossEmote(text)
     for _, untriggers in pairs(AssignmentsController.raidBossEmoteUntriggersCache) do
         for _, untrigger in ipairs(untriggers) do
             if text:match(untrigger.text) ~= nil then
-                Log.debug("Found raid boss emote UNTRIGGER match")
+                Log.debug("Found raid boss emote UNTRIGGER match", trigger)
                 AssignmentsController:CancelDelayTimers(untrigger.uuid)
             end
         end
