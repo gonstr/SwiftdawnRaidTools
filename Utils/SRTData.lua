@@ -211,7 +211,7 @@ local defaultAssignments = {
             },
             ["triggers"] = {
                 {
-                    ["spell_id"] = 98495,
+                    ["spell_id"] = 98333,
                     ["type"] = "SPELL_CAST",
                     ["delay"] = 7,
                     ["countdown"] = 3,
