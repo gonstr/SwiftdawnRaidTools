@@ -91,7 +91,11 @@ function SRTNotification:Initialize()
     SwiftdawnRaidTools.db.profile.notifications.locked = true
 
     -- The base frame that dictates the size of the notification
-    self.container:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", SwiftdawnRaidTools.db.profile.notifications.anchorX, SwiftdawnRaidTools.db.profile.notifications.anchorY)
+    if SwiftdawnRaidTools.db.profile.notifications.anchorX and SwiftdawnRaidTools.db.profile.notifications.anchorY then
+        self.container:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", SwiftdawnRaidTools.db.profile.notifications.anchorX, SwiftdawnRaidTools.db.profile.notifications.anchorY)
+    else
+        self.container:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+    end
     self.container:SetFrameStrata("HIGH")
     self.container:SetMovable(true)
     self.container:SetUserPlaced(true)
