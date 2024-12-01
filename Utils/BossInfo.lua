@@ -53,17 +53,24 @@ function BossInfo.Initialize()
     end
 
     -- Add bosses not in the encounter journal until discovered
-    BossInfo.instances[72][1082] = "Sinestra"
-    BossInfo.instances[72][1083] = "Sinestra"
-    BossInfo.instances[72][42001] = "The Test Boss"
+    BossInfo.instances[72].encounters[1082] = { name = "Sinestra" }
+    BossInfo.instances[72].encounters[1083] = { name = "Sinestra" }
+    BossInfo.instances[72].encounters[42001] = { name = "The Test Boss" }
 
     EJ_SelectTier(currTier)
     if DevTool then DevTool:AddData(BossInfo, "BossInfo") end
     BossInfo.initialized = true
 end
 
+function BossInfo.Get()
+    if not BossInfo.initialized then
+        BossInfo.Initialize()
+    end
+    return BossInfo
+end
+
 function BossInfo.GetEncounterInfoByID(encounterID)
-    for _, instanceInfo in Utils:OrderedPairs(BossInfo.instances) do
+    for _, instanceInfo in Utils:OrderedPairs(BossInfo.Get().instances) do
         for storedEncounterID, encounterInfo in Utils:OrderedPairs(instanceInfo.encounters) do
             if storedEncounterID == encounterID then
                 return encounterInfo
@@ -74,5 +81,5 @@ function BossInfo.GetEncounterInfoByID(encounterID)
 end
 
 function BossInfo.GetNameByID(encounterID)
-    return BossInfo.GetEncounterInfoByID(encounterID).name
+    return BossInfo.Get().GetEncounterInfoByID(encounterID).name
 end
