@@ -2,12 +2,6 @@
 Roster = {}
 Roster.__index = Roster
 
-local function timestamp()
-    local currentTimestamp = time()
-    ---@class string
-    return date("%d-%m-%Y %H:%M:%S", currentTimestamp)
-end
-
 ---@return Roster
 function Roster:New()
     ---@class Roster
@@ -15,7 +9,7 @@ function Roster:New()
     self.__index = self
     obj.id = Utils:GenerateUUID()
     obj.name = nil
-    obj.timestamp = timestamp()
+    obj.timestamp = Utils:Timestamp()
     obj.players = {}
     obj.encounters = {}
     return obj
@@ -46,7 +40,7 @@ function Roster.Parse(raw, name)
         roster.name = name
     end
     roster.encounters = raw
-    roster.timestamp = timestamp()
+    roster.timestamp = Utils:Timestamp()
     for _, encounter in pairs(roster.encounters) do
         for _, ability in pairs(encounter) do
             for _, group in pairs(ability.assignments) do

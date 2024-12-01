@@ -291,6 +291,9 @@ function RosterBuilder:InitializeCreateAssignments()
     self.assignments.finishButton = FrameBuilder.CreateButton(self.assignments.encounter.pane, 95, 25, "Finish Edit", SRTColor.Green, SRTColor.GreenHighlight)
     self.assignments.finishButton:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", 0, 5)
     self.assignments.finishButton:SetScript("OnMouseDown", function (button)
+        if SyncController.syncedID == self.selectedRoster.id and SyncController.syncedTimestamp ~= self.selectedRoster.timestamp then
+            SyncController:ScheduleAssignmentsSync()
+        end
         self.state = State.LOAD_OR_CREATE_ROSTER
         self:UpdateAppearance()
     end)
@@ -408,7 +411,7 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
 
         rosterInfo.timestamp = rosterInfo.timestamp or self.loadCreate.info.scroll.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         rosterInfo.timestamp:SetFont(self:GetPlayerFont(), self:GetAppearance().playerFontSize)
-        rosterInfo.timestamp:SetText("Created on "..self.selectedRoster.timestamp)
+        rosterInfo.timestamp:SetText("Last updated: "..self.selectedRoster.timestamp)
         rosterInfo.timestamp:SetTextColor(0.8, 0.8, 0.8, 1)
         rosterInfo.timestamp:SetPoint("TOPLEFT", 10, -5)
         rosterInfo.timestamp:Show()
@@ -820,6 +823,7 @@ function RosterBuilder:UpdateCreateAssignments()
                                     end
                                 end
                             end
+                            self.selectedRoster.timestamp = Utils:Timestamp()
                             self:UpdateCreateAssignments()
                         end
                     end)
@@ -881,6 +885,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             ["type"] = "SPELL",
                             ["player"] = self.pickedPlayer.name,
                         }
+                        self.selectedRoster.timestamp = Utils:Timestamp()
                     elseif groupIndex == 0 then
                         self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1] = {}
                         table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1], {
@@ -888,6 +893,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             ["type"] = "SPELL",
                             ["player"] = self.pickedPlayer.name,
                         })
+                        self.selectedRoster.timestamp = Utils:Timestamp(true)
                     elseif not self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] or #self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] < 2 then
                         self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] = self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] or {}
                         table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex], {
@@ -895,6 +901,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             ["type"] = "SPELL",
                             ["player"] = self.pickedPlayer.name,
                         })
+                        self.selectedRoster.timestamp = Utils:Timestamp(true)
                     elseif #self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] >= 2 then
                         self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1] = {}
                         table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1], {
@@ -902,6 +909,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             ["type"] = "SPELL",
                             ["player"] = self.pickedPlayer.name,
                         })
+                        self.selectedRoster.timestamp = Utils:Timestamp(true)
                     end
                     self.state = State.CREATE_ASSIGNMENTS
                     self:UpdateCreateAssignments()

@@ -7,7 +7,9 @@ SyncController = {
     lastSyncTime = 0,
     ---@class FunctionContainer
     syncTimer = nil,
-    clientVersions = {}
+    clientVersions = {},
+    syncedID = nil,
+    syncedTimestamp = nil
 }
 
 local function performSync()
@@ -24,6 +26,8 @@ local function performSync()
         SwiftdawnRaidTools.encountersProgress = progressData.progress
         SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS)
     end)
+    SyncController.syncedID = SRTData.GetActiveRosterID()
+    SyncController.syncedTimestamp = SRTData.GetActiveRoster().timestamp
 end
 
 function SyncController:ScheduleAssignmentsSync()
