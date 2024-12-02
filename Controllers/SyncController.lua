@@ -29,7 +29,7 @@ local function performSync()
         SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS)
     end)
     SyncController.syncedID = SRTData.GetActiveRosterID()
-    SyncController.syncedTimestamp = SRTData.GetActiveRoster().timestamp
+    SyncController.syncedTimestamp = SRTData.GetActiveRoster().lastUpdated
 end
 
 function SyncController:ScheduleAssignmentsSync()

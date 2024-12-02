@@ -440,13 +440,16 @@ function AssignmentEditor:UpdateRosterPane()
 end
 
 local function ApplyBuffChange(original, replacement)
-    if SwiftdawnRaidTools.DEBUG then print(string.format("Changing %s's Spell:%d for %s's Spell:%d on encounter %d and ability %d", original.name, original.selectedID, replacement.name, replacement.selectedID, original.encounterID, original.bossAbility)) end
-    for _, assignment in ipairs(SRT_Profile().data.encounters[original.encounterID][original.bossAbility]["assignments"][original.assignmentGroup]) do
+    Log.debug(string.format("Changing %s's Spell:%d for %s's Spell:%d on encounter %d ability %d", original.name, original.selectedID, replacement.name, replacement.selectedID, original.encounterID, original.bossAbility))
+    for _, assignment in ipairs(SRTData.GetActiveEncounters()[original.encounterID][original.bossAbility]["assignments"][original.assignmentGroup]) do
         if assignment.player == original.name and assignment.spell_id == original.selectedID then
             assignment.player = replacement.name
             assignment.spell_id = replacement.selectedID
         end
     end
+    Roster.MarkUpdated(SRTData.GetActiveRoster())
+    SwiftdawnRaidTools.overview:Update()
+    SwiftdawnRaidTools.rosterBuilder:Update()
 end
 
 function AssignmentEditor:UpdateApplyChangePane()
@@ -502,7 +505,7 @@ function AssignmentEditor:CreateTriggerFrame(bossAbilityFrame)
     triggerFrame:SetBackdrop({
         bgFile = "Interface\\Addons\\SwiftdawnRaidTools\\Media\\gradient32x32.tga",
         tile = true,
-        tileSize = 16,
+        tileSize = triggerFrame:GetHeight(),
     })
     triggerFrame:SetBackdropColor(0, 0, 0, 0)
     triggerFrame.text = triggerFrame.text or triggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")

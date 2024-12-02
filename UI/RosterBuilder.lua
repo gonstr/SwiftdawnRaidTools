@@ -291,7 +291,7 @@ function RosterBuilder:InitializeCreateAssignments()
     self.assignments.finishButton = FrameBuilder.CreateButton(self.assignments.encounter.pane, 95, 25, "Finish Edit", SRTColor.Green, SRTColor.GreenHighlight)
     self.assignments.finishButton:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", 0, 5)
     self.assignments.finishButton:SetScript("OnMouseDown", function (button)
-        if SyncController.syncedID == self.selectedRoster.id and SyncController.syncedTimestamp ~= self.selectedRoster.timestamp then
+        if SyncController.syncedID == self.selectedRoster.id and SyncController.syncedTimestamp ~= self.selectedRoster.lastUpdated then
             SyncController:ScheduleAssignmentsSync()
         end
         self.state = State.LOAD_OR_CREATE_ROSTER
@@ -345,8 +345,8 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
     end
     for id, roster in pairs(SRTData.GetRosters()) do
         roster.id = id  --Fix legacy issue
-        local rosterFrame = self.availableRosters[id] or FrameBuilder.CreateRosterFrame(self.loadCreate.load.scroll.content, id, Roster.GetName(roster).." - "..Roster.GetTimestamp(roster), 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize)
-        rosterFrame.name = Roster.GetName(roster).." - "..Roster.GetTimestamp(roster)
+        local rosterFrame = self.availableRosters[id] or FrameBuilder.CreateRosterFrame(self.loadCreate.load.scroll.content, id, roster.name.." - "..Roster.GetLastUpdatedTimestamp(roster), 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize)
+        rosterFrame.name = roster.name.." - "..Roster.GetLastUpdatedTimestamp(roster)
         rosterFrame.Update()
 
         if previousFrame then
@@ -407,11 +407,11 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
             end)
             FrameBuilder.UpdateButton(self.loadCreate.activateButton)
         end
-        self.loadCreate.info.title:SetText(Roster.GetName(self.selectedRoster))
+        self.loadCreate.info.title:SetText(self.selectedRoster.name)
 
         rosterInfo.timestamp = rosterInfo.timestamp or self.loadCreate.info.scroll.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         rosterInfo.timestamp:SetFont(self:GetPlayerFont(), self:GetAppearance().playerFontSize)
-        rosterInfo.timestamp:SetText("Last updated: "..self.selectedRoster.timestamp)
+        rosterInfo.timestamp:SetText("Last updated: "..Roster.GetLastUpdatedTimestamp(self.selectedRoster))
         rosterInfo.timestamp:SetTextColor(0.8, 0.8, 0.8, 1)
         rosterInfo.timestamp:SetPoint("TOPLEFT", 10, -5)
         rosterInfo.timestamp:Show()
@@ -823,7 +823,7 @@ function RosterBuilder:UpdateCreateAssignments()
                                     end
                                 end
                             end
-                            self.selectedRoster.timestamp = Utils:Timestamp()
+                            Roster.MarkUpdated(self.selectedRoster)
                             self:UpdateCreateAssignments()
                         end
                     end)
@@ -885,7 +885,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             ["type"] = "SPELL",
                             ["player"] = self.pickedPlayer.name,
                         }
-                        self.selectedRoster.timestamp = Utils:Timestamp()
+                        Roster.MarkUpdated(self.selectedRoster)
                     elseif groupIndex == 0 then
                         self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1] = {}
                         table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1], {
@@ -893,7 +893,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             ["type"] = "SPELL",
                             ["player"] = self.pickedPlayer.name,
                         })
-                        self.selectedRoster.timestamp = Utils:Timestamp(true)
+                        Roster.MarkUpdated(self.selectedRoster)
                     elseif not self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] or #self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] < 2 then
                         self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] = self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] or {}
                         table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex], {
@@ -901,7 +901,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             ["type"] = "SPELL",
                             ["player"] = self.pickedPlayer.name,
                         })
-                        self.selectedRoster.timestamp = Utils:Timestamp(true)
+                        Roster.MarkUpdated(self.selectedRoster)
                     elseif #self.selectedRoster.encounters[encounterID][abilityIndex].assignments[groupIndex] >= 2 then
                         self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1] = {}
                         table.insert(self.selectedRoster.encounters[encounterID][abilityIndex].assignments[numberOfGroups + 1], {
@@ -909,7 +909,7 @@ function RosterBuilder:UpdateCreateAssignments()
                             ["type"] = "SPELL",
                             ["player"] = self.pickedPlayer.name,
                         })
-                        self.selectedRoster.timestamp = Utils:Timestamp(true)
+                        Roster.MarkUpdated(self.selectedRoster)
                     end
                     self.state = State.CREATE_ASSIGNMENTS
                     self:UpdateCreateAssignments()
