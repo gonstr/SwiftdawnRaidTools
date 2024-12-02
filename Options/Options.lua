@@ -977,6 +977,8 @@ local importOptions = {
                         Log.info("Not syncing import. You are not the raid leader")
                     end
                     SwiftdawnRaidTools.overview:Update()
+                    SwiftdawnRaidTools.assignmentEditor:Update()
+                    SwiftdawnRaidTools.rosterBuilder:Update()
                 end
             end,
         },
