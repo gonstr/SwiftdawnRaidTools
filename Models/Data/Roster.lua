@@ -16,6 +16,7 @@ end
 
 function Roster.MarkUpdated(roster)
     roster.lastUpdated = time()
+    Log.debug("Roster "..roster.id.." updated at "..Roster.GetLastUpdatedTimestamp(roster))
 end
 
 function Roster.GetLastUpdated(roster)
@@ -23,7 +24,7 @@ function Roster.GetLastUpdated(roster)
 end
 
 function Roster.GetLastUpdatedTimestamp(roster)
-    return date("%d-%m-%Y %H:%M:%S", Roster.GetLastUpdated(roster.lastUpdated))
+    return date("%d-%m-%Y %H:%M:%S", Roster.GetLastUpdated(roster))
 end
 
 ---@param player Player
