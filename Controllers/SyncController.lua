@@ -45,7 +45,7 @@ function SyncController:ScheduleAssignmentsSync()
     end
     local timeSinceLastSync = GetTime() - SyncController.lastSyncTime
     local waitTime = math.max(0, SYNC_WAIT_TIME - timeSinceLastSync)
-    Log.debug("Scheduling raid sync in "..waitTime.."seconds")
+    Log.debug("Scheduling raid sync in "..waitTime.." seconds")
     SyncController.syncTimer = C_Timer.NewTimer(waitTime, function()
         SyncController.lastSyncTime = GetTime()
         performSync()

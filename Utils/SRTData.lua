@@ -687,12 +687,32 @@ local testAssignments = {
                         ["spell_id"] = 740,
                         ["type"] = "SPELL",
                         ["player"] = "Aeolyne",
-                    }, -- [1]
+                    } -- [1]
+                }, -- [1]
+            },
+            ["type"] = "RAID_ASSIGNMENTS",
+            ["version"] = 1,
+            ["encounter"] = 42001,
+            ["triggers"] = {
+                {
+                    ['type'] = "ENCOUNTER_START",
+                    ['delay'] = 4,
+                    ['countdown'] = 3
+                }
+            },
+            ["uuid"] = "113efe46-3fe2-4dd2-85a9-0e0b51689f69",
+            ["metadata"] = {
+                ["name"] = "Encounter Start",
+            },
+        }, -- [1]  Encounter Start Phase
+        {
+            ["assignments"] = {
+                {
                     {
                         ["spell_id"] = 62618,
                         ["type"] = "SPELL",
                         ["player"] = "Kondec",
-                    }, -- [2]
+                    } -- [1]
                 }, -- [1]
             },
             ["type"] = "RAID_ASSIGNMENTS",
@@ -702,18 +722,13 @@ local testAssignments = {
                 {
                     ["spell_id"] = 81572,
                     ["type"] = "SPELL_AURA",
-                }, -- [1]
-                {
-                    ['type'] = "ENCOUNTER_START",
-                    ['delay'] = 5,
-                    ['countdown'] = 3
-                }
+                } -- [1]
             },
             ["uuid"] = "437efe45-3fe2-4dd2-85a9-0e0b51689f69",
             ["metadata"] = {
-                ["name"] = "Spell Aura Trigger",
+                ["name"] = "Spell Aura",
             },
-        }, -- [1]  Spell Aura Phase
+        }, -- [2]  Spell Aura Phase
         {
             ["assignments"] = {
                 {
@@ -745,7 +760,7 @@ local testAssignments = {
             ["metadata"] = {
                 ["name"] = "Raid Boss Emote",
             },
-        }, -- [2]  Raid Boss Emote Phase
+        }, -- [3]  Raid Boss Emote Phase
         {
             ["assignments"] = {
                 {
@@ -786,7 +801,7 @@ local testAssignments = {
             ["metadata"] = {
                 ["name"] = "Spell Cast",
             },
-        }, -- [3]  Spell Cast Phase
+        }, -- [4]  Spell Cast Phase
         --{
         --    ["assignments"] = {
         --        {
@@ -834,7 +849,7 @@ local testAssignments = {
         --    ["metadata"] = {
         --        ["name"] = "Conditional Spell Cast Test",
         --    },
-        --}, -- [4]  Conditional Spell Cast Phase
+        --}, -- [5]  Conditional Spell Cast Phase
         --{
         --    ["assignments"] = {
         --        {
@@ -872,7 +887,7 @@ local testAssignments = {
         --    ["metadata"] = {
         --        ["name"] = "Unit Health Test",
         --    },
-        --}, -- [5]  Unit Health Phase
+        --}, -- [6]  Unit Health Phase
     }
 }
 
