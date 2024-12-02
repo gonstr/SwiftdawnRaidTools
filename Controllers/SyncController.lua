@@ -11,9 +11,11 @@ SyncController = {
 }
 
 local function performSync()
+    if not SRTData.GetActiveRoster().lastUpdated then SRTData.GetActiveRoster().lastUpdated = time() end
     local data = {
         encountersId = SRTData.GetActiveRosterID(),
-        encounters = SRTData.GetActiveRoster().encounters
+        encounters = SRTData.GetActiveRoster().encounters,
+        lastUpdated = SRTData.GetActiveRoster().lastUpdated
     }
     Log.debug("Sending raid sync", data)
     SwiftdawnRaidTools:SendRaidMessage("SYNC", data, SwiftdawnRaidTools.PREFIX_SYNC, "BULK", function(_, sent, total)
@@ -79,17 +81,9 @@ function SyncController:SendStatus()
     end
     local data = {
         encountersId = SRTData.GetActiveRosterID(),
+        lastUpdated = Roster.GetLastUpdated(SRTData.GetActiveRoster())
     }
     SwiftdawnRaidTools:SendRaidMessage("SYNC_STATUS", data, SwiftdawnRaidTools.PREFIX_SYNC)
-end
-
-function SyncController:HandleStatus(data)
-    if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
-        return
-    end
-    if SRTData.GetActiveRosterID() ~= data.encountersId then
-        SyncController:ScheduleAssignmentsSync()
-    end
 end
 
 function SyncController:SetClientVersion(player, version)

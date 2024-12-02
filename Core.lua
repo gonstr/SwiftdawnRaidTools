@@ -190,30 +190,55 @@ function SwiftdawnRaidTools:OnCommReceived(prefix, message, _, sender)
     end
 end
 
+local function AcceptIncomingSyncOrNot(incomingData)
+    -- If the sync coming in has a different Roster ID, accept the new roster
+    -- If the Roster ID is the same, but the lastUpdated is higher, accept the new version
+    -- If the lastUpdated is not in the payload, its coming from an old version; accept it for backward compatibility
+    return incomingData.encountersId ~= SRTData.GetActiveRosterID() or (incomingData.lastUpdated > Roster.GetLastUpdated(SRTData.GetActiveRoster()) or not incomingData.lastUpdated)
+end
+
+local function TriggerSyncOrNot(incomingData)
+    -- If the sync coming in has a different Roster ID, trigger the sync
+    -- If the Roster ID is the same, but the lastUpdated is lower, trigger the sync
+    -- If the lastUpdated is not in the payload, its coming from an old version; trigger the sync
+    return incomingData.encountersId ~= SRTData.GetActiveRosterID() or (incomingData.lastUpdated < Roster.GetLastUpdated(SRTData.GetActiveRoster()) or not incomingData.lastUpdated)
+end
+
 function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
     if payload.e == "SYNC_REQ_VERSIONS" then
-        Log.debug("Received message SYNC_REQ_VERSIONS:", payload)
+        Log.debug("Received message SYNC_REQ_VERSIONS from "..tostring(sender), payload)
         SyncController:SendVersion()
     elseif payload.e == "SYNC_STATUS" then
-        SyncController:HandleStatus(payload.d)
+        if IsEncounterInProgress() or not Utils:IsPlayerRaidLeader() then
+            return
+        end
+        if TriggerSyncOrNot(payload.d) then
+            SyncController:ScheduleAssignmentsSync()
+        end
     elseif payload.e == "SYNC_PROG" then
-        if payload.d.encountersId ~= SRTData.GetActiveRosterID() then
+        if AcceptIncomingSyncOrNot(payload.d) then
             self.encountersProgress = payload.d.progress
             SRTData.SetActiveRosterID("none")
             self.overview:Update()
         end
     elseif payload.e == "SYNC" then
-        Log.debug("Received message SYNC", payload)
-        self.encountersProgress = nil
-        SRTData.SetActiveRosterID(payload.d.encountersId)
-        SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster"))
-        self.overview:Update()
+        if AcceptIncomingSyncOrNot(payload.d) then
+            Log.debug("Received message SYNC from "..tostring(sender), payload)
+            self.encountersProgress = nil
+            SRTData.SetActiveRosterID(payload.d.encountersId)
+            SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster", payload.d.lastUpdated))
+            self.overview:Update()
+        elseif payload.d.encountersId == SRTData.GetActiveRosterID() and payload.d.lastUpdated == Roster.GetLastUpdated(SRTData.GetActiveRoster()) then
+            Log.debug("Ignoring SYNC from "..tostring(sender)..", already have this version", payload)
+        else
+            Log.debug("Ignoring SYNC from "..tostring(sender)..", outdated version!", payload)
+        end
     elseif payload.e == "ACT_GRPS" then
-        Log.debug("Received message ACT_GRPS", payload)
+        Log.debug("Received message ACT_GRPS from "..tostring(sender), payload)
         Groups.SetAllActive(payload.d)
         self.overview:UpdateActiveGroups()
     elseif payload.e == "TRIGGER" then
-        Log.debug("Received message TRIGGER", payload)
+        Log.debug("Received message TRIGGER from "..tostring(sender), payload)
         self.debugLog:AddItem(payload.d)
         Groups.SetActive(payload.d.uuid, payload.d.activeGroups)
         self.notification:ShowRaidAssignment(payload.d.uuid, payload.d.context, payload.d.delay, payload.d.countdown)

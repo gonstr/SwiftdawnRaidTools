@@ -7,26 +7,23 @@ function Roster:New()
     ---@class Roster
     local obj = setmetatable({}, self)
     self.__index = self
-    obj.name = nil
-    obj.timestamp = Utils:Timestamp()
+    obj.name = "Roster"
+    obj.lastUpdated = time()
     obj.players = {}
     obj.encounters = {}
     return obj
 end
 
-function Roster.GetName(roster)
-    if roster.name then
-        return roster.name
-    else
-        return "Roster"
-    end
+function Roster.MarkUpdated(roster)
+    roster.lastUpdated = time()
 end
 
-function Roster.GetTimestamp(roster)
-    if not roster.timestamp then
-        roster.timestamp = Utils:Timestamp()
-    end
-    return roster.timestamp
+function Roster.GetLastUpdated(roster)
+    return roster.lastUpdated or 0
+end
+
+function Roster.GetLastUpdatedTimestamp(roster)
+    return date("%d-%m-%Y %H:%M:%S", Roster.GetLastUpdated(roster.lastUpdated))
 end
 
 ---@param player Player
@@ -34,13 +31,11 @@ function Roster.AddPlayer(roster, player)
     roster.players[player.name] = player
 end
 
-function Roster.Parse(raw, name)
+function Roster.Parse(raw, name, lastUpdated)
     local roster = Roster:New()
-    if name then
-        roster.name = name
-    end
+    roster.name = name or "Roster"
     roster.encounters = raw
-    roster.timestamp = Utils:Timestamp()
+    roster.lastUpdated = lastUpdated or time()
     for _, encounter in pairs(roster.encounters) do
         for _, ability in pairs(encounter) do
             for _, group in pairs(ability.assignments) do
