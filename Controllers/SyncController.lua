@@ -7,9 +7,7 @@ SyncController = {
     lastSyncTime = 0,
     ---@class FunctionContainer
     syncTimer = nil,
-    clientVersions = {},
-    syncedID = nil,
-    syncedTimestamp = nil
+    clientVersions = {}
 }
 
 local function performSync()
@@ -28,8 +26,7 @@ local function performSync()
         SwiftdawnRaidTools.encountersProgress = progressData.progress
         SwiftdawnRaidTools:SendRaidMessage("SYNC_PROG", progressData, SwiftdawnRaidTools.PREFIX_SYNC_PROGRESS)
     end)
-    SyncController.syncedID = SRTData.GetActiveRosterID()
-    SyncController.syncedTimestamp = SRTData.GetActiveRoster().lastUpdated
+    SRTData.UpdateSyncedRosterInfo(SRTData.GetActiveRosterID(), SRTData.GetActiveRoster().lastUpdated)
 end
 
 function SyncController:ScheduleAssignmentsSync()
@@ -59,10 +56,10 @@ function SyncController:SyncAssignmentsNow()
         Log.info("Not syncing now. Encounter is in progress")
         return
     end
-    if not Utils:IsPlayerRaidLeader() then
-        Log.info("Not syncing now. You are not the raid leader")
-        return
-    end
+    -- if not Utils:IsPlayerRaidLeader() then
+    --     Log.info("Not syncing now. You are not the raid leader")
+    --     return
+    -- end
     if SyncController.syncTimer then
         SyncController.syncTimer:Cancel()
         SyncController.syncTimer = nil

@@ -210,8 +210,10 @@ function SwiftdawnRaidTools:SendRaidMessage(event, data, prefix, prio, callbackF
         e = event,
         d = data,
     }
-    -- "Send" message directly to self
-    self:HandleMessagePayload(payload)
+    -- "Send" message directly to self if it is not SYNC
+    if payload.e ~= "SYNC" then
+        self:HandleMessagePayload(payload)
+    end
     -- Send to raid
     if IsInRaid() then
         self:SendCommMessage(prefix, self:Serialize(payload), "RAID", nil, prio, callbackFn)
@@ -269,7 +271,7 @@ function SwiftdawnRaidTools:HandleMessagePayload(payload, sender)
             Log.debug("Received message SYNC from "..tostring(sender), payload)
             self.encountersProgress = nil
             SRTData.SetActiveRosterID(payload.d.encountersId)
-            SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Synced Roster", payload.d.lastUpdated))
+            SRTData.AddRoster(payload.d.encountersId, Roster.Parse(payload.d.encounters, "Received Roster", payload.d.lastUpdated))
             self.overview:Update()
         elseif payload.d.encountersId == SRTData.GetActiveRosterID() and payload.d.lastUpdated == Roster.GetLastUpdated(SRTData.GetActiveRoster()) then
             Log.debug("Ignoring SYNC from "..tostring(sender)..", already have this version", payload)

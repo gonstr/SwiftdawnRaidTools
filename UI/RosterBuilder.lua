@@ -291,7 +291,7 @@ function RosterBuilder:InitializeCreateAssignments()
     self.assignments.finishButton = FrameBuilder.CreateButton(self.assignments.encounter.pane, 95, 25, "Finish Edit", SRTColor.Green, SRTColor.GreenHighlight)
     self.assignments.finishButton:SetPoint("BOTTOMRIGHT", self.content, "BOTTOMRIGHT", 0, 5)
     self.assignments.finishButton:SetScript("OnMouseDown", function (button)
-        if SyncController.syncedID == self.selectedRoster.id and SyncController.syncedTimestamp ~= self.selectedRoster.lastUpdated then
+        if SRTData.GetSyncedRosterID() == self.selectedRoster.id and SRTData.GetSyncedRosterLastUpdated() ~= self.selectedRoster.lastUpdated then
             SyncController:ScheduleAssignmentsSync()
         end
         self.state = State.LOAD_OR_CREATE_ROSTER
@@ -344,10 +344,25 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
         rosterFrame:Hide()
     end
     for id, roster in pairs(SRTData.GetRosters()) do
-        roster.id = id  --Fix legacy issue
+        -- roster.id = id  --Fix legacy issue
         local rosterFrame = self.availableRosters[id] or FrameBuilder.CreateRosterFrame(self.loadCreate.load.scroll.content, id, roster.name.." - "..Roster.GetLastUpdatedTimestamp(roster), 260, 20, self:GetPlayerFont(), self:GetAppearance().playerFontSize)
         rosterFrame.name = roster.name.." - "..Roster.GetLastUpdatedTimestamp(roster)
         rosterFrame.Update()
+
+        -- Make sure rosters are colored properly
+        if self.selectedRoster and roster.id == self.selectedRoster.id then
+            -- Yellow for selected
+            rosterFrame.text:SetTextColor(SRTColor.GameYellow.r, SRTColor.GameYellow.g, SRTColor.GameYellow.b, SRTColor.GameYellow.a)
+        elseif roster.id == SRTData.GetSyncedRosterID() and Roster.GetLastUpdated(roster) == SRTData.GetSyncedRosterLastUpdated() then
+            -- Blue for synced and up-to-date roster
+            rosterFrame.text:SetTextColor(SRTColor.BlueHighlight.r, SRTColor.BlueHighlight.g, SRTColor.BlueHighlight.b, SRTColor.BlueHighlight.a)
+        elseif roster.id == SRTData.GetSyncedRosterID() and Roster.GetLastUpdated(roster) > SRTData.GetSyncedRosterLastUpdated() then
+            -- Green for synced and altered roster (does this ever happen?)
+            rosterFrame.text:SetTextColor(SRTColor.Green.r, SRTColor.Green.g, SRTColor.Green.b, SRTColor.Green.a)
+        else
+            -- Light gray for the rest
+            rosterFrame.text:SetTextColor(SRTColor.LightGray.r, SRTColor.LightGray.g, SRTColor.LightGray.b, SRTColor.LightGray.a)
+        end
 
         if previousFrame then
             rosterFrame:SetPoint("TOPLEFT", previousFrame, "BOTTOMLEFT", 0, -3)
@@ -357,16 +372,6 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
 
         rosterFrame:SetScript("OnMouseDown", function ()
             self.selectedRoster = roster
-
-            for _, rf in pairs(self.availableRosters) do
-                rf.text:SetTextColor(0.8, 0.8, 0.8, 1)
-            end
-            rosterFrame.text:SetTextColor(1, 0.8235, 0, 1)
-
-            -- -- FIXME: REMOVE ME! FOR TESTING ONLY!
-            -- self.selectedRoster.encounters = {}
-            -- -- FIXME: REMOVE ME! FOR TESTING ONLY!
-
             self:UpdateAppearance()
         end)
 
@@ -404,6 +409,7 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
                 SyncController:SyncAssignmentsNow()
                 SwiftdawnRaidTools.overview:Update()
                 SwiftdawnRaidTools.assignmentEditor:Update()
+                self:UpdateAppearance()
             end)
             FrameBuilder.UpdateButton(self.loadCreate.activateButton)
         end
@@ -436,8 +442,7 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
 
         rosterInfo.encounters = rosterInfo.encounters or self.loadCreate.info.scroll.content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         rosterInfo.encounters:SetFont(self:GetPlayerFont(), self:GetAppearance().playerFontSize)
-        
-        
+
         local encounters = nil
         for _, encounterID in pairs(self:EncounterIDsWithFilledAssignments()) do
             if encounters then
@@ -454,9 +459,6 @@ function RosterBuilder:UpdateLoadOrCreateRoster()
         rosterInfo.encounters:SetPoint("TOPLEFT", rosterInfo.players, "BOTTOMLEFT", 0, -3)
         rosterInfo.encounters:Show()
     else
-        for _, rf in pairs(self.availableRosters) do
-            rf.text:SetTextColor(0.8, 0.8, 0.8, 1)
-        end
         self.loadCreate.deleteButton.color = SRTColor.Gray
         self.loadCreate.deleteButton.colorHighlight = SRTColor.Gray
         FrameBuilder.UpdateButton(self.loadCreate.deleteButton)

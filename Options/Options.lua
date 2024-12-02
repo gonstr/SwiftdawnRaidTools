@@ -971,11 +971,7 @@ local importOptions = {
                     local encounters, encountersId = SRTImport:AddIDs(result)
                     SRTData.SetActiveRosterID(encountersId or "none")
                     SRTData.AddRoster(encountersId, Roster.Parse(encounters, "Imported Roster"))
-                    if Utils:IsPlayerRaidLeader() then
-                        SyncController:SyncAssignmentsNow()
-                    else
-                        Log.info("Not syncing import. You are not the raid leader")
-                    end
+                    SyncController:SyncAssignmentsNow()
                     SwiftdawnRaidTools.overview:Update()
                     SwiftdawnRaidTools.assignmentEditor:Update()
                     SwiftdawnRaidTools.rosterBuilder:Update()

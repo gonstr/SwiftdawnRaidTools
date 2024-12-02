@@ -900,7 +900,9 @@ function SRTData.Initialize()
         pool = {},
         players = {},
         rosters = {},
-        activeRosterID = nil
+        activeRosterID = nil,
+        syncedRosterID = nil,
+        syncedRosterLastUpdated = -1
     }
     if DevTool then DevTool:AddData(SRT_Global().srt_data, "SRTData") end
     -- Preseed our database with static information
@@ -1046,6 +1048,7 @@ function SRTData.GetPlayerFromPool(name)
     return data.players[name]
 end
 
+---@return Roster[]
 function SRTData.GetRosters()
     local data = SRT_Global().srt_data
     return data.rosters
@@ -1181,4 +1184,18 @@ function SRTData.GetActiveEncounters()
         end
     end
     return encountersWithAssignments
+end
+
+function SRTData.UpdateSyncedRosterInfo(rosterID, lastUpdated)
+    local data = SRT_Global().srt_data
+    data.syncedRosterID = rosterID
+    data.syncedRosterLastUpdated = lastUpdated
+end
+
+function SRTData.GetSyncedRosterID()
+    return SRT_Global().srt_data.syncedRosterID
+end
+
+function SRTData.GetSyncedRosterLastUpdated()
+    return SRT_Global().srt_data.syncedRosterLastUpdated
 end
