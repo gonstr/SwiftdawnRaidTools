@@ -909,7 +909,7 @@ local fojjiIntegrationOptions = {
             fontSize = "medium",
             name = "|cffff0000WeakAuras is not installed.|r",
             order = 3,
-            hidden = function() return SwiftdawnRaidTools:WeakAurasIsInstalled() end
+            hidden = function() return WAHelper:IsWeakaurasInstalled() end
         },
         helperWeakAuraInstalledMessage = {
             type = "description",
