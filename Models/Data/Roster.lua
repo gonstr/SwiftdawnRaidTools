@@ -17,7 +17,7 @@ end
 
 function Roster.MarkUpdated(roster)
     roster.lastUpdated = time()
-    Log.debug("Roster "..roster.id.." updated at "..Roster.GetLastUpdatedTimestamp(roster))
+    Log.debug("Roster updated at "..Roster.GetLastUpdatedTimestamp(roster), { rosterID = roster.id })
 end
 
 function Roster.GetLastUpdated(roster)
