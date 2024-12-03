@@ -56,10 +56,10 @@ function SyncController:SyncAssignmentsNow()
         Log.info("Not syncing now. Encounter is in progress")
         return
     end
-    -- if not Utils:IsPlayerRaidLeader() then
-    --     Log.info("Not syncing now. You are not the raid leader")
-    --     return
-    -- end
+    if not Utils:IsPlayerRaidLeader() then
+        Log.info("Not syncing now. You are not the raid leader")
+        return
+    end
     if SyncController.syncTimer then
         SyncController.syncTimer:Cancel()
         SyncController.syncTimer = nil
