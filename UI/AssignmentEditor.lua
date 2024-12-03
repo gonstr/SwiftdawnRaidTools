@@ -34,7 +34,6 @@ function AssignmentEditor:New(height)
 end
 
 function AssignmentEditor:Initialize()
-    DevTool:AddData(self, "AssignmentEditor")
     SRTWindow.Initialize(self)
     -- Setup header
     self.headerText:SetText("Assignments Explorer")
