@@ -101,16 +101,16 @@ function AssignmentEditor:Initialize()
     self.rosterPane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
     self.rosterPane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
     self.rosterPane.roster = {}
-    -- self.rosterBackButton = FrameBuilder.CreateButton(self.rosterPane, 75, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
-    -- self.rosterBackButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
-    -- self.rosterBackButton:SetScript("OnMouseUp", function (_, button)
-    --     if button == "LeftButton" then
-    --         self.lastState = State.SHOW_PLAYER
-    --         self.state = State.SHOW_PLAYER
-    --         self:UpdateAppearance()
-    --     end
-    -- end)
     self.rosterPane:Hide()
+    self.cancelReplaceButton = FrameBuilder.CreateButton(self.rosterPane, 75, 25, "Cancel", SRTColor.Red, SRTColor.RedHighlight)
+    self.cancelReplaceButton:SetPoint("BOTTOMLEFT", self.rosterPane, "BOTTOMLEFT", 0, 5)
+    self.cancelReplaceButton:SetScript("OnMouseUp", function (_, button)
+        if button == "LeftButton" then
+            self.lastState = State.SHOW_PLAYER
+            self.state = State.ONLY_ENCOUNTER
+            self:UpdateAppearance()
+        end
+    end)
     -- Setup apply buff change pane
     self.applyChangePane = CreateFrame("Frame", "SRT_AssignmentEditor_ApplyChange", self.main)
     self.applyChangePane:SetClipsChildren(true)
@@ -118,15 +118,6 @@ function AssignmentEditor:Initialize()
     self.applyChangePane:SetPoint("TOPRIGHT", self.main, "TOPRIGHT", -10, -5)
     self.applyChangePane:SetPoint("BOTTOMLEFT", self.main, "BOTTOM", 5, 5)
     self.applyChangePane:SetPoint("BOTTOMRIGHT", self.main, "BOTTOMRIGHT", -10, 5)
-    -- self.applyChangeBackButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Back", SRTColor.Red, SRTColor.RedHighlight)
-    -- self.applyChangeBackButton:SetPoint("BOTTOMLEFT", self.applyChangePane, "BOTTOMLEFT", 0, 5)
-    -- self.applyChangeBackButton:SetScript("OnMouseUp", function (_, button)
-    --     if button == "LeftButton" then
-    --         self.lastState = State.SHOW_ROSTER
-    --         self.state = State.SHOW_PLAYER
-    --         self:UpdateAppearance()
-    --     end
-    -- end)
     self.applyChangeAcceptButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Accept", SRTColor.Green, SRTColor.GreenHighlight)
     self.applyChangeAcceptButton:SetPoint("BOTTOMRIGHT", self.applyChangePane, "BOTTOMRIGHT", 0, 5)
     self.applyChangeCancelButton = FrameBuilder.CreateButton(self.applyChangePane, 75, 25, "Cancel", SRTColor.Red, SRTColor.RedHighlight)
