@@ -266,7 +266,7 @@ function AssignmentEditor:UpdateEncounterPane()
             end
 
             -- Set OnClick for each assignment
-            for _, assignmentFrame in pairs(groupFrame.assignments) do
+            for assignmentIndex, assignmentFrame in pairs(groupFrame.assignments) do
                 assignmentFrame:SetScript("OnMouseUp", function (frame, button)
                     if button == "LeftButton" then
                         self.lastState = State.ONLY_ENCOUNTER
@@ -278,7 +278,8 @@ function AssignmentEditor:UpdateEncounterPane()
                             selectedID = frame.spellId,
                             encounterID = self.selectedEncounterID,
                             bossAbility = abilityIndex,
-                            assignmentGroup = frame.groupIndex
+                            groupIndex = frame.groupIndex,
+                            assignmentIndex = assignmentIndex
                         }
                         self:UpdateAppearance()
                     end
@@ -431,12 +432,18 @@ function AssignmentEditor:UpdateRosterPane()
 end
 
 local function ApplyBuffChange(original, replacement)
+    Log.debug("Assignment updated", {
+        originalPlayer = original.name,
+        originalSpellID = original.selectedID,
+        replacementPlayer = replacement.name,
+        replacementSpellID = replacement.selectedID,
+        bossAbility = original.bossAbility
+    })
     Log.debug(string.format("Changing %s's Spell:%d for %s's Spell:%d on encounter %d ability %d", original.name, original.selectedID, replacement.name, replacement.selectedID, original.encounterID, original.bossAbility))
-    for _, assignment in ipairs(SRTData.GetActiveEncounters()[original.encounterID][original.bossAbility]["assignments"][original.assignmentGroup]) do
-        if assignment.player == original.name and assignment.spell_id == original.selectedID then
-            assignment.player = replacement.name
-            assignment.spell_id = replacement.selectedID
-        end
+    local assignmentFrame = SRTData.GetActiveEncounters()[original.encounterID][original.bossAbility]["assignments"][original.groupIndex][original.assignmentIndex]
+    if assignmentFrame.player == original.name and assignmentFrame.spell_id == original.selectedID then
+        assignmentFrame.player = replacement.name
+        assignmentFrame.spell_id = replacement.selectedID
     end
     Roster.MarkUpdated(SRTData.GetActiveRoster())
     SwiftdawnRaidTools.overview:Update()
