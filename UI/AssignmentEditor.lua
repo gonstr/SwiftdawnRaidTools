@@ -433,13 +433,9 @@ end
 
 local function ApplyBuffChange(original, replacement)
     Log.debug("Assignment updated", {
-        originalPlayer = original.name,
-        originalSpellID = original.selectedID,
-        replacementPlayer = replacement.name,
-        replacementSpellID = replacement.selectedID,
-        bossAbility = original.bossAbility
+        original = original,
+        replacement = replacement
     })
-    Log.debug(string.format("Changing %s's Spell:%d for %s's Spell:%d on encounter %d ability %d", original.name, original.selectedID, replacement.name, replacement.selectedID, original.encounterID, original.bossAbility))
     local assignmentFrame = SRTData.GetActiveEncounters()[original.encounterID][original.bossAbility]["assignments"][original.groupIndex][original.assignmentIndex]
     if assignmentFrame.player == original.name and assignmentFrame.spell_id == original.selectedID then
         assignmentFrame.player = replacement.name
